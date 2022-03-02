@@ -67,7 +67,8 @@ void WorldSystem::Update()
 		}
 
 		else {
-			seq.Add<Spawn>(MakeAsteroidSpawner());
+			seq.Add<Spawn>(MakeAsteroidSpawner())
+			   .And<iw::Delay>(8);
 		}
 
 		seq.Start();

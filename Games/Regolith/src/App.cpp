@@ -63,6 +63,42 @@ int App::Initialize(
 	int err = Application::Initialize(options);
 	if (err) return err;
 
+	entity_manager test;
+	test.create<int>();
+	test.create<int>();
+	test.create<int>();
+	test.create<int>();
+	test.create<int>();
+	test.create<int>();
+	entity_query<false, int> query = test.query<int>();
+
+	std::vector<int> ints;
+	ints.emplace_back();
+	ints.emplace_back();
+	ints.emplace_back();
+	ints.emplace_back();
+	ints.emplace_back();
+	ints.emplace_back();
+
+	auto end = ints.end();
+	auto itr = ints.begin();
+	for (; itr != end; ++itr)
+	{
+		*itr += 1;
+	}
+
+	auto eend = query.end();
+	auto iitr = query.begin();
+	for (; iitr != eend; ++iitr)
+	{
+		std::get<0>(*iitr) += 1;
+	}
+
+	
+
+
+
+
 	test_handler handler1("test1");
 	test_handler handler2("test2");
 	test_handler handler3("test3");
@@ -346,11 +382,12 @@ int App::Initialize(
 		return false;
 	});
 
-	/*bool log = false;
+	/*
 
 	Task->coroutine(
 		[log]()
 		{
+			bool log = false;
 			if (log)
 			{
 				const auto& queue = entities_defer().m_queue;

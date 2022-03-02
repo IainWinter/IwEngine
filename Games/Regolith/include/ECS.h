@@ -44,16 +44,6 @@ constexpr inline _t min(_t a, _t b)
 
 #endif
 
-// needed for event_manager::callbacks
-
-struct pair_hash
-{
-    template <class T1, class T2>
-    std::size_t operator() (const std::pair<T1, T2> &pair) const {
-        return std::hash<T1>()(pair.first) ^ std::hash<T2>()(pair.second) * 31;
-    }
-};
-
 struct component
 {
 	hash_t m_hash = 0; // low 16 bits are the repeat count
@@ -327,12 +317,12 @@ struct entity_storage
 		void* m_addr;
 	};
 
-	using store_t = std::vector<entity_data>;
-	using itr = store_t::iterator;
+	using store_t = iw::sparse_set<int, entity_data>;
+	using itr = decltype(store_t::m_items)::iterator;
 
 	archetype m_archetype;
 	iw::pool_allocator m_pool;
-	int m_recycle; // index to head of delected entities, m_addr becomes index to next 
+	int m_instance;
 	int m_count;   // number of alive entities
 
 	store_t m_entities;
@@ -342,38 +332,46 @@ struct entity_storage
 	)
 		: m_archetype (archetype)
 		, m_pool      (archetype.m_size, 16)
-		, m_recycle   (-1)
+		, m_instance  (0)
 		, m_count     (0)
 	{}
 
 	entity_handle create_entity(
 		int version = 0)
 	{
-		entity_data* data;
+		int index = -1;
 
-		if (m_recycle != -1)
+		for (int i = 0; i < m_entities.m_sparse.size(); i++)
 		{
-			data = &m_entities.at(m_recycle);
-			m_recycle = (int)data->m_addr;
+			if (m_entities.m_sparse.at(i) == -1)
+			{
+				index = i;
+				break;
+			}
 		}
 
-		else
+		if (index == -1)
 		{
-			data = &m_entities.emplace_back();
-			data->m_index = m_entities.size() - 1;
-			data->m_version = version;
+			index = m_entities.m_sparse.size();
 		}
 
-		data->m_addr = m_pool.alloc(m_archetype.m_size);
+		m_entities.emplace(index);
+
+		entity_data& data = m_entities.at(index);
+		data.m_index = index;
+		data.m_version = m_instance;
+
+		data.m_addr = m_pool.alloc(m_archetype.m_size);
 
 		for (const component& component : m_archetype.m_components)
 		{
-			component.m_default(offset_raw_pointer(data->m_addr, component));
+			component.m_default(offset_raw_pointer(data.m_addr, component));
 		}
 
 		m_count += 1;
+		m_instance += 1;
 
-		return wrap(*data);
+		return wrap(data);
 	}
 
 	void destroy_entity(
@@ -394,11 +392,7 @@ struct entity_storage
 		}
 		
 		m_pool.free(data.m_addr, m_archetype.m_size);
-
-		data.m_addr = (void*)m_recycle; // credit skypjack, this is such a good idea, 0's the ptr aswell!!:)
-		data.m_version += 1;
-
-		m_recycle = handle.m_index;
+		m_entities.erase(handle.m_index);
 		m_count -= 1;
 	}
 
@@ -406,7 +400,8 @@ struct entity_storage
 		entity_handle handle)
 	{
 		assert(handle.m_archetype == m_archetype.m_hash                    && "entity_storage::is_entity_alive failed, archetype mismatch");
-		return handle.m_version == m_entities.at(handle.m_index).m_version;
+		return  m_entities.contains(handle.m_index)
+			&& handle.m_version == m_entities.at(handle.m_index).m_version;
 	}
 
 	std::pair<bool, entity_handle> find_from_component(
@@ -494,8 +489,8 @@ struct entity_storage
 		return (char*)ptr + offset_of_component(m_archetype, component);
 	}
 
-	itr begin() { return m_entities.begin(); }
-	itr end()   { return m_entities.end();   }
+	itr begin() { return m_entities.m_items.begin(); }
+	itr end()   { return m_entities.m_items.end();   }
 
 private:
 	entity_handle wrap(const entity_data& data)
@@ -592,60 +587,118 @@ struct entity_query
 
 	struct itr
 	{
-		std::vector<entity_storage::itr>            m_curs;
-		std::vector<entity_storage::itr>            m_ends;
-		std::vector<std::array<int, sizeof...(_q)>> m_offsets;
-		std::vector<entity_storage*>                m_stores;
+		struct itr_part
+		{
+			std::array<int, sizeof...(_q)> m_offsets;
+			int m_more;
+			entity_storage::itr m_itr;
+			entity_storage* m_store; // this is ONLY to return an 'entity', ONLY needs archetype hash from it...
+		};
 
-		int m_current; // current item
+		std::vector<itr_part> m_parts;
+		typename std::vector<itr_part>::iterator m_current;
+		int m_more;
 
 		entity_manager* m_manager; // ref to manager, ONLY for returning entity instead of entity_handle
 
 		itr(
 			std::vector<entity_storage*> matches,
 			entity_manager* manager,
-			bool end
+			bool is_end
 		)
-			: m_current (end ? matches.size() : 0)
-			, m_stores  (matches)
-			, m_manager (manager)
+			: m_manager (manager)
+			, m_more    (0)
 		{
-			for (entity_storage* storage : matches)
-			{
-				if (end)
-				{
-					m_curs.push_back(storage->end());
-					// dont need ends or offsets because 
-					// checks for m_current block checks into these lists
-				}
+			// If its a begin iterator, and its not empty, add it to parts
+			// If its an end iterator, and there is a back and its not empty, add it to parts
+			// If parts is empty, add a null iterator to fake end
 
-				else
+			if (is_end)
+			{
+				for (auto itr = matches.rbegin(); itr != matches.rend(); ++itr)
 				{
-					m_curs   .push_back(storage->begin());
-					m_ends   .push_back(storage->end());
-					m_offsets.push_back(query_offsets<_q...>(storage->m_archetype));
+					entity_storage* store = *itr;
+					if (store->m_count > 0)
+					{
+						itr_part& part = m_parts.emplace_back();
+						part.m_itr = store->end();
+						break; // only need the last matches end iterator
+					}
 				}
 			}
 
-			step_to_next_valid();
+			else
+			{
+				for (entity_storage* storage : matches)
+				{
+					if (storage->m_count == 0) continue;
+			
+					entity_storage::itr begin = storage->begin();
+					entity_storage::itr end   = storage->end();
+			
+					itr_part& part = m_parts.emplace_back();
+					part.m_offsets = query_offsets<_q...>(storage->m_archetype);
+					part.m_more = std::distance(begin, end);
+					part.m_itr = begin;
+					part.m_store = storage;
+			
+					m_more += part.m_more;
+				}
+			}
+
+			//if (is_end) // lots of checks...
+			//{
+			//	if (matches.size() > 0 && matches.back()->m_count > 0)
+			//	{
+			//		itr_part& part = m_parts.emplace_back();
+			//		part.m_itr = matches.back()->end();
+			//	}
+			//}
+
+			//else
+			//{
+			//	for (entity_storage* storage : matches)
+			//	{
+			//		if (storage->m_count == 0) continue;
+
+			//		entity_storage::itr begin = storage->begin();
+			//		entity_storage::itr end   = storage->end();
+
+			//		itr_part& part = m_parts.emplace_back();
+			//		part.m_offsets = query_offsets<_q...>(storage->m_archetype);
+			//		part.m_more = std::distance(begin, end);
+			//		part.m_itr = begin;
+			//		part.m_store = storage;
+
+			//		m_more += part.m_more;
+			//	}
+			//}
+
+			if (m_parts.size() == 0)
+			{
+				m_parts.emplace_back();
+			}
+
+			m_current = m_parts.begin();
 		}
 
 		std::tuple<_q&...> just_components() const
 		{
-			return tie_from_offsets<_q...>(m_curs.at(m_current)->m_addr, m_offsets.at(m_current));
+			return tie_from_offsets<_q...>(m_current->m_itr->m_addr, m_current->m_offsets);
 		}
 
 		result_t operator*() const
 		{
 			if constexpr (_with_entity)
 			{
-				const entity_storage::entity_data& cur = *m_curs.at(m_current);
-				entity_storage* store = m_stores.at(m_current);
-
-				entity_handle handle = { cur.m_index, cur.m_version, store->m_archetype.m_hash };
+				entity_handle handle = {
+					m_current->m_itr->m_index,
+					m_current->m_itr->m_version,
+					m_current->m_store->m_archetype.m_hash
+				};
 
 				return std::tuple_cat(
-					std::make_tuple<entity>({ handle, store, m_manager }),
+					std::make_tuple<entity>({ handle, m_current->m_store, m_manager }),
 					just_components()
 				);
 			}
@@ -658,41 +711,24 @@ struct entity_query
 
 		itr& operator++()
 		{
-			do
-			{
-					 auto& itr = m_curs.at(m_current);
-				const auto& end = m_ends.at(m_current);
+			++m_current->m_itr;
+			--m_current->m_more;
+			--m_more;
+			if (m_more > 0 && m_current->m_more == 0) ++m_current;
 
-				++itr;
-				if (itr == end) ++m_current;
-			} 
-			while (is_itr_invalid());
+			// checking for m_more keeps begin -> end at final end iterator
 
 			return *this;
 		}
 
 		bool operator==(const itr& other) const 
 		{
-			return m_current            == other.m_current
-				&& (   m_current >= m_curs.size()	      // hack to not overshoot the vectors, fix would be to not use vectors
-					|| m_curs.at(m_current) == other.m_curs.at(m_current));
+			return m_more == other.m_more && m_current->m_itr == other.m_current->m_itr;
 		}
 
 		bool operator!=(const itr& other) const
 		{
 			return !operator==(other);
-		}
-
-		// little bit of a hack
-
-		bool is_itr_invalid() const
-		{
-			return m_current < m_curs.size() && (long long)m_curs.at(m_current)->m_addr < 1000;
-		}
-
-		void step_to_next_valid()
-		{
-			if (is_itr_invalid()) operator++();
 		}
 	};
 

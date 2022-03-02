@@ -45,154 +45,46 @@ namespace util {
 
 			iterator(
 				index_type index,
-				const direct_type* direct)
-				: m_index(index)
-				, m_direct(direct)
+				const direct_type* direct
+			)
+				: m_index  (index)
+				, m_direct (direct)
 			{}
 		private:
 			friend class sparse_set<index_type>;
 
 		public:
 			iterator()
-				: m_index(0)
-				, m_direct(nullptr)
+				: m_index  (0)
+				, m_direct (nullptr)
 			{}
 
-			iterator(
-				const iterator& copy) = default;
-
-			iterator(
-				iterator&& copy) = default;
-
+			iterator(const iterator& copy) = default;
+			iterator(iterator&& copy) = default;
 			~iterator() = default;
-
-			iterator& operator=(
-				const iterator& copy) = default;
-
-			iterator& operator=(
-				iterator&& copy) = default;
-
-			iterator& operator++() {
-				++m_index;
-				return *this;
-			}
-
-			iterator& operator--() {
-				--m_index;
-				return *this;
-			}
-
-			iterator operator++(
-				int)
-			{
-				iterator itr(*this);
-				++*this;
-				return itr;
-			}
-
-			iterator operator--(
-				int)
-			{
-				iterator itr(*this);
-				--*this;
-				return itr;
-			}
-
-			iterator& operator+=(
-				const difference_type& value)
-			{
-				m_index += value;
-				return *this;
-			}
-
-			iterator& operator-=(
-				const difference_type& value)
-			{
-				m_index -= value;
-				return *this;
-			}
-
-			iterator operator+(
-				const difference_type& dif) const
-			{
-				return iterator(m_index + dif, m_direct);
-			}
-
-			iterator operator-(
-				const difference_type& dif) const
-			{
-				return iterator(m_index - dif, m_direct);
-			}
-
-			virtual difference_type operator+(
-				const iterator& itr) const
-			{
-				return m_index + itr.m_index;
-			}
-
-			virtual difference_type operator-(
-				const iterator& itr) const
-			{
-				return m_index - itr.m_index;
-			}
-
-			virtual bool operator==(
-				const iterator& itr) const
-			{
-				return m_index == itr.m_index;
-			}
-
-			virtual bool operator!=(
-				const iterator& itr) const
-			{
-				return !(m_index == itr.m_index);
-			}
-
-			virtual bool operator>(
-				const iterator& itr) const
-			{
-				return m_index > itr.m_index;
-			}
-
-			virtual bool operator<(
-				const iterator& itr) const
-			{
-				return m_index < itr.m_index;
-			}
-
-			virtual bool operator>=(
-				const iterator& itr) const
-			{
-				return !(m_index < itr.m_index);
-			}
-
-			virtual bool operator<=(
-				const iterator& itr) const
-			{
-				return !(m_index > itr.m_index);
-			}
-
-			pointer operator->() const {
-				return &m_direct->at(m_index);
-			}
-
-			reference operator*() const {
-				return *operator->();
-			}
-
-			reference operator[](
-				const index_type& index) const
-			{
-				return m_direct->at(m_index + index); //Can't remember why this would be an offset? Probly wrong
-			}
-
-			inline index_type index() const {
-				return m_index;
-			}
-
-			inline index_type sparse_index() const {
-				return m_direct->at(m_index);
-			}
+			iterator& operator=(const iterator& copy) = default;
+			iterator& operator=(iterator&& copy) = default;
+			iterator& operator++() {	++m_index; return *this; }
+			iterator& operator--() { --m_index; return *this; }
+			iterator operator++(int) { iterator itr(*this); ++* this; return itr; }
+			iterator operator--(int) { iterator itr(*this); --*this; return itr; }
+			iterator& operator+=(const difference_type& value) { m_index += value; return *this; }
+			iterator& operator-=(const difference_type& value) { m_index -= value; return *this; }
+			iterator operator+(const difference_type& dif) const { return iterator(m_index + dif, m_direct); }
+			iterator operator-(const difference_type& dif) const { return iterator(m_index - dif, m_direct); }
+			virtual difference_type operator+(const iterator& itr) const { return m_index + itr.m_index; }
+			virtual difference_type operator-(const iterator& itr) const { return m_index - itr.m_index; }
+			virtual bool operator==(const iterator& itr) const { return m_index == itr.m_index; }
+			virtual bool operator!=(const iterator& itr) const { return !(m_index == itr.m_index); }
+			virtual bool operator>(const iterator& itr) const { return m_index > itr.m_index; }
+			virtual bool operator<(const iterator& itr) const { return m_index < itr.m_index; }
+			virtual bool operator>=(const iterator& itr) const { return !(m_index < itr.m_index); }
+			virtual bool operator<=(const iterator& itr) const { return !(m_index > itr.m_index); }
+			pointer operator->() const { return &m_direct->at(m_index); }
+			reference operator*() const { return *operator->(); }
+			reference operator[]( const index_type& index) const { return m_direct->at(m_index + index); }
+			inline index_type index() const { return m_index; }
+			inline index_type sparse_index() const { return m_direct->at(m_index); }
 		};
 	//protected:
 		std::vector<_t> m_sparse;
@@ -237,14 +129,28 @@ namespace util {
 			_t x)
 		{
 			assert(contains(x));
-			_t back  = m_direct.back();
+
+			_t& sparse = m_sparse.at(x);
+
+			// this version moves the indices back
+			for (_t i = 0; i < m_sparse.size(); ++i)
+			{
+				_t& s = m_sparse.at(i);
+				if (s != EMPTY_VALUE && s > sparse) s -= _t(1);
+			}
+
+			m_direct.erase(m_direct.begin() + sparse);
+			sparse = EMPTY_VALUE;
+
+			// this version swaps the back, not too good for ecs, should provide an options for this through template val
+			/*_t back  = m_direct.back();
 			_t& swap = m_sparse[x];
 
 			m_sparse[back] = swap;
 			m_direct[swap] = back;
 
 			swap = EMPTY_VALUE;
-			m_direct.pop_back();
+			m_direct.pop_back();*/
 		}
 
 		/**
@@ -326,7 +232,6 @@ namespace util {
 			_t index) const
 		{
 			assert(contains(index));
-
 			return m_sparse[index];
 		}
 
@@ -428,14 +333,12 @@ namespace util {
 		template<
 			bool _const>
 		class iterator_ 
-			: public sparse_set<_index_t>::iterator //This might be monkey shit but well see
+			: public sparse_set<_index_t>::iterator
 		{
 			public:
 				using item_vec_ = std::vector<_item_t>;
-				using item_type
-					= std::conditional_t<_const, const _item_t, _item_t>;
-				using item_vec
-					= std::conditional_t<_const, const item_vec_, item_vec_>;
+				using item_type = std::conditional_t<_const, const _item_t, _item_t>;
+				using item_vec  = std::conditional_t<_const, const item_vec_, item_vec_>;
 				using value_type = std::remove_cv_t<item_type>;
 				using pointer    = item_type*;
 				using reference  = item_type&;
@@ -448,93 +351,30 @@ namespace util {
 				iterator_(
 					index_type index,
 					const direct_type* direct,
-					item_vec* items)
-					: iterator(index, direct)
-					, m_items(items)
+					item_vec* items
+				)
+					: iterator (index, direct)
+					, m_items  (items)
 				{}
 
 			public:
 				iterator_() = default;
-
-				iterator_(
-					const iterator_& copy) = default;
-
-				iterator_(
-					iterator_&& copy) = default;
-
+				iterator_(const iterator_& copy) = default;
+				iterator_(iterator_&& copy) = default;
 				~iterator_() = default;
-
-				iterator_& operator=(
-					const iterator_& copy) = default;
-
-				iterator_& operator=(
-					iterator_&& copy) = default;
-					
-				iterator_& operator++() {
-					++m_index;
-					return *this;
-				}
-
-				iterator_& operator--() {
-					--m_index;
-					return *this;
-				}
-
-				iterator_ operator++(
-					int)
-				{
-					iterator_ itr(*this);
-					++*this;
-					return itr;
-				}
-
-				iterator_ operator--(
-					int)
-				{
-					iterator_ itr(*this);
-					--*this;
-					return itr;
-				}
-
-				iterator_& operator+=(
-					const difference_type& value)
-				{
-					m_index += value;
-					return *this;
-				}
-
-				iterator_& operator-=(
-					const difference_type& value)
-				{
-					m_index -= value;
-					return *this;
-				}
-
-				iterator_ operator+(
-					const difference_type& dif) const
-				{
-					return iterator_(m_index + dif, m_direct, m_items);
-				}
-
-				iterator_ operator-(
-					const difference_type& dif) const
-				{
-					return iterator_(m_index - dif, m_direct, m_items);
-				}
-				
-				pointer operator->() {
-					return &m_items->at(m_index);
-				}
-
-				reference operator*() {
-					return *operator->();
-				}
-
-				reference operator[](
-					const index_type& index)
-				{
-					return m_items->at(m_index + index);
-				}
+				iterator_& operator=(const iterator_& copy) = default;
+				iterator_& operator=(iterator_&& copy) = default;
+				iterator_& operator++() { ++m_index; return *this; }
+				iterator_& operator--() { --m_index; return *this; }
+				iterator_ operator++(int) { iterator_ itr(*this); ++*this; return itr; }
+				iterator_ operator--(int) { iterator_ itr(*this); --*this; return itr; }
+				iterator_& operator+=(const difference_type& value) { m_index += value; return *this; }
+				iterator_& operator-=(const difference_type& value) { m_index -= value; return *this; }
+				iterator_ operator+(const difference_type& dif) const { return iterator_(m_index + dif, m_direct, m_items); }
+				iterator_ operator-(const difference_type& dif) const { return iterator_(m_index - dif, m_direct, m_items); }
+				pointer operator->() { return &m_items->at(m_index); }
+				reference operator*() { return *operator->(); }
+				reference operator[](const index_type& index) { return m_items->at(m_index + index); }
 		};
 
 		using iterator       = iterator_<false>;
@@ -617,10 +457,14 @@ namespace util {
 		{
 			_index_t loc = base_t::at(index);
 
-			m_items[loc].~_item_t();
-			m_items[loc] = std::move(m_items.back());
+			// this version just erases and moves all the items back
+			m_items.erase(m_items.begin() + loc);
 
-			m_items.pop_back();
+			// this version swaps the back
+			//m_items[loc].~_item_t();
+			//m_items[loc] = std::move(m_items.back());
+			//m_items.pop_back();
+
 			base_t::erase(index);
 		}
 
