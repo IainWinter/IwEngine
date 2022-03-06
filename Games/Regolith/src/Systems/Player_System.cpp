@@ -13,9 +13,11 @@ int PlayerSystem::Initialize()
 	transform.Position = glm::vec3(w, h, 0);
 	rigidbody.SetTransform(&transform);
 	rigidbody.SetMass(10);
+	rigidbody.Restitution = 0;
+	rigidbody.StaticFriction = 1;
 	core.TimeWithoutCore = 4.f;
 	player.SpecialLaser = MakeFatLaser_Cannon();
-	player.CurrentWeapon = MakeFatLaser_Cannon();
+	player.CurrentWeapon = MakeWattz_Cannon();
 
 	player.Moves[0] = new Dash_Move();
 	player.Moves[1] = new SmokeScreen_Move();
@@ -57,6 +59,14 @@ void PlayerSystem::Destroy()
 // dont take inputs in fixed update 
 void PlayerSystem::FixedUpdate()
 {
+	Player& player = m_player.get<Player>();
+	iw::Rigidbody& rigidbody = m_player.get<iw::Rigidbody>();
+
+	// movement
+
+	player.move = glm::vec3(iw::norm(glm::vec2(player.i_moveX, player.i_moveY)), 0.f);
+	rigidbody.Velocity = player.move * player.u_speed;
+
 	//glm::vec3& imp = player->imp;
 	//glm::vec3& acc = rigidbody->Velocity;
 	//glm::vec3 nacc = iw::norm(acc);
@@ -85,13 +95,7 @@ void PlayerSystem::Update()
 {
 	timer.Tick();
 
-	Player&        player    = m_player.get<Player>();
-	iw::Rigidbody& rigidbody = m_player.get<iw::Rigidbody>();
-
-	// movement
-
-	player.move = glm::vec3(iw::norm(glm::vec2(player.i_moveX, player.i_moveY)), 0.f);
-	rigidbody.Velocity = player.move * player.u_speed;
+	Player& player = m_player.get<Player>();
 
 	// special actions
 

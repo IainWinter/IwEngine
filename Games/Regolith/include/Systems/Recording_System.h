@@ -24,7 +24,7 @@ struct Recording_System : iw::SystemBase
 		: iw::SystemBase ("Recording system test")
 		, m_sand         (sand)
 		, m_frameCount   (100)
-		, m_frameSize    (50)
+		, m_frameSize    (100)
 		, m_frameToDraw  (0)
 		, m_last_x       (0.f)
 		, m_last_y       (0.f)

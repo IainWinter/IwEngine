@@ -5,6 +5,7 @@
 #include "plugins/iw/Sand/Engine/SandLayer.h"
 
 #include "Components/Projectile.h"
+#include "Components/Asteroid.h"
 
 #include "Events.h"
 #include "ECS.h"
@@ -30,17 +31,11 @@ private:
 		entity MakeProjectile(
 		const ShotInfo& shot)
 	{
-		entity entity = entities().create<iw::Transform, iw::Rigidbody, Projectile, _cs...>();
+		entity entity = MakeProjectile_raw<iw::Transform, iw::Rigidbody, _cs...>(shot)
+			.set<iw::Transform>(glm::vec3(shot.x, shot.y, 0));
 
-		entity.set<Projectile>(shot);
-		entity.get<Projectile>().Shot.origin = ::entity(); // for testing
-
-		iw::Transform& transform = entity.get<iw::Transform>();
 		iw::Rigidbody& rigidbody = entity.get<iw::Rigidbody>();
-
-		transform.Position = glm::vec3(shot.x, shot.y, 0);
-
-		rigidbody.SetTransform(&transform);
+		rigidbody.SetTransform(&entity.get<iw::Transform>());
 		rigidbody.Velocity = glm::vec3(shot.dx, shot.dy, 0);
 		rigidbody.IsKinematic = false;
 
@@ -54,8 +49,9 @@ private:
 	entity MakeProjectile_raw(
 		const ShotInfo& shot)
 	{
-		return entities().create<Projectile, _cs...>()
-					  .set<Projectile>(shot);
+		entity e = entities().create<Projectile, _cs...>()
+			.set<Projectile>(shot);
+		return e;
 	}
 
 	entity MakeBullet(const ShotInfo& shot, int depth);

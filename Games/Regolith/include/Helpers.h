@@ -218,7 +218,7 @@ struct LightningConfig
 	LightningType Type = LightningType::POINT; // only for outside logic
 	entity A; // only used if Type = ENTITY
 	entity B;
-	entity Entity; // the entity who owns this lightning
+	entity Owner;
 
 	int X = 0;
 	int Y = 0;
@@ -287,8 +287,7 @@ LightningHitInfo DrawLightning(
 
 				if (    cell.Type != iw::CellType::EMPTY
 					&& cell.Type != iw::CellType::LIGHTNING
-					|| (    info.tile
-						&& info.tile != &config.A.get<iw::Tile>()))
+					|| info.tile)
 				{
 					hit.X = px;
 					hit.Y = py;

@@ -516,7 +516,7 @@ struct entity
 
 	bool is_alive() const
 	{
-		if (hash() == hash_int3(0, 0, 0))
+		if (m_handle.m_archetype == hash_t(0))
 		{
 			return false;
 		}
@@ -1143,10 +1143,14 @@ struct command_buffer
 			}
 		}
 
+		if (!entity.is_alive())
+		{
+			printf("\n[Entity] Tried queue a delete with a dead entity");
+			printf("\n[Entity]\t 1. Index: %d from %s", entity.m_handle.m_index, m_where_current);
+		}
 		command_destroy* command = queue<command_destroy>();
 		command->m_type = entity_command::DESTROY;
 		command->m_handle = entity.m_handle;
-
 	}
 
 	void set(entity entity, const component& component) // no data

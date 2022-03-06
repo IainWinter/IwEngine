@@ -522,6 +522,7 @@ void Menu_Title_Layer::UI()
 
 		ImGui::SetCursorPos(ImVec2(img_xy, img_xy));
 		ImGui::Image(Image("deathMovie"), ImVec2(img_wh, img_wh), ImVec2(uv0.x, uv0.y), ImVec2(uv1.x, uv1.y));
+		ImGui::Text("Frame %d/%d, step %.2f", deathMovieFrame, deathMovie.TileCount(), deathMovieFrameTimer.GetTime("step"));
 
 		deathMovieFrameTimer.Tick();
 		if (deathMovieFrameTimer.Can("step"))

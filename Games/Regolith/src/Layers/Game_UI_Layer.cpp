@@ -159,7 +159,8 @@ bool Menu_GameUI_Layer::On(iw::ActionEvent& e)
 		{
 			ProjHitTile_Event& event = e.as<ProjHitTile_Event>();
 			if (   event.Config.Hit.has<Player>()
-				&& event.Config.Projectile.is_alive()) // for crash ?
+				&& event.Config.Projectile.is_alive()
+				&& event.Config.Projectile.has<iw::Rigidbody>())
 			{
 				int index  = event.Config.Info.index;
 				int width  = event.Config.Info.tile->m_sprite.m_width;

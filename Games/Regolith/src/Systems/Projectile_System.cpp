@@ -4,13 +4,13 @@
 
 void ProjectileSystem::Update()
 {
-	command_buffer to_delete(&entities());
+	// dps is based on framerate ...
 
 	for (auto [entity, transform, projectile] : entities().query<iw::Transform, Projectile>().with_entity())
 	{
 		if (glm::distance2(transform.Position, glm::vec3(200.f, 200.f, 0.f)) > 400 * 400)
 		{
-			to_delete.destroy(entity);
+			entities_defer().destroy(entity);
 		}
 
 		else
@@ -19,12 +19,10 @@ void ProjectileSystem::Update()
 			projectile.Life -= iw::DeltaTime();
 			if (projectile.Life <= 0.f)
 			{
-				to_delete.destroy(entity);
+				entities_defer().destroy(entity);
 			}
 		}
 	}
-
-	to_delete.execute();
 
 	for (auto components : entities().query<iw::Transform, iw::Rigidbody, Projectile, Linear_Projectile>().with_entity())
 	{
@@ -202,43 +200,44 @@ void ProjectileSystem::Update()
 	{
 		glm::vec3& pos = transform.Position;
 		
-		auto& [angle, dangle] = iw::choose_e(ball.Points);
-		
-		angle += .01 * dangle;
-		
-		float length = 15;
-		float dx = cos(angle);
-		float dy = sin(angle);
-		
-		iw::CollisionObject* object = Physics->QueryVector(
-			pos, glm::vec3(dx, dy, 0.f), 75, 35).Closest();
-		
-		LightningConfig config;
-		
-		if (   object 
-			&& object != &rigidbody
-			&& proj.Shot.origin != GetPhysicsEntity(object).second)
+		//auto& [angle, dangle] = iw::choose_e(ball.Points);
+		for (auto& [angle, dangle] : ball.Points)
 		{
-			config.Type = LightningType::ENTITY;
+			angle += .01 * dangle;
+
+			float length = 15;
+			float dx = cos(angle);
+			float dy = sin(angle);
+
+			iw::CollisionObject* object = Physics->QueryVector(
+				pos, glm::vec3(dx, dy, 0.f), 75, 35).Closest();
+
+			LightningConfig config;
 			config.A = entity;
-			config.B = GetPhysicsEntity(object).second;
+			config.Owner = proj.Shot.origin;
+			config.ArcSize = 5;
+			config.LifeTime = iw::DeltaTime();
+			config.StopOnHit = true;
+
+			if (   object
+				&& object != &rigidbody
+				&& proj.Shot.origin != GetPhysicsEntity(object).second)
+			{
+				config.Type = LightningType::ENTITY;
+				config.B = GetPhysicsEntity(object).second;
+			}
+
+			else
+			{
+				config.Type = LightningType::POINT;
+				config.X = (int)floor(pos.x);
+				config.Y = (int)floor(pos.y);
+				config.TargetX = (int)floor(pos.x + dx * length);
+				config.TargetY = (int)floor(pos.y + dy * length);
+			}
+
+			bolts.push_back(config);
 		}
-		
-		else
-		{
-			config.Type = LightningType::POINT;
-			config.X       = (int)floor(pos.x);
-			config.Y       = (int)floor(pos.y);
-			config.TargetX = (int)floor(pos.x + dx * length);
-			config.TargetY = (int)floor(pos.y + dy * length);
-			config.A = proj.Shot.origin;
-		}
-		
-		config.ArcSize = 5;
-		config.LifeTime = iw::DeltaTime();
-		config.StopOnHit = true;
-		
-		bolts.push_back(config);
 	}
 
 	for (auto [entity, proj, bolt] : entities().query<Projectile, LightBolt_Projectile>().with_entity())
@@ -253,17 +252,18 @@ void ProjectileSystem::Update()
 			glm::vec3(shot.dx, shot.dy, .0f), shot.Speed(), 64);
 		
 		LightningConfig config;
+		config.A = entity;
+		config.Owner = proj.Shot.origin;
 		config.LifeTime = .01f + iw::randf() * .05f;
 		config.StopOnHit = true;
-		config.A = shot.origin;
-		config.Entity = entity;
 		config.ArcSize = 10 + iw::randi(6) - 3;
-		
+
 		if (query.Objects.size() > 0)
 		{
 			auto [dist, obj] = iw::choose_e(query.Objects);
 		
 			config.Type = LightningType::ENTITY;
+			config.A = shot.origin;
 			config.B = GetPhysicsEntity(obj).second;
 		
 			bolts.push_back(config);
@@ -310,7 +310,7 @@ void ProjectileSystem::Update()
 			{
 				if (!::GetPhysicsComponent(bolt.B)->Collider)
 				{
-					bolt.B.destroy();
+					entities_defer().destroy(bolt.B);
 				}
 			}
 
@@ -318,14 +318,17 @@ void ProjectileSystem::Update()
 			{
 				entity entity = entities().find(hit.TileInfo.tile).second;
 
+				if (entity == bolt.Owner) continue;
+
 				if (   entity.has<Player>()
-					|| entity.has<Enemy>())
+					|| entity.has<Enemy>()
+					|| entity.has<Asteroid>())
 				{
 					ProjHitTile_Config config;
 					config.X = hit.X;
 					config.Y = hit.Y;
 					config.Info = hit.TileInfo;
-					config.Projectile = bolt.Entity;
+					config.Projectile = bolt.A;
 					config.Hit = entity;
 
 					Bus->push<RemoveCellFromTile_Event>(hit.TileInfo.index, config.Hit);

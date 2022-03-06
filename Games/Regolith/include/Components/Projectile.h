@@ -28,8 +28,8 @@ struct Projectile
 	Projectile(
 		const ShotInfo& shot
 	)
-		: Shot(shot)
-		, Life(shot.life)
+		: Shot (shot)
+		, Life (shot.life)
 	{}
 };
 
