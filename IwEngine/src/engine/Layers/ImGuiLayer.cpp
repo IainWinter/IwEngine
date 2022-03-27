@@ -105,12 +105,12 @@ namespace Engine {
 	void ImGuiLayer::ImGui() {
 		ImGui::GetIO().DeltaTime = Time::DeltaTime();
 
-		if (m_window) {
-			iw::vec2 pos = Mouse::ClientPos();
+		//if (m_window) {
+		//	iw::vec2 pos = Mouse::ClientPos();
 
-			ImGui::GetIO().MousePos.x = pos.x();
-			ImGui::GetIO().MousePos.y = pos.y();
-		}
+		//	ImGui::GetIO().MousePos.x = pos.x();
+		//	ImGui::GetIO().MousePos.y = pos.y();
+		//}
 	}
 
 	void ImGuiLayer::Begin() {
@@ -208,7 +208,7 @@ namespace Engine {
 
 		// Frame
 
-		ImGui::Render();
+		ImGui::Render(); // calls EndFrame
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		// Update and Render additional Platform Windows
@@ -246,9 +246,11 @@ namespace Engine {
 
 			io.MousePos.x = (float)screenPos.x;
 			io.MousePos.y = (float)screenPos.y;
+
+			return io.WantCaptureMouse;
 		}
 
-		return io.WantCaptureMouse;
+		return false;
 	}
 
 	bool ImGuiLayer::On(
@@ -261,9 +263,11 @@ namespace Engine {
 			if (io.WantCaptureMouse) {
 				io.MouseWheel += e.Delta;
 			}
+
+			return io.WantCaptureMouse;
 		}
 
-		return io.WantCaptureMouse;
+		return false;
 	}
 
 	bool ImGuiLayer::On(
@@ -275,9 +279,10 @@ namespace Engine {
 			&& io.WantCaptureMouse)
 		{
 			io.MouseDown[(int)e.Button - (int)InputName::LMOUSE] = e.State;
+			return io.WantCaptureMouse;
 		}
 
-		return io.WantCaptureMouse;
+		return false;
 	}
 
 	bool ImGuiLayer::On(
@@ -288,9 +293,10 @@ namespace Engine {
 		if (io.WantCaptureKeyboard)
 		{
 			io.KeysDown[(int)e.Button] = e.State;
+			return io.WantCaptureKeyboard;
 		}
 
-		return io.WantCaptureKeyboard;
+		return false;
 	}
 
 	bool ImGuiLayer::On(
@@ -301,9 +307,10 @@ namespace Engine {
 		if (io.WantCaptureKeyboard)
 		{
 			io.AddInputCharacter(e.Character);
+			return io.WantCaptureKeyboard;
 		}
 
-		return io.WantCaptureKeyboard;
+		return false;
 	}
 	
 	bool ImGuiLayer::On(

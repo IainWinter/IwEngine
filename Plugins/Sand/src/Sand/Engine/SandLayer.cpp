@@ -132,6 +132,7 @@ int SandLayer::Initialize() {
 		);
 	}
 
+	m_world->m_sandLayerIndex = m_sandLayerIndex;
 	m_world->m_workers.push_back(new SandWorkerBuilder<SimpleSandWorker>());
 
 	// this code SUCKS, the order has to be the same as the order in the enum
@@ -294,7 +295,7 @@ void SandLayer::PasteTiles(const std::vector<std::tuple<iw::Transform*, iw::Tile
 
 	for (const auto& [transform, tile, meshCollider] : tiles)
 	{
-		if (tile->m_sandLayerIndex != m_sandLayerIndex) return;
+		if (tile->m_sandLayerIndex != m_sandLayerIndex) continue;
 
 		m_tilesThisFrame.push_back(tile);
 

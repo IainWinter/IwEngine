@@ -14,7 +14,6 @@ namespace Engine {
 	private:
 		ref<IDevice> m_device;
 
-		EventStack<Layer*> m_layers;
 
 #ifdef IW_REMOTE_EDITOR
 		RemoteSession m_remote;
@@ -26,6 +25,8 @@ namespace Engine {
 		float m_frameDelay;
 	public:
 		APP_VARS
+
+		EventStack<Layer*> m_layers;
 
 	public:
 		IWENGINE_API

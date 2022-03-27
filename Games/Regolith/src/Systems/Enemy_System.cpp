@@ -42,7 +42,7 @@ void EnemySystem::FixedUpdate()
 		
 		glm::vec3 pos = ship.Target.get<iw::Transform>().Position;
 			
-		// set flocking target to target
+		// set flocking target to player pos
 		flocker.Target = glm::vec2(pos.x, pos.y);
 		
 		// start explosion if close to target
@@ -50,6 +50,7 @@ void EnemySystem::FixedUpdate()
 			&& glm::distance(pos, transform.Position) < bomb.RadiusToExplode)
 		{
 			bomb.Explode = true;
+			entities_defer().remove<Flocker>(entity);
 		}
 		
 		if (bomb.Explode)
@@ -233,7 +234,7 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 		}
 	}
 
-	entity = MakeTile(*tex, components);
+	entity = MakeTile(sand->m_sandLayerIndex, *tex, components);
 	AddEntityToPhysics(entity, Physics);
 
 	iw::Rigidbody& rigidbody = entity.get<iw::Rigidbody>();
@@ -368,7 +369,7 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 			Bus->push<SpawnItem_Event>(config);
 
 			// spawn copy of just display
-			::entity tileCopy = MakeTile(entity.get<iw::Tile>().m_sprite, { make_component<iw::MeshCollider2>() });
+			::entity tileCopy = MakeTile(sand->m_sandLayerIndex, entity.get<iw::Tile>().m_sprite, { make_component<iw::MeshCollider2>() });
 			AddEntityToPhysics(tileCopy, Physics);
 
 			tileCopy.set<iw::Transform>(transform);

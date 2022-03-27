@@ -25,6 +25,8 @@ public:
 
 	std::vector<std::vector<SandChunk*>> m_batches;
 	std::vector<SandWorkerBuilderBase*>  m_workers;
+
+	int m_sandLayerIndex = -1;
 private:
 	Concurrency::concurrent_unordered_map<std::pair<int, int>, SandChunk*, iw::pair_hash> m_chunkLookup;
 	std::mutex m_chunkMutex;

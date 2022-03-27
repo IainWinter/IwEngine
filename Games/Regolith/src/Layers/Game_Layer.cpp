@@ -73,23 +73,50 @@ bool Game_Layer::On(iw::ActionEvent& e)
 		{
 			LOG_TRACE << "DESTROYED_PLAYER";
 
-			for (iw::ISystem* s : temp_GetSystems())
+			std::vector<iw::ISystem*> systems = temp_GetSystems().m_items;
+
+			for (iw::ISystem* s : systems)
 			{
 				if (   s == projectile_s // to keep projs moving for a second after death
-					|| s == recorder_s
-					|| s == tile_s)  // to grab from layer in App
+					|| s == recorder_s)  // to grab from layer in App
 				{
 					continue;
 				}
 
-				DestroySystem(s);
+				PopSystem(s);
 			}
 
-			PopSystem(tile_s);
+			// This is only an est on the framerate, should record a few frames after death
+			// below is the ratio of frames after death vs before
 
-			Task->delay(.5f, [=]() {
-				Console->QueueCommand("set-state post");
-			});
+			float time = recorder_s->m_frameCount * .3f * iw::DeltaTime();
+
+			Task->delay(time,
+				[=]() {
+					recorder_s->m_record = false;
+				}
+			);
+
+			Task->delay(time + 1.f,
+				[=]() {
+					for (auto [e] : entities().all())
+					{
+						entities_defer().destroy(e);
+					}
+					entities_defer().execute();
+					//entities().m_storage.clear();
+
+					for (iw::ISystem* s : systems) // only because popping a system to pause it makes it so it cannot get deleted, need a third 'paused' state in EventStack, real solve is to rethink how this works
+					{
+						if (s == recorder_s) continue;
+						DestroySystem(s);
+					}
+
+					std::stringstream ss; ss << "set-death-movie-frame " << recorder_s->m_frameToDraw + 1;
+					Console->QueueCommand("set-state post");
+					Console->QueueCommand(ss.str());
+				}
+			);
 
 			// I think that the animation will look better in UI land instead of the sand
 			// ahh do need to keep the sand alive for a little for the projectiles tho

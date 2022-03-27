@@ -10,13 +10,11 @@ namespace Engine {
 	// and bool 'On(Event&)' functions for every event
 	template<
 		typename T>
-	class EventStack {
-	public:
+	struct EventStack {
 		using iterator = typename std::vector<T>::iterator;
-	private:
+
 		std::vector<T> m_items;
 
-	public:
 		void PushBack(
 			const T& item)
 		{

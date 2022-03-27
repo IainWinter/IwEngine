@@ -71,15 +71,18 @@ struct temp_PhysicsSystem
 
 struct StaticLayer : iw::Layer
 {
-	StaticLayer()
+	iw::Application* app;
+
+	StaticLayer(iw::Application* app)
 		: iw::Layer("Static")
+		, app(app)
 	{}
 
 	int Initialize() override
 	{
 		//PushSystem<iw::PhysicsSystem>();
+		//PushSystem<iw::EntityCleanupSystem>();
 		PushSystem<temp_PhysicsSystem>();
-		PushSystem<iw::EntityCleanupSystem>();
 
 		if (int e = LoadAssets(Asset.get(), Renderer->Now.get()))
 		{
@@ -90,6 +93,17 @@ struct StaticLayer : iw::Layer
 		Physics->AddSolver(new iw::ImpulseSolver());
 
 		return Layer::Initialize();
+	}
+
+	void ImGui() override
+	{
+		ImGui::Begin("Layers");
+		for (Layer* layer : app->m_layers)
+		{
+			ImGui::Text(layer->Name().c_str());
+		}
+
+		ImGui::End();
 	}
 };
 
@@ -154,6 +168,8 @@ struct TileRender_Layer : iw::Layer
 					? &entity.get<iw::MeshCollider2>()
 					: nullptr);
 			//}
+
+			//break; // only can see tiles if there is only a single entity?
 		}
 
 		m_sand->PasteTiles(tiles);

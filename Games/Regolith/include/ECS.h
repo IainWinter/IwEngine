@@ -979,6 +979,18 @@ struct entity_manager
 		return result;
 	}
 
+	entity_query<true> all()
+	{
+		entity_query<true> result(this);
+
+		for (auto& [_, storage] : m_storage)
+		{
+			result.m_matches.push_back(&storage);
+		}
+
+		return result;
+	}
+
 private:
 	void clean_storage(const entity_storage& storage)
 	{

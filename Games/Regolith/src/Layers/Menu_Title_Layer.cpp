@@ -522,13 +522,25 @@ void Menu_Title_Layer::UI()
 
 		ImGui::SetCursorPos(ImVec2(img_xy, img_xy));
 		ImGui::Image(Image("deathMovie"), ImVec2(img_wh, img_wh), ImVec2(uv0.x, uv0.y), ImVec2(uv1.x, uv1.y));
-		ImGui::Text("Frame %d/%d, step %.2f", deathMovieFrame, deathMovie.TileCount(), deathMovieFrameTimer.GetTime("step"));
+		//ImGui::Text("Frame %d/%d, step %.2f", deathMovieFrame, deathMovie.TileCount(), deathMovieFrameTimer.GetTime("step"));
 
 		deathMovieFrameTimer.Tick();
 		if (deathMovieFrameTimer.Can("step"))
 		{
 			deathMovieFrame = (deathMovieFrame + 1) % deathMovie.TileCount();
 		}
+
+		float y = bg_h - padding_1;
+
+		ImGui::SetCursorPosY(y);
+		ImGui::SetCursorPosX(x);
+		if (Button("Main Menu")) {
+			// save amount of money you have...
+			SetViewDefault();
+		}
+
+		ImGui::SameLine();
+		Button("Continue");
 	}
 
 	ImGui::End();

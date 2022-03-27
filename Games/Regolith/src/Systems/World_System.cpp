@@ -287,7 +287,7 @@ bool WorldSystem::On(iw::ActionEvent& e)
 			//c.DontRemoveCells = true;
 
 			SpawnEnemy_Config c;
-			c.EnemyType = BOSS_1;
+			c.EnemyType = FIGHTER;
 			c.TargetEntity = m_player;
 			c.SpawnLocationX = 201.5;
 			c.SpawnLocationY = 300;
@@ -359,7 +359,7 @@ entity WorldSystem::MakeAsteroid(
 		}
 	}
 
-	entity entity = MakeTile(*asteroid_tex, wrap<Asteroid, Throwable, iw::MeshCollider2>());
+	entity entity = MakeTile(sand->m_sandLayerIndex, *asteroid_tex, wrap<Asteroid, Throwable, iw::MeshCollider2>());
 	AddEntityToPhysics(entity, Physics);
 
 	iw::Transform& t = entity.get<iw::Transform>();

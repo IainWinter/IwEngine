@@ -151,7 +151,7 @@ entity ItemSystem::MakeItem(
     const SpawnItem_Config& config,
     iw::ref<iw::Texture>& sprite)
 {
-    entity entity = MakeTile(*sprite, wrap<Item, KeepInWorld, iw::Circle>());
+    entity entity = MakeTile(sand->m_sandLayerIndex, *sprite, wrap<Item, KeepInWorld, iw::Circle>());
     AddEntityToPhysics(entity, Physics);
 
     Item&          item      = entity.get<Item>();

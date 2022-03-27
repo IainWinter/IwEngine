@@ -55,7 +55,7 @@ int App::Initialize(
 {
 	SetMenuStateAppVars(APP_VARS_LIST);
 
-	PushLayer<StaticLayer>();
+	PushLayer<StaticLayer>(this);
 	PushLayer<Audio_Layer>();
 
 	PushLayer<iw::DebugLayer>();
@@ -344,6 +344,12 @@ int App::Initialize(
 
 				return finished;
 			});
+		}
+
+		else
+		if (command.Verb == "set-death-movie-frame")
+		{
+			m_menus->deathMovieFrame = command.Num(0);
 		}
 
 		//else

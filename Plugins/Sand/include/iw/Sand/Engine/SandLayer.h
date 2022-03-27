@@ -48,7 +48,9 @@ private:
 	int m_worldChunksY;
 
 	inline static int s_sandLayerIndex = 0;
-	int m_sandLayerIndex;
+
+public:
+	int m_sandLayerIndex; // copied into SandWorld, could remove from here
 
 public:
 	SandLayer(

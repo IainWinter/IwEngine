@@ -141,9 +141,6 @@ void AddEntityToPhysics(
 			physics->RemoveCollisionObject(ptr);
 			physics->AddCollisionObject(&entity.get<iw::CollisionObject>());
 		});
-
-
-		//e.on_add([](int) {});
 	}
 
 	e.on_destroy([=](entity entity) {
@@ -243,14 +240,17 @@ CellInfo GetRandomNearCell(iw::SandLayer* sand, entity entity, glm::vec2 delta)
 	{
 		cells = FindClosestCellPositionsMatchingTile(sand, entity.get<iw::Tile>(), a.x, a.y);
 	}
-	else
+
+	if (cells.size() > 0)
 	{
-		CellInfo& info = cells.emplace_back();
-		info.x = (int)floor(a.x);
-		info.y = (int)floor(a.y);
+		return cells.at(iw::randi(cells.size() - 1));
 	}
 
-	return cells.at(iw::randi(cells.size() - 1));
+	CellInfo info;
+	info.x = (int)floor(a.x);
+	info.y = (int)floor(a.y);
+
+	return info;
 }
 
 inline
@@ -503,6 +503,7 @@ void flood_fill(
 // this assumes that if others is provided, then the last component is a valid physics collider type
 inline
 entity MakeTile(
+	int index,
 	const iw::Texture& sprite,
 	std::vector<component> others = {})
 {
@@ -532,6 +533,8 @@ entity MakeTile(
 
 		entities().get(entity.m_handle, others.back(), (void**)&body.Collider);
 	}
+
+	entity.get<iw::Tile>().m_sandLayerIndex = index;
 
 	return entity;
 }
@@ -578,7 +581,7 @@ entity SplitTile(
 		texture->Colors32()[it] = tile.m_sprite.Colors32()[i];
 	}
 
-	::entity split = MakeTile(*texture, others);
+	::entity split = MakeTile(tile.m_sandLayerIndex, *texture, others);
 
 	// give split the pos and rot of the orignal peice
 

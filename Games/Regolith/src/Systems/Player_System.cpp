@@ -2,7 +2,7 @@
 
 int PlayerSystem::Initialize()
 {
-	m_player = MakeTile(*A_texture_player, wrap<Player, CorePixels, KeepInWorld, iw::Circle>());
+	m_player = MakeTile(sand->m_sandLayerIndex, *A_texture_player, wrap<Player, CorePixels, KeepInWorld, iw::Circle>());
 	AddEntityToPhysics(m_player, Physics);
 
 	iw::Rigidbody& rigidbody = m_player.get<iw::Rigidbody>();
@@ -26,7 +26,7 @@ int PlayerSystem::Initialize()
 	Bus->send<CreatedPlayer_Event>(m_player); // set immediately in other systems before System Update
 	Bus->send<CreatedCoreTile_Event>(m_player);
 
-	m_handle = Console->AddHandler([&](
+	iw::HandlerFunc* handle = Console->AddHandler([&](
 		const iw::Command& command)
 	{
 		Player& player = m_player.get<Player>();
@@ -47,12 +47,9 @@ int PlayerSystem::Initialize()
 		return false;
 	});
 
-	return 0;
-}
+	m_player.on_destroy([=](entity e) {Console->RemoveHandler(handle); });
 
-void PlayerSystem::Destroy()
-{
-	Console->RemoveHandler(m_handle);
+	return 0;
 }
 
 // dont take inputs in fixed update 
