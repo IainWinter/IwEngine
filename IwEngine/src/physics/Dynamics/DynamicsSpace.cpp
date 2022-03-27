@@ -55,7 +55,7 @@ namespace Physics {
 
 			Rigidbody* rigidbody = (Rigidbody*)object;
 
-			if (rigidbody->IsKinematic)
+			if (rigidbody->IsSimulated)
 			{
 				rigidbody->Velocity        += dt * rigidbody->NetForce  * rigidbody->InvMass;
 				rigidbody->AngularVelocity += dt * rigidbody->NetTorque * rigidbody->Inertia;
@@ -95,7 +95,7 @@ namespace Physics {
 
 			rigidbody->SetLastTrans(rigidbody->Transform);
 
-			if (rigidbody->IsKinematic)
+			if (rigidbody->IsSimulated)
 			{
 				Transform& transform = rigidbody->Transform;
 
@@ -147,7 +147,7 @@ namespace Physics {
 			if (!object->IsDynamic) continue;
 
 			Rigidbody* rigidbody = (Rigidbody*)object;
-			if (rigidbody->TakesGravity && rigidbody->IsKinematic) {
+			if (rigidbody->TakesGravity && rigidbody->IsSimulated) {
 				rigidbody->Gravity = m_gravity;
 			}
 		}
@@ -158,7 +158,7 @@ namespace Physics {
 			if (!object->IsDynamic) continue;
 
 			Rigidbody* rigidbody = (Rigidbody*)object;
-			if (rigidbody->SimGravity && rigidbody->IsKinematic) {
+			if (rigidbody->SimGravity && rigidbody->IsSimulated) {
 				rigidbody->ApplyGravity();
 			}
 		}
@@ -171,7 +171,7 @@ namespace Physics {
 			if (!object->IsDynamic) continue;
 
 			Rigidbody* rigidbody = (Rigidbody*)object;
-			if (rigidbody->IsKinematic) {
+			if (rigidbody->IsSimulated) {
 				Transform t = rigidbody->Transform;
 				glm::vec3   v = rigidbody->Velocity;
 
@@ -203,7 +203,7 @@ namespace Physics {
 			if (!object->IsDynamic) continue;
 			Rigidbody* rigidbody = (Rigidbody*)object;
 
-			if (rigidbody->IsKinematic) {
+			if (rigidbody->IsSimulated) {
 				rigidbody->NetForce  = glm::vec3();
 				rigidbody->NetTorque = glm::vec3();
 			}

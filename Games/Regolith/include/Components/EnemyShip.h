@@ -10,7 +10,8 @@ enum EnemyType
 	FIGHTER,
 	BOMB,
 	STATION,
-	BASE
+	BASE,
+	BOSS_1
 };
 
 struct Enemy
@@ -23,22 +24,30 @@ struct Enemy
 	float ActiveTime  = .1f;
 };
 
-struct Fighter_Enemy {
+struct Fighter_Enemy
+{
 	Weapon* Weapon = nullptr;
 };
 
-struct Bomb_Enemy {
+struct Bomb_Enemy
+{
 	float TimeToExplode = 1.f;
 	float RadiusToExplode = 10.f;
 	bool Explode = false;
 };
 
-struct Station_Enemy {
-	iw::Timer timer;
-
-	Station_Enemy() {}
+struct Station_Enemy
+{
+	iw::Timer Timer;
 };
 
-struct Base_Enemy {
+struct Base_Enemy
+{
 
+};
+
+struct Boss_1_Enemy
+{
+	iw::Timer Timer;
+	Weapon* EnergyBall = nullptr;
 };

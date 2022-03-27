@@ -3,6 +3,7 @@
 #include "iw/engine/ComponentHelper.h"
 #include "iw/physics/Dynamics/Rigidbody.h"
 #include "plugins/iw/Sand/Tile.h"
+#include "iw/util/thread/thread_pool.h"
 #include <string>
 #include <sstream>
 #include <utility>
@@ -207,16 +208,9 @@ struct LightningHitInfo
 	bool HasContact = false;
 };
 
-enum class LightningType
-{
-	POINT,
-	ENTITY
-};
-
 struct LightningConfig
 {
-	LightningType Type = LightningType::POINT; // only for outside logic
-	entity A; // only used if Type = ENTITY
+	entity A;
 	entity B;
 	entity Owner;
 
@@ -225,15 +219,73 @@ struct LightningConfig
 	int TargetX = 0;
 	int TargetY = 0;
 	float ArcSize = 0;
-	float LifeTime = 0;
+	float LifeTime = 0.005f;
 	bool StopOnHit = false;
+
+	float DelayPerCell = 0.f;
+
+	iw::ref<iw::Space> Space; // for finding point on tile
+	iw::ref<iw::thread_pool> Task; // for delayed draw
 };
 
 inline
-LightningHitInfo DrawLightning(
+CellInfo GetRandomNearCell(iw::SandLayer* sand, entity entity, glm::vec2 delta)
+{
+	iw::CollisionObject* obj = entity.is_alive() ? GetPhysicsComponent(entity) : nullptr;
+
+	glm::vec2 a = obj->Collider
+	            ? obj->Collider->as_dim<iw::d2>()->FindFurthestPoint(&obj->Transform, delta)
+	            : obj->Transform.WorldPosition();
+
+	std::vector<CellInfo> cells;
+
+	if (entity.has<iw::Tile>())
+	{
+		cells = FindClosestCellPositionsMatchingTile(sand, entity.get<iw::Tile>(), a.x, a.y);
+	}
+	else
+	{
+		CellInfo& info = cells.emplace_back();
+		info.x = (int)floor(a.x);
+		info.y = (int)floor(a.y);
+	}
+
+	return cells.at(iw::randi(cells.size() - 1));
+}
+
+inline
+std::pair<LightningHitInfo, std::vector<std::pair<int, int>>> GetDrawLightningList(
 	iw::SandLayer* sand,
 	LightningConfig config)
 {
+	if (config.Space)
+	{
+		iw::CollisionObject* originObj = config.A.is_alive() ? GetPhysicsComponent(config.A) : nullptr;
+		iw::CollisionObject* targetObj = config.B.is_alive() ? GetPhysicsComponent(config.B) : nullptr;
+
+		glm::vec2 origin(config.X, config.Y);
+		glm::vec2 target(config.TargetX, config.TargetY);
+
+		if (originObj) origin = originObj->Transform.Position;
+		if (targetObj) target = targetObj->Transform.Position;
+
+		glm::vec2 delta = target - origin;
+
+		if (originObj)
+		{
+			CellInfo cell = GetRandomNearCell(sand, config.A, delta);
+			config.X = cell.x;
+			config.Y = cell.y;
+		}
+
+		if (targetObj)
+		{
+			CellInfo cell = GetRandomNearCell(sand, config.A, delta);
+			config.TargetX = cell.x;
+			config.TargetY = cell.y;
+		}
+	}
+
 	float x = config.X;
 	float y = config.Y;
 	float dx = config.TargetX - x;
@@ -245,12 +297,13 @@ LightningHitInfo DrawLightning(
 
 	LightningHitInfo hit;
 
-	iw::Cell c = iw::Cell::GetDefault(iw::CellType::LIGHTNING);
-	c.life = config.LifeTime;
-	c.StyleOffset = iw::randfs() * .5;
+	std::vector<std::pair<int, int>> drawList;
 
-	while (d > 2 && (!hit.HasContact || !config.StopOnHit))
+	int max_iter = 1000;
+	while (max_iter > 0 && d > 2 && (!hit.HasContact || !config.StopOnHit))
 	{
+		max_iter -= 1;
+
 		dx = config.TargetX - x;
 		dy = config.TargetY - y;
       
@@ -273,10 +326,6 @@ LightningHitInfo DrawLightning(
 			[&](
 				float px, float py)
 			{
-				c.life += 0.00005;
-				//c.dx *= 0.99f * (iw::randi() ? -1 : 1);
-				//c.dy *= 0.99f * (iw::randi() ? -1 : 1);
-
 				if (!sand->m_world->InBounds(px, py))
 				{
 					return false; // bolt could come back into world
@@ -297,8 +346,8 @@ LightningHitInfo DrawLightning(
 					return config.StopOnHit;
 				}
 
-				sand->m_world->SetCell(px, py, c);
-				
+				drawList.emplace_back(px, py);
+
 				return false;
 			});
       
@@ -306,79 +355,69 @@ LightningHitInfo DrawLightning(
 		y = y1;
 	}
 
-	return hit;
+	return { hit, drawList };
 }
 
 inline
 LightningHitInfo DrawLightning(
 	iw::SandLayer* sand,
-	iw::ref<iw::Space>& space,
 	LightningConfig config)
 {
-	// pick points that are on surface
+	auto [hit, drawList] = GetDrawLightningList(sand, config);
 
-	iw::CollisionObject* originObj = config.A.is_alive() ? GetPhysicsComponent(config.A) : nullptr;
-	iw::CollisionObject* targetObj = config.B.is_alive() ? GetPhysicsComponent(config.B) : nullptr;
+	iw::Cell c = iw::Cell::GetDefault(iw::CellType::LIGHTNING);
+	c.life = config.LifeTime;
+	c.StyleOffset = iw::randfs() * .5;
 
-	if (!originObj || !targetObj)
+	if (config.Task && config.DelayPerCell > 0.f)
 	{
-		return {};
+		std::vector<std::pair<int, int>>* vec = new std::vector<std::pair<int, int>>(std::move(drawList));
+		int* index = new int(0);
+		float* timer = new float(0.f);
+		float delay = config.DelayPerCell;
+
+		c.life = delay * vec->size();
+
+		config.Task->coroutine(
+			[vec, index, timer, delay, sand, c]()
+			{
+				if (*index < vec->size())
+				{
+					*timer += iw::DeltaTime();
+
+					while (*timer > delay && *index < vec->size())
+					{
+						*timer -= delay;
+
+						const auto& [x, y] = vec->at(*index);
+						sand->m_world->SetCell(x, y, c);
+						*index += 1;
+					}
+
+					return false;
+				}
+
+				delete vec;
+				delete index;
+				delete timer;
+				return true;
+			}
+		);
+
+		hit.HasContact = false; // delayed lightning needs to use a lambda in the coroutine
 	}
 
-	glm::vec2 origin = originObj->Transform.Position;
-	glm::vec2 target = targetObj->Transform.Position;
-
-	glm::vec2 delta = target - origin;
-
-	glm::vec2 a = originObj->Collider
-	            ? originObj->Collider->as_dim<iw::d2>()->FindFurthestPoint(&originObj->Transform, delta)
-	            : originObj->Transform.WorldPosition();
-
-	glm::vec2 b = targetObj->Collider
-	            ? targetObj->Collider->as_dim<iw::d2>()->FindFurthestPoint(&targetObj->Transform, -delta)
-	            : targetObj->Transform.WorldPosition();
-
-	std::vector<CellInfo> origins;
-	std::vector<CellInfo> targets;
-
-	if (config.A.has<iw::Tile>())
-	{
-		origins = FindClosestCellPositionsMatchingTile(sand, config.A.get<iw::Tile>(), a.x, a.y);
-	}
 	else
 	{
-		CellInfo& info = origins.emplace_back();
-		info.x = (int)floor(a.x);
-		info.y = (int)floor(a.y);
+		for (const auto& [x, y] : drawList)
+		{
+			sand->m_world->SetCell(x, y, c);
+		}
 	}
 
-	if (config.B.has<iw::Tile>())
-	{
-		targets = FindClosestCellPositionsMatchingTile(sand, config.B.get<iw::Tile>(), b.x, b.y);
-	}
-	else
-	{
-		CellInfo& info = targets.emplace_back();
-		info.x = (int)floor(b.x);
-		info.y = (int)floor(b.y);
-	}
-
-	if (    origins.size() == 0 
-	     || targets.size() == 0)
-	{
-		return {};
-	}
-
-	CellInfo o = origins.at(iw::randi(origins.size() - 1));
-	CellInfo t = targets.at(iw::randi(targets.size() - 1));
-
-	config.X = o.x;
-	config.Y = o.y;
-	config.TargetX = t.x;
-	config.TargetY = t.y;
-
-	return DrawLightning(sand, config);
+	return hit;
 }
+
 
 enum cell_state : char
 {
@@ -577,8 +616,16 @@ entity SplitTile(
 
 	// not required for position
 
-	splitBody.Velocity = o3; // could add vel of projectile
-	splitBody.AngularVelocity.z = iw::randf();
+	glm::vec3 force  = o3 * 1000.f;
+	glm::vec3 torque = glm::vec3(0.f, 0.f, iw::randf() * 10.f);
+
+	splitBody.ApplyForce(force); // could add vel of projectile, also find what the constant here should be
+	splitBody.ApplyTorque(torque);
+
+	// add opposite force to current entity
+
+	rigidbody.ApplyForce(-force);
+	//rigidbody.ApplyTorque(-torque);
 
 	return split;
 }

@@ -29,8 +29,6 @@ void EnemySystem::FixedUpdate()
 		ShotInfo shot = fighter.Weapon->GetShot(entity, pos.x, pos.y);
 		Bus->push<SpawnProjectile_Event>(shot);
 		Bus->push<PlaySound_Event>(fighter.Weapon->Audio);
-
-		Audio->Play("event:/weapons/fire_laser");
 	}
 
 	for (auto [entity, transform, tile, flocker, ship, bomb] : entities().query<iw::Transform, iw::Tile, Flocker, Enemy, Bomb_Enemy>().with_entity())
@@ -81,8 +79,8 @@ void EnemySystem::FixedUpdate()
 			continue;
 		}
 
-		station.timer.TickFixed();
-		if (station.timer.Can("spawn"))
+		station.Timer.TickFixed();
+		if (station.Timer.Can("spawn"))
 		{
 			SpawnEnemy_Config config;
 
@@ -138,6 +136,34 @@ void EnemySystem::FixedUpdate()
 			closestThrowable->ThrowTarget = ship.Target;
 		}
 	}
+
+	for (auto [entity, transform, ship, boss] : entities().query<iw::Transform, Enemy, Boss_1_Enemy>().with_entity())
+	{
+		// need to design how this boss will fight you...
+		
+		if (boss.EnergyBall->CanFire())
+		{
+			// should materialize the energy ball infront of it
+
+			glm::vec3 pos = ship.Target.get<iw::Transform>().Position;
+
+			LightningConfig lighting;
+			lighting.A = entity;
+			lighting.TargetX = pos.x;
+			lighting.TargetY = pos.y;
+			lighting.ArcSize = 10;
+			lighting.Space = Space;
+			lighting.Task = Task;
+			lighting.DelayPerCell = 0.005f;
+
+			DrawLightning(sand, lighting);
+
+			ShotInfo shot = boss.EnergyBall->GetShot(entity, pos.x, pos.y);
+
+			Bus->push<SpawnProjectile_Event>(shot);
+			Bus->push<PlaySound_Event>(boss.EnergyBall->Audio);
+		}
+	}
 }
 
 bool EnemySystem::On(iw::ActionEvent& e)
@@ -159,10 +185,11 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 	archetype archetype = make_archetype<Flocker, CorePixels, Enemy>();
 	entity entity;
 
-	std::vector<component> components = {
+	component_list components = {
 		make_component<Flocker>(),
 		make_component<CorePixels>(),
-		make_component<Enemy>() };
+		make_component<Enemy>()
+	};
 
 	iw::ref<iw::Texture> tex;
 
@@ -170,32 +197,39 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 	{
 		case FIGHTER: 
 		{
-			components.push_back(make_component<Fighter_Enemy>());
-			components.push_back(make_component<iw::Circle>());
+			components.add<Fighter_Enemy>();
+			components.add<iw::Circle>();
 			tex = A_texture_enemy_fighter;
 			break;
 		}
 		case BOMB: 
 		{
-			components.push_back(make_component<Bomb_Enemy>());
-			components.push_back(make_component<Throwable>());
-			components.push_back(make_component<iw::Circle>());
+			components.add<Bomb_Enemy>();
+			components.add<Throwable>();
+			components.add<iw::Circle>();
 			tex = A_texture_enemy_bomb;
 			break;
 		}
 		case STATION:
 		{
-			components.push_back(make_component<Station_Enemy>());
-			components.push_back(make_component<iw::MeshCollider2>());
+			components.add<Station_Enemy>();
+			components.add<iw::MeshCollider2>();
 			tex = A_texture_enemy_station;
 			break;
 		}
 		case BASE:
 		{
-			components.push_back(make_component<Base_Enemy>());
-			components.push_back(make_component<iw::MeshCollider2>());
+			components.add<Base_Enemy>();
+			components.add<iw::MeshCollider2>();
 			tex = A_texture_enemy_base;
 			break;
+		}
+		case BOSS_1:
+		{
+			components.add<Boss_1_Enemy>();
+			components.add<iw::MeshCollider2>();
+			components.remove<Flocker>();
+			tex = A_texture_enemy_boss_1;
 		}
 	}
 
@@ -204,14 +238,10 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 
 	iw::Rigidbody& rigidbody = entity.get<iw::Rigidbody>();
 	iw::Transform& transform = entity.get<iw::Transform>();
-	Flocker&       flocker   = entity.get<Flocker>();
 	Enemy&         enemy     = entity.get<Enemy>();
 	CorePixels&    core      = entity.get<CorePixels>();
 
 	core.TimeWithoutCore = 0.f;
-	
-	flocker.Target.x = config.TargetLocationX;
-	flocker.Target.y = config.TargetLocationY;
 
 	transform.Position.x = config.SpawnLocationX;
 	transform.Position.y = config.SpawnLocationY;
@@ -228,6 +258,7 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 		{
 			Fighter_Enemy& fighter = entity.get<Fighter_Enemy>();
 			fighter.Weapon = MakeLaser_Cannon_Enemy();
+
 			enemy.ExplosionPower = 200;
 
 			break;
@@ -238,7 +269,6 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 			bomb.TimeToExplode = .5f;
 			bomb.RadiusToExplode = 30;
 
-			flocker.SpeedNearTarget = 1;
 			rigidbody.AngularVelocity.z = .9f;
 
 			enemy.ExplosionPower = 200;
@@ -248,12 +278,11 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 		case STATION:
 		{
 			Station_Enemy& station = entity.get<Station_Enemy>();
-			station.timer.SetTime("spawn", 2, .5);
+			station.Timer.SetTime("spawn", 2, .5);
 
 			rigidbody.SetMass(100);
 			//rigidbody->AngularVelocity.z = .1f;
 			//rigidbody->Transform.Rotation.z = .4;
-			flocker.Speed = 25;
 
 			enemy.ExplosionPower = 300;
 
@@ -265,11 +294,45 @@ void EnemySystem::SpawnEnemy(SpawnEnemy_Config& config)
 
 			rigidbody.SetMass(1000);
 			rigidbody.AngularVelocity.z = .1f;
-			flocker.Speed = 25;
 
 			enemy.ExplosionPower = 1200;
 
 			break;
+		}
+		case BOSS_1:
+		{
+			Boss_1_Enemy& boss = entity.get<Boss_1_Enemy>();
+			boss.EnergyBall = MakeWattz_Cannon();
+			boss.Timer.SetTime("fire_ball", 1.f);
+
+			rigidbody.IsSimulated = false;
+			entity.get<iw::Tile>().m_dontRemoveCells = true;
+		}
+	}
+
+	if (entity.has<Flocker>())
+	{
+		Flocker& flocker = entity.get<Flocker>();
+		flocker.Target.x = config.TargetLocationX;
+		flocker.Target.y = config.TargetLocationY;
+
+		switch (config.EnemyType)
+		{
+			case BOMB: 
+			{
+				flocker.SpeedNearTarget = 1;
+				break;
+			}
+			case STATION:
+			{
+				flocker.Speed = 25;
+				break;
+			}
+			case BASE:
+			{
+				flocker.Speed = 25;
+				break;
+			}
 		}
 	}
 

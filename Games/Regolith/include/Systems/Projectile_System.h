@@ -37,7 +37,7 @@ private:
 		iw::Rigidbody& rigidbody = entity.get<iw::Rigidbody>();
 		rigidbody.SetTransform(&entity.get<iw::Transform>());
 		rigidbody.Velocity = glm::vec3(shot.dx, shot.dy, 0);
-		rigidbody.IsKinematic = false;
+		rigidbody.IsSimulated = false;
 
 		AddEntityToPhysics(entity, Physics);
 

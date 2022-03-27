@@ -31,7 +31,7 @@ void WorldSystem::Update()
 		//DrawLightning(sand, l);
 	}
 
-	//return; // comment this line to stop all spawning
+	return; // comment this line to stop all spawning
 	m_timer.Tick();
 
 	bool needsAnotherLevel = false;
@@ -165,8 +165,9 @@ void WorldSystem::FixedUpdate()
 		//config.B = entity;// Space.GetEntity(handle);
 		config.ArcSize = 10;
 		config.LifeTime = .01f;
-		
-		DrawLightning(sand, Space, config);
+		config.Space = Space;
+
+		DrawLightning(sand, config);
 	}
 }
 
@@ -178,7 +179,12 @@ bool WorldSystem::On(iw::ActionEvent& e)
 		{
 			auto& [x, y, info, hit, projectile] = e.as<ProjHitTile_Event>().Config;
 
-			if (!hit.is_alive() || !projectile.is_alive())
+			if (!hit.is_alive() || !projectile.is_alive()) // this is a hack
+			{
+				break;
+			}
+
+			if (hit.has<iw::Tile>() && hit.get<iw::Tile>().m_dontRemoveCells) // dont spark if not removing cells, this could be reenabled...
 			{
 				break;
 			}
@@ -268,22 +274,26 @@ bool WorldSystem::On(iw::ActionEvent& e)
 		case CREATED_PLAYER: {
 			m_player = e.as<CreatedPlayer_Event>().PlayerEntity;
 
-			SpawnAsteroid_Config c;
-			c.SpawnLocationX = 100;
-			c.SpawnLocationY = 100;
-			c.AngularVel = 0;
-			c.Size = 0;
+			// THIS IS TESTING
 
-			Bus->push<SpawnAsteroid_Event>(c);
+			//SpawnAsteroid_Config c;
+			//c.SpawnLocationX = 201.5;
+			//c.SpawnLocationY = 300;
+			//c.AngularVel = 0;
+			//c.Size = 0;
+			//c.Mass = 100000.f;
+			//c.TextureOverride = "textures/SpaceGame/boss1.png";
+			////c.DrawAsBox = true;
+			//c.DontRemoveCells = true;
 
-			SpawnEnemy_Config cc = {};
-			cc.SpawnLocationX = 300;
-			cc.SpawnLocationY = 300;
-			cc.TargetLocationX = 300;
-			cc.TargetLocationY = 300;
-			cc.EnemyType = STATION;
+			SpawnEnemy_Config c;
+			c.EnemyType = BOSS_1;
+			c.TargetEntity = m_player;
+			c.SpawnLocationX = 201.5;
+			c.SpawnLocationY = 300;
+			
 
-			Bus->push<SpawnEnemy_Event>(cc);
+			Bus->push<SpawnEnemy_Event>(c);
 
 			break;
 		}
@@ -329,14 +339,27 @@ entity WorldSystem::MakeAsteroid(
 {
 	iw::ref<iw::Texture> asteroid_tex;
 
-	switch (config.Size)
+	if (config.TextureOverride.size() > 0)
 	{
-		case 0: asteroid_tex = A_texture_asteroid_mid_1; break;
-		case 1: asteroid_tex = A_texture_asteroid_mid_2; break;
-		case 2: asteroid_tex = A_texture_asteroid_mid_3; break;
+		asteroid_tex = Asset->Load<iw::Texture>(config.TextureOverride);
+		if (!asteroid_tex)
+		{
+			LOG_WARNING << "Failed to make asteroid with texture override path: " << config.TextureOverride;
+			return {};
+		}
 	}
 
-	entity entity = MakeTile(*asteroid_tex, component_list<Asteroid, Throwable, iw::MeshCollider2>());
+	else
+	{
+		switch (config.Size)
+		{
+			case 0: asteroid_tex = A_texture_asteroid_mid_1; break;
+			case 1: asteroid_tex = A_texture_asteroid_mid_2; break;
+			case 2: asteroid_tex = A_texture_asteroid_mid_3; break;
+		}
+	}
+
+	entity entity = MakeTile(*asteroid_tex, wrap<Asteroid, Throwable, iw::MeshCollider2>());
 	AddEntityToPhysics(entity, Physics);
 
 	iw::Transform& t = entity.get<iw::Transform>();
@@ -347,9 +370,12 @@ entity WorldSystem::MakeAsteroid(
 	r.Velocity = glm::vec3(config.VelocityX, config.VelocityY, 0);
 	r.AngularVelocity.z = config.AngularVel;
 	r.SetTransform(&t);
-	r.SetMass(1000);
+	r.SetMass(config.Mass * (config.Size + 1));
 
 	entity.get<Asteroid>().Lifetime = 10;
+	//entity.get<iw::Tile>().m_drawAsBox = config.DrawAsBox;
+
+	entity.get<iw::Tile>().m_dontRemoveCells = config.DontRemoveCells;
 
 	return entity;
 }

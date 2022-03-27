@@ -35,11 +35,11 @@ namespace Physics {
 
 			glm::vec3 impluse = j * manifold.Normal;
 
-			if (aBody ? aBody->IsKinematic : false) {
+			if (aBody ? aBody->IsSimulated : false) {
 				aVel -= impluse * aInvMass;
 			}
 
-			if (bBody ? bBody->IsKinematic : false) {
+			if (bBody ? bBody->IsSimulated : false) {
 				bVel += impluse * bInvMass;
 			}
 
@@ -74,11 +74,11 @@ namespace Physics {
 				friction = -j * tangent * mu;
 			}
 
-			if (aBody ? aBody->IsKinematic : false) {
+			if (aBody ? aBody->IsSimulated : false) {
 				aBody->Velocity = aVel - friction * aInvMass;
 			}
 
-			if (bBody ? bBody->IsKinematic : false) {
+			if (bBody ? bBody->IsSimulated : false) {
 				bBody->Velocity = bVel + friction * bInvMass;
 			}
 		}

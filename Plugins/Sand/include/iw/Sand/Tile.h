@@ -20,6 +20,8 @@ struct Tile {
 
 	Texture m_sprite;
 	iw::Color m_tint = iw::Color(1.f);
+	//bool m_drawAsBox = false;
+	bool m_dontRemoveCells = false;
 
 	enum PixelState : unsigned char {
 		EMPTY   = 0x00,
@@ -48,6 +50,8 @@ struct Tile {
 
 	bool RemovePixel(unsigned index)
 	{
+		if (m_dontRemoveCells) return false;
+
 		bool remove = State(index) == FILLED;
 
 		if (remove)

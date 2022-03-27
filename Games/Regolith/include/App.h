@@ -47,7 +47,7 @@ struct temp_PhysicsSystem
 
 		for (auto [transform, rigidbody] : entities().query<iw::Transform, iw::Rigidbody>())
 		{
-			if (rigidbody.IsKinematic)
+			if (rigidbody.IsSimulated)
 			{
 				transform.Position = iw :: lerp(rigidbody.LastTrans().Position, rigidbody.Transform.Position, a);
 				transform.Scale    = iw :: lerp(rigidbody.LastTrans().Scale,    rigidbody.Transform.Scale,    a);
@@ -96,25 +96,64 @@ struct StaticLayer : iw::Layer
 struct TileRender_Layer : iw::Layer
 {
 	iw::SandLayer* m_sand;
+	iw::ref<iw::RenderTarget> target;
 
 	TileRender_Layer(
 		iw::SandLayer* sand
 	)
 		: iw::Layer ("Tile Render")
 		, m_sand    (sand)
-	{}
+	{
+		target = REF<iw::RenderTarget>();
+		target->AddTexture(REF<iw::Texture>(400, 400));
+		target->AddTexture(REF<iw::Texture>(400, 400, iw::TEX_2D, iw::DEPTH));
+	}
 
 	void PreUpdate() override
 	{
+
+		// to fix this super simple, could just have an option for drawing the pixels
+		// as just a box
+
+		// This needs to render the tiles using the gpu
+
+		// render each tiles to a texture that is 
+
 		std::vector<std::tuple<iw::Transform*, iw::Tile*, iw::MeshCollider2*>> tiles;
 
 		for (auto [entity, transform, tile] : entities().query<iw::Transform, iw::Tile>().with_entity())
 		{
-			iw::MeshCollider2* collider = entity.has<iw::MeshCollider2>()
-				? &entity.get<iw::MeshCollider2>()
-				: nullptr;
+			//if (tile.m_drawAsBox)
+			//{
+			//	for (int index : tile.m_currentCells) // really slow...
+			//	{
+			//		auto [x, y] = iw::xy<int>(index, tile.m_sprite.m_width);
 
-			tiles.emplace_back(&transform, &tile, collider);
+			//		x += transform.WorldPosition().x;
+			//		y += transform.WorldPosition().y;
+
+			//		iw::SandChunk* chunk = m_sand->m_world->GetChunk(x, y);
+
+			//		if (   !chunk 
+			//			|| !chunk->IsEmpty(x, y)
+			//			|| tile.State(index) != iw::Tile::FILLED)
+			//		{
+			//			return;
+			//		}
+			//	
+			//		chunk->SetCell_unsafe(x, y, tile.m_sprite.Colors32()[index],       iw::SandField::COLOR);
+			//		chunk->SetCell_unsafe(x, y, true, iw::SandField::SOLID);
+			//		chunk->SetCell_unsafe(x, y, iw::TileInfo { &tile, (unsigned int)index }, iw::SandField::TILE_INFO);
+			//	}
+			//}
+
+			//else
+			//{
+				tiles.emplace_back(&transform, &tile,
+					entity.has<iw::MeshCollider2>()
+					? &entity.get<iw::MeshCollider2>()
+					: nullptr);
+			//}
 		}
 
 		m_sand->PasteTiles(tiles);

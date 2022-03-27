@@ -21,6 +21,7 @@ inline rTex A_texture_enemy_fighter;
 inline rTex A_texture_enemy_bomb;
 inline rTex A_texture_enemy_station;
 inline rTex A_texture_enemy_base;
+inline rTex A_texture_enemy_boss_1;
 
 inline rTex A_texture_background;
 inline rTex A_texture_asteroid_mid_1;

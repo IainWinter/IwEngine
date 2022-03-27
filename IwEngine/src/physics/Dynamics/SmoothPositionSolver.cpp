@@ -28,11 +28,11 @@ namespace Physics {
 			glm::vec3 deltaA;
 			glm::vec3 deltaB;
 
-			if (aBody ? aBody->IsKinematic : false) {
+			if (aBody ? aBody->IsSimulated : false) {
 				deltaA = aInvMass * correction;
 			}
 
-			if (bBody ? bBody->IsKinematic : false) {
+			if (bBody ? bBody->IsSimulated : false) {
 				deltaB = bInvMass * correction;
 			}
 
@@ -43,11 +43,11 @@ namespace Physics {
 			Rigidbody* aBody = manifolds[i].ObjA->IsDynamic ? (Rigidbody*)manifolds[i].ObjA : nullptr;
 			Rigidbody* bBody = manifolds[i].ObjB->IsDynamic ? (Rigidbody*)manifolds[i].ObjB : nullptr;
 
-			if (aBody ? aBody->IsKinematic : false) {
+			if (aBody ? aBody->IsSimulated : false) {
 				aBody->Transform.Position -= deltas[i].first;
 			}
 
-			if (bBody ? bBody->IsKinematic : false) {
+			if (bBody ? bBody->IsSimulated : false) {
 				bBody->Transform.Position += deltas[i].second;
 			}
 		}

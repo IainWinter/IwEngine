@@ -56,8 +56,8 @@ int Menu_Title_Layer::Initialize()
 	ortho = iw::OrthographicCamera(4, 5, 0, 50);
 	persp = iw::PerspectiveCamera(.67, 4/5.f);
 	//persp.RecalculateProjection();
-	//iw::ISystem* sis = PushSystem<iw::SpaceInspectorSystem>();
-	//sis->Initialize();
+	iw::ISystem* sis = PushSystem<iw::SpaceInspectorSystem>();
+	sis->Initialize();
 
 	// axis guide
 	/*

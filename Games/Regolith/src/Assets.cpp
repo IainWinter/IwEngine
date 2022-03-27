@@ -16,6 +16,7 @@ int LoadAssets(
 	A_texture_enemy_bomb      = LOADTEX("textures/SpaceGame/enemy_bomb.png");
 	A_texture_enemy_station   = LOADTEX("textures/SpaceGame/enemy_station.png");
 	A_texture_enemy_base      = LOADTEX("textures/SpaceGame/enemy_base.png");
+	A_texture_enemy_boss_1    = LOADTEX("textures/SpaceGame/enemy_boss_1.png");
 							  
 	A_texture_background      = LOADTEX("textures/SpaceGame/space.png");
 	A_texture_asteroid_mid_1  = LOADTEX("textures/SpaceGame/asteroid_mid_1.png");

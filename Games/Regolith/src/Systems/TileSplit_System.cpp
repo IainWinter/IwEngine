@@ -53,11 +53,15 @@ bool TileSplitSystem::On(iw::ActionEvent& e)
 		case REMOVE_CELL_FROM_TILE:
 		{
 			RemoveCellFromTile_Event& event = e.as<RemoveCellFromTile_Event>();
-			entity_handle handle = event.Entity.m_handle;
 
-			if (std::find(splits.begin(), splits.end(), handle) == splits.end())
+			if (event.Entity.get<iw::Tile>().m_dontRemoveCells)
 			{
-				splits.push(handle);
+				break;
+			}
+
+			if (std::find(splits.begin(), splits.end(), event.Entity.m_handle) == splits.end())
+			{
+				splits.push(event.Entity.m_handle);
 			}
 
 			break;
@@ -216,7 +220,7 @@ void TileSplitSystem::SplitTileOff(
 	glm::vec2 midOld = tile.m_sprite.Dimensions() / 2.f;
 	if (toSplit.size() > 10)
 	{
-		::entity split = ::SplitTile(entity, toSplit, component_list<Asteroid, Throwable, iw::MeshCollider2>());
+		::entity split = ::SplitTile(entity, toSplit, wrap<Asteroid, Throwable, iw::MeshCollider2>());
 		AddEntityToPhysics(split, Physics);
 
 		split.get<Asteroid>().Lifetime = toSplit.size() / 5.f;

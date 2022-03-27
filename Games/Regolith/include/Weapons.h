@@ -172,6 +172,7 @@ inline Weapon* MakeLaser_Cannon_Enemy()
 	cannon->FireDelay = 2.f;
 	cannon->FireDelayMargin = 1.f;
 	cannon->Inaccuracy = .05f;
+	cannon->Audio = "event:/weapons/fire_laser";
 
 	return cannon;
 }

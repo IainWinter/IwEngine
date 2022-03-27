@@ -522,7 +522,7 @@ namespace Editor {
 			PrintCell("Mass");             PrintEditCell(&mass);
 			PrintCell("Takes gravity");    PrintEditCell(&body->TakesGravity);
 			PrintCell("Simulate gravity"); PrintEditCell(&body->SimGravity);
-			PrintCell("Kinemtaic");        PrintEditCell(&body->IsKinematic);
+			PrintCell("Kinemtaic");        PrintEditCell(&body->IsSimulated);
 			PrintCell("Static friction");  PrintEditCell(&body->StaticFriction);
 			PrintCell("Dynamic friction"); PrintEditCell(&body->DynamicFriction);
 			PrintCell("Restitution");      PrintEditCell(&body->Restitution);

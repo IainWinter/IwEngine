@@ -218,18 +218,17 @@ void ProjectileSystem::Update()
 			config.ArcSize = 5;
 			config.LifeTime = iw::DeltaTime();
 			config.StopOnHit = true;
+			config.Space = Space;
 
 			if (   object
 				&& object != &rigidbody
 				&& proj.Shot.origin != GetPhysicsEntity(object).second)
 			{
-				config.Type = LightningType::ENTITY;
 				config.B = GetPhysicsEntity(object).second;
 			}
 
 			else
 			{
-				config.Type = LightningType::POINT;
 				config.X = (int)floor(pos.x);
 				config.Y = (int)floor(pos.y);
 				config.TargetX = (int)floor(pos.x + dx * length);
@@ -257,12 +256,12 @@ void ProjectileSystem::Update()
 		config.LifeTime = .01f + iw::randf() * .05f;
 		config.StopOnHit = true;
 		config.ArcSize = 10 + iw::randi(6) - 3;
+		config.Space = Space;
 
 		if (query.Objects.size() > 0)
 		{
 			auto [dist, obj] = iw::choose_e(query.Objects);
 		
-			config.Type = LightningType::ENTITY;
 			config.A = shot.origin;
 			config.B = GetPhysicsEntity(obj).second;
 		
@@ -293,16 +292,7 @@ void ProjectileSystem::Update()
 
 	for (LightningConfig& bolt : bolts)
 	{
-		LightningHitInfo hit;
-
-		if (bolt.Type == LightningType::ENTITY)
-		{
-			hit = DrawLightning(sand, Space, bolt);
-		}
-
-		else {
-			hit = DrawLightning(sand, bolt);
-		}
+		LightningHitInfo hit = DrawLightning(sand, bolt);
 		
 		if (hit.HasContact)
 		{
@@ -412,7 +402,7 @@ entity ProjectileSystem::MakeWattz(
 {
 	entity entity = MakeProjectile<LightBall_Projectile>(shot);
 
-	entity.get<iw::Rigidbody>().IsKinematic = true;
+	entity.get<iw::Rigidbody>().IsSimulated = true;
 
 	LightBall_Projectile& ball = entity.get<LightBall_Projectile>();
 

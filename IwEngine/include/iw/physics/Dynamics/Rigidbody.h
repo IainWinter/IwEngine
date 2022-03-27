@@ -22,7 +22,7 @@ namespace Physics {
 		scalar InvMass;       // 1 / Mass of rigidbody
 		bool TakesGravity;    // If the rigidbody will use its own gravity or take it from the space
 		bool SimGravity;      // If the rigidbody will simulate gravity
-		bool IsKinematic;     // If the rigidbody gets simulated. Still participates with collisions, but is unefected.
+		bool IsSimulated;     // If the rigidbody gets simulated. Still participates with collisions, but is unaffected.
 
 		scalar StaticFriction;  // Static friction coefficient
 		scalar DynamicFriction; // Dynamic friction coefficient

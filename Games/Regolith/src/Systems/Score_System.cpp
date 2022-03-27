@@ -8,10 +8,13 @@ bool ScoreSystem::On(iw::ActionEvent& e)
 		{
 			ProjHitTile_Event& event = e.as<ProjHitTile_Event>();
 
-			if (event.Config.Hit.has<Enemy>())
+			if (   !event.Config.Hit.has<Enemy>()
+				||  event.Config.Hit.get<iw::Tile>().m_dontRemoveCells)
 			{
-				Bus->push<ChangePlayerScore_Event>(Score + 1);
+				break;
 			}
+
+			Bus->push<ChangePlayerScore_Event>(Score + 1);
 
 			break;
 		}

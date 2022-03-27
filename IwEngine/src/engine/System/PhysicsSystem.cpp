@@ -23,7 +23,7 @@ namespace Engine {
 		for (auto entity : eca) {
 			auto [transform, rigidbody] = entity.Components.Tie<Components>();
 			
-			if (rigidbody->IsKinematic)
+			if (rigidbody->IsSimulated)
 			{
 				transform->Position = iw :: lerp(rigidbody->LastTrans().Position, rigidbody->Transform.Position, a);
 				transform->Scale    = iw :: lerp(rigidbody->LastTrans().Scale,    rigidbody->Transform.Scale,    a);

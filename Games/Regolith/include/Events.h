@@ -388,6 +388,11 @@ struct REFLECT SpawnAsteroid_Config
 	float VelocityY      = 0.f;
 	float AngularVel     = 0.f;
 	int Size = 1;
+	float Mass = 1000.f;
+	//bool DrawAsBox = false;
+	bool DontRemoveCells = false;
+
+	std::string TextureOverride = "";
 };
 
 struct REFLECT SpawnAsteroid_Event : iw::SingleEvent

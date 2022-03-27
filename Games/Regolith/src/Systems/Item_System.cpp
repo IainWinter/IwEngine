@@ -151,7 +151,7 @@ entity ItemSystem::MakeItem(
     const SpawnItem_Config& config,
     iw::ref<iw::Texture>& sprite)
 {
-    entity entity = MakeTile(*sprite, component_list<Item, KeepInWorld, iw::Circle>());
+    entity entity = MakeTile(*sprite, wrap<Item, KeepInWorld, iw::Circle>());
     AddEntityToPhysics(entity, Physics);
 
     Item&          item      = entity.get<Item>();

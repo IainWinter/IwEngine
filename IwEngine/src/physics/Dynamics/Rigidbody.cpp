@@ -17,7 +17,7 @@ namespace Physics {
 		, InvMass(1)
 		, TakesGravity(true)
 		, SimGravity(true)
-		, IsKinematic(isKinematic)
+		, IsSimulated(isKinematic)
 		, StaticFriction(.5)
 		, DynamicFriction(.5)
 		, Restitution(.5)

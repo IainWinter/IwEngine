@@ -58,7 +58,7 @@ int App::Initialize(
 	PushLayer<StaticLayer>();
 	PushLayer<Audio_Layer>();
 
-	//PushLayer<iw::DebugLayer>();
+	PushLayer<iw::DebugLayer>();
 
 	int err = Application::Initialize(options);
 	if (err) return err;
