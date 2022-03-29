@@ -47,24 +47,6 @@ int Game_Layer::Initialize()
 	return Layer::Initialize();
 }
 
-void Game_Layer::Destroy()
-{
-	//iw::ComponentQuery query = Space->MakeQuery();
-	//query.SetAny({
-	//	Space->GetComponent<Player>(),
-	//	Space->GetComponent<Enemy>(),
-	//	Space->GetComponent<Asteroid>(),
-	//	Space->GetComponent<Projectile>(),
-	//	Space->GetComponent<Item>()
-	//});
-
-	//Space->Query(query).Each([&](iw::EntityHandle handle) {
-	//	Space->QueueEntity(handle, iw::func_Destroy);
-	//});
-
-	Layer::Destroy();
-}
-
 bool Game_Layer::On(iw::ActionEvent& e)
 {
 	switch (e.Action)
@@ -91,20 +73,37 @@ bool Game_Layer::On(iw::ActionEvent& e)
 
 			float time = recorder_s->m_frameCount * .3f * iw::DeltaTime();
 
+			recorder_s->m_freezeCamera = true;
+
 			Task->delay(time,
 				[=]() {
 					recorder_s->m_record = false;
 				}
 			);
 
-			Task->delay(time + 1.f,
+			Task->delay(time + 2.f,
 				[=]() {
-					for (auto [e] : entities().all())
+					// this sucks, should be able to just clear memory and not worry about .on_destroy events spawning new entities. 
+					// Could block new entities being created, but then everything needs to check for that not returning a valid entity
+					// Could block on_destroy, but that could be used to cleanup memory or in case of physics, remove the entities.
+					// So I cannot really think of a better solution, but this only works if a destroied entity creates less entities than itself.
+					// Could also block the event bus to stop explosion events for instance.
+
+					// This could be the solve tho, should look into how others handle this. I assume the way is some form of freezing spawning new entities mixed with recursive deletion.
+
+					bool entitiesStillExist = true;  
+					while (entitiesStillExist)
 					{
-						entities_defer().destroy(e);
+						entitiesStillExist = false;  
+						for (auto [e] : entities().all())
+						{
+							entitiesStillExist = true;
+							entities_defer().destroy(e);
+						}
+						entities_defer().execute();
 					}
-					entities_defer().execute();
-					//entities().m_storage.clear();
+					
+					entities().m_storage.clear();
 
 					for (iw::ISystem* s : systems) // only because popping a system to pause it makes it so it cannot get deleted, need a third 'paused' state in EventStack, real solve is to rethink how this works
 					{
@@ -123,16 +122,6 @@ bool Game_Layer::On(iw::ActionEvent& e)
 			// for testing this simple verson, forget animations!!
 
 			//PushSystem<DeathTransition_System>(sand, 3);
-			//Console->QueueCommand("fade 3. 4.");
-
-			//float time = iw::RawTotalTime();
-			//Task->coroutine(
-			//	[this, time]()
-			//{
-			//	bool done = iw::RawTotalTime() - time > 7.f;
-			//	if (done) Console->QueueCommand("set-state post");
-			//	return done;
-			//});
 
 			break;
 		}

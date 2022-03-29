@@ -5,7 +5,7 @@ void Recording_System::RecordFrame(
 {
 	if (!m_record) return;
 
-	if (m_player.is_alive())
+	if (!m_freezeCamera && m_player.is_alive())
 	{
 		m_last_x = m_player.get<iw::Transform>().Position.x;
 		m_last_y = m_player.get<iw::Transform>().Position.y;

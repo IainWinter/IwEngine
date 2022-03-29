@@ -20,7 +20,8 @@ enum class MenuTarget
 	SETTINGS_CONTROLS,
 	PAUSE,
 	GAME,
-	POST_GAME // input name for highscore - and replay of death
+	POST_GAME, // input name for highscore - and replay of death
+	UPGRADE
 };
 
 struct Menu_Title_Layer : Menu_Layer
@@ -64,6 +65,8 @@ struct Menu_Title_Layer : Menu_Layer
 	bool normalize;
 
 	Highscores_MenuParts highscoreParts;
+	Upgrade_MenuParts upgradeParts;
+	Decals_MenuParts decalParts;
 
 	GameSettings gameSettings; // for audio/video
 	GameSettings gameControls; // for button mappings
@@ -73,6 +76,11 @@ struct Menu_Title_Layer : Menu_Layer
 	int deathMovieFrame; // put in movie class
 	iw::TextureAtlas deathMovie;
 	iw::Timer deathMovieFrameTimer;
+
+	int m_finalScore;
+	int m_finalProgress;
+
+	float m_decalPostGameTime;
 
 	Menu_Title_Layer()
 		: Menu_Layer      ("Menu Title")
@@ -84,6 +92,9 @@ struct Menu_Title_Layer : Menu_Layer
 		, fade_exit       (0.f)
 		, normalize       (true)
 		, deathMovieFrame (0)
+		, m_finalScore    (0)
+		, m_finalProgress (0)
+		, m_decalPostGameTime (0)
 	{
 		SetViewDefault();
 		last_menu = target_menu;
@@ -92,6 +103,11 @@ struct Menu_Title_Layer : Menu_Layer
 		last_rot = target_rot;
 
 		deathMovieFrameTimer.SetTime("step", .1);
+
+		ImVec4 decalColor = ImVec4(.8, .8, .8, 1);
+
+		decalParts.lines.emplace_back(Decals_MenuParts::Line { 0, 0, 0, 0, 1, decalColor });
+		decalParts.lines.emplace_back(Decals_MenuParts::Line { 0, 0, 0, 0, 1, decalColor });
 	}
 
 	void SetViewDefault()
@@ -156,7 +172,15 @@ struct Menu_Title_Layer : Menu_Layer
 		deathMovie.m_texture->Initialize(Renderer->Device);
 		RegisterImage("deathMovie", (void*)movie.m_texture->Handle()->Id());
 		target_menu = MenuTarget::POST_GAME;
-		target_fade = 0.6f;
+		//target_fade = 0.4f;
+	}
+
+	void SetViewUpgrade()
+	{
+		target_menu = MenuTarget::UPGRADE;
+		//target_fade = 0.4f;
+
+		upgradeParts.money = 10000/*m_finalScore*/;
 	}
 
 	bool IsFromPause() const

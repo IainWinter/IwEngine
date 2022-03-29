@@ -94,17 +94,6 @@ struct StaticLayer : iw::Layer
 
 		return Layer::Initialize();
 	}
-
-	void ImGui() override
-	{
-		ImGui::Begin("Layers");
-		for (Layer* layer : app->m_layers)
-		{
-			ImGui::Text(layer->Name().c_str());
-		}
-
-		ImGui::End();
-	}
 };
 
 struct TileRender_Layer : iw::Layer

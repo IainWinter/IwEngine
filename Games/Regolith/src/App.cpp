@@ -58,7 +58,7 @@ int App::Initialize(
 	PushLayer<StaticLayer>(this);
 	PushLayer<Audio_Layer>();
 
-	PushLayer<iw::DebugLayer>();
+	//PushLayer<iw::DebugLayer>();
 
 	int err = Application::Initialize(options);
 	if (err) return err;
@@ -186,6 +186,7 @@ int App::Initialize(
 	m_fonts->Load("Quicksand", 30, "fonts/ttf/Quicksand-Medium.ttf");
 	m_fonts->Load("Quicksand", 40, "fonts/ttf/Quicksand-Medium.ttf");
 	m_fonts->Load("Quicksand", 60, "fonts/ttf/Quicksand-Medium.ttf");
+	m_fonts->Load("Quicksand", 120, "fonts/ttf/Quicksand-Medium.ttf");
 
 	PushLayer<iw::ImGuiLayer>(Window, m_fonts)->BindContext();
 
@@ -376,7 +377,7 @@ int App::Initialize(
 		else
 		if (command.Verb == "final-score")
 		{
-			//m_finalScore = command.Tokens[0].Int;
+			m_menus->m_finalScore = command.Num(0);
 		}
 
 		else

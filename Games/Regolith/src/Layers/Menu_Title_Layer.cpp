@@ -56,8 +56,8 @@ int Menu_Title_Layer::Initialize()
 	ortho = iw::OrthographicCamera(4, 5, 0, 50);
 	persp = iw::PerspectiveCamera(.67, 4/5.f);
 	//persp.RecalculateProjection();
-	iw::ISystem* sis = PushSystem<iw::SpaceInspectorSystem>();
-	sis->Initialize();
+	//iw::ISystem* sis = PushSystem<iw::SpaceInspectorSystem>();
+	//sis->Initialize();
 
 	// axis guide
 	/*
@@ -251,6 +251,10 @@ float easeIn(float x)
 
 void Menu_Title_Layer::UI()
 {
+	highscoreParts.UpdateBG(this);
+	upgradeParts.UpdateBG(this);
+	decalParts.UpdateBG(this);
+
 	// testing camera moves, these dont really matter and it seems like if I can get a cool skybox and render the sun, then these will
 	// fall into place
 
@@ -512,17 +516,51 @@ void Menu_Title_Layer::UI()
 
 	if (last_menu == MenuTarget::POST_GAME)
 	{
+		float img_wh = bg_w / 2;
+		float img_xy = (bg_w - img_wh) / 2;
+
+		ImGui::PushFont(iwFont("Quicksand_120"));
+		ImVec2 size = ImGui::CalcTextSize("GAME OVER");
+		
+		float title_x = bg_w / 2 - size.x / 2;
+		float title_y = img_xy / 2 - size.y / 2;
+
+		ImGui::SetCursorPos(ImVec2(title_x, title_y));
+		ImGui::Text("GAME OVER");
+		ImGui::PopFont();
+
+		// decals
+
+		decalParts.lines.at(0).x  = img_xy;
+		decalParts.lines.at(0).y  = img_xy;
+		decalParts.lines.at(0).x2 = img_xy;
+		decalParts.lines.at(0).y2 = bg_h;
+
+		decalParts.lines.at(1).x  = 0;
+		decalParts.lines.at(1).y  = bg_h - padding_1;
+		decalParts.lines.at(1).x2 = bg_w;
+		decalParts.lines.at(1).y2 = bg_h - padding_1;
+
+		decalParts.DrawLines();
+
+		// Death movie
+
 		glm::vec2 uv0 = glm::vec2(0, 0);
 		glm::vec2 uv1 = glm::vec2(1, 1);
 		uv0 = deathMovie.MapUv(deathMovieFrame, uv0);
 		uv1 = deathMovie.MapUv(deathMovieFrame, uv1);
-
-		int img_wh = bg_w / 2;
-		int img_xy = (bg_w - img_wh) / 2;
-
 		ImGui::SetCursorPos(ImVec2(img_xy, img_xy));
-		ImGui::Image(Image("deathMovie"), ImVec2(img_wh, img_wh), ImVec2(uv0.x, uv0.y), ImVec2(uv1.x, uv1.y));
-		//ImGui::Text("Frame %d/%d, step %.2f", deathMovieFrame, deathMovie.TileCount(), deathMovieFrameTimer.GetTime("step"));
+		ImGui::Image(
+			Image("deathMovie"), 
+			ImVec2(img_wh, img_wh), 
+			ImVec2(uv0.x, uv0.y), 
+			ImVec2(uv1.x, uv1.y), 
+			ImVec4(1, 1, 1, 1), 
+			decalParts.lines.at(0).color
+		);
+
+		// debug frame count
+		// ImGui::Text("Frame %d/%d, step %.2f", deathMovieFrame, deathMovie.TileCount(), deathMovieFrameTimer.GetTime("step"));
 
 		deathMovieFrameTimer.Tick();
 		if (deathMovieFrameTimer.Can("step"))
@@ -530,17 +568,129 @@ void Menu_Title_Layer::UI()
 			deathMovieFrame = (deathMovieFrame + 1) % deathMovie.TileCount();
 		}
 
-		float y = bg_h - padding_1;
+		// stats
 
-		ImGui::SetCursorPosY(y);
-		ImGui::SetCursorPosX(x);
-		if (Button("Main Menu")) {
-			// save amount of money you have...
-			SetViewDefault();
+		auto printStat = [](const std::string& title, const std::string& value)
+		{
+			ImGui::TableNextCell();
+			ImGui::Text(title.c_str());
+			ImGui::TableNextCell();
+			RightAlign(value);
+			ImGui::Text(value.c_str());
+		};
+
+		ImGui::SetCursorPos(ImVec2(img_xy + padding_01, img_xy + img_wh));
+		ImGui::BeginTable("stat-table", 2, 0, ImVec2(img_wh, img_wh));
+
+			// Score
+
+			std::stringstream ss;
+
+			ss = {}; ss << m_finalScore << "r";
+			printStat("Regolith", ss.str());
+
+			// Progress
+
+			ss = {}; ss << m_finalProgress << "%"; // todo: percent isnt in font????
+			printStat("Progress", ss.str());
+
+			ImGui::PushFont(iwFont("Quicksand_24"));
+
+			printStat("Time alive", "3:10 min");
+			printStat("Killed by", "Enemy fighter");
+			printStat("Accuracy", "33.4%");
+			printStat("Favourite weapon", "Minigun");
+
+			ImGui::PopFont();
+
+		ImGui::EndTable();
+
+		// buttons
+
+		ImGui::SetCursorPosY(bg_h - padding_1 + padding_01);
+		ImGui::SetCursorPosX(img_xy + padding_01);
+		if (Button("Continue"))
+		{
+			SetViewUpgrade();
+			decalParts.lines.emplace_back(Decals_MenuParts::Line { 0, 0, 0, 0, 1, decalParts.lines.at(0).color });
+		}
+	}
+
+	if (last_menu == MenuTarget::UPGRADE)
+	{
+		float img_wh = bg_w / 2;
+		float img_xy = (bg_w - img_wh) / 2;
+
+		// title
+		
+		ImGui::PushFont(iwFont("Quicksand_120"));
+		ImVec2 size = ImGui::CalcTextSize("UPGRADES");
+		
+		float title_x = bg_w / 2 - size.x / 2;
+		float title_y = img_xy / 2 - size.y / 2;
+
+		ImGui::SetCursorPos(ImVec2(title_x, title_y));
+		ImGui::Text("UPGRADES");
+		ImGui::PopFont();
+
+		// decals
+
+		if (m_decalPostGameTime > 1.f)
+		{
+			decalParts.lines.at(0).y  = 0;
+			decalParts.lines.at(0).x  = padding_1;
+			decalParts.lines.at(0).x2 = padding_1;
+
+			decalParts.lines.at(2).x2 = bg_w;
 		}
 
-		ImGui::SameLine();
-		Button("Continue");
+		else
+		{
+			m_decalPostGameTime = iw::lerp(m_decalPostGameTime, 1.f, iw::DeltaTime() * 10);
+
+			decalParts.lines.at(0).y  = iw::lerp(img_xy,       0.f, m_decalPostGameTime);
+			decalParts.lines.at(0).x  = iw::lerp(img_xy, padding_1, m_decalPostGameTime);
+			decalParts.lines.at(0).x2 = iw::lerp(img_xy, padding_1, m_decalPostGameTime);
+
+			decalParts.lines.at(2).x2 = iw::lerp(0.f, bg_w, m_decalPostGameTime);;
+		}
+
+		decalParts.lines.at(0).y2 = bg_h;
+
+		decalParts.lines.at(1).x  = 0;
+		decalParts.lines.at(1).y  = bg_h - padding_1;
+		decalParts.lines.at(1).x2 = bg_w;
+		decalParts.lines.at(1).y2 = bg_h - padding_1;
+
+		float tooltip_y = bg_h / 3;
+
+		decalParts.lines.at(2).x = 0;
+		decalParts.lines.at(2).y  = tooltip_y;
+		decalParts.lines.at(2).y2 = tooltip_y;
+
+		decalParts.DrawLines();
+
+		upgradeParts.UpgradeTable(
+			padding_1 + padding_01, 
+			bg_h * .5f/* - padding_1 - padding_01*/, 
+			bg_w - padding_1 * 2 - padding_01,
+			bg_h * .5f
+		);
+
+		upgradeParts.Tooltip(
+			padding_1 + padding_01, 
+			tooltip_y + padding_01
+		);
+
+		// buttons
+
+		ImGui::SetCursorPosY(bg_h - padding_1 + padding_01);
+		ImGui::SetCursorPosX(padding_1 + padding_01);
+		if (Button("Continue"))
+		{
+			SetViewDefault();
+			decalParts.lines.pop_back();
+		}
 	}
 
 	ImGui::End();

@@ -58,7 +58,5 @@ public:
 	}
 
 	int Initialize() override;
-	void Destroy() override;
-
 	bool On(iw::ActionEvent& e) override;
 };

@@ -43,7 +43,7 @@ int SandWorldRenderSystem::Initialize() {
 
 void SandWorldRenderSystem::Update()
 {
-	bool _debugShowChunkBounds = Keyboard::KeyDown(InputName::C);
+	bool _debugShowChunkBounds = Keyboard::KeyDown(InputName::F8);
 
 	unsigned int* pixels = (unsigned int*)m_texture->Colors();
 	m_texture->Clear();

@@ -19,6 +19,16 @@ bool Button(const std::string& name)
 	return isClicked;
 }
 
+bool ImageButton(const ImTextureID& id, const ImVec2& size, const ImVec2& uv0, const ImVec2& uv1, float frame, const ImVec4& bg, const ImVec4& tint)
+{
+	std::stringstream ss;
+	ss << (unsigned long long)id;
+
+	bool isClicked = ImGui::ImageButton(id, size, uv0, uv1, frame, bg, tint);
+	PlayHoverOrClickSound(ss.str());
+	return isClicked;
+}
+
 bool Checkbox(const std::string& name, bool& active)
 {
 	bool isClicked = ImGui::Checkbox(name.c_str(), &active);
