@@ -17,8 +17,8 @@ struct Player
 	bool  i_fire2 = false;
 
 	float u_speed = 200;           // max speed
-	//float u_acceleration = 300;  // accelerate to max speed
-	//float u_impulse = 200;       // initial speed on button press
+	float u_acceleration = 300;  // accelerate to max speed
+	float u_impulse = 200;       // initial speed on button press
 
 	//float rotation = 0.f;
 
@@ -32,6 +32,12 @@ struct Player
 
 	bool NoDamage = false;
 
+	// these are props only used for the moves, which kinda sucks
+	// Main issue here is that the velocity of a rigidbody cannot have multiple channels, so if it gets
+	// set anywhere the dashing veloity is removed
+
+	glm::vec3 DashVelocity = glm::vec3(0.f, 0.f, 0.f);
+
 	//~Player()
 	//{
 	//	for (Move* move : Moves)
@@ -40,38 +46,38 @@ struct Player
 	//	}
 	//}
 
-	//glm::vec3 imp;
-	//glm::vec3 vel;
+	glm::vec3 imp;
+	glm::vec3 vel;
 
 	// returns the new vel
 
-	//float CalcImp(float move)
-	//{
-	//	return move * u_impulse;
-	//}
+	float CalcImp(float move)
+	{
+		return move * u_impulse;
+	}
 
-	//float CalcAcc(float vel, float nvel, float move, float dt)
-	//{
-	//	if (move != 0.f)
-	//	{
-	//		vel += move * u_acceleration * dt;
-	//	}
+	float CalcAcc(float vel, float nvel, float move, float dt)
+	{
+		if (move != 0.f)
+		{
+			vel += move * u_acceleration * dt;
+		}
 
-	//	else 
-	//	{
-	//		int sign = signbit(vel);
-	//		vel -= nvel * u_acceleration /*u_breaking*/ * dt;
-	//		if (sign != signbit(vel))
-	//		{
-	//			vel = 0;
-	//		}
-	//	}
+		else 
+		{
+			int sign = signbit(vel);
+			vel -= nvel * u_acceleration /*u_breaking*/ * dt;
+			if (sign != signbit(vel))
+			{
+				vel = 0;
+			}
+		}
 
-	//	return vel;
-	//}
+		return vel;
+	}
 
-	//float CalcVel(float vel, float nvel, float move, float dt)
-	//{
-	//	return /*CalcImp(move) + */CalcAcc(vel, nvel, move, dt);
-	//}
+	float CalcVel(float vel, float nvel, float move, float dt)
+	{
+		return /*CalcImp(move) + */CalcAcc(vel, nvel, move, dt);
+	}
 };

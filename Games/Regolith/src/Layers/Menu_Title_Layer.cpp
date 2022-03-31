@@ -689,7 +689,7 @@ void Menu_Title_Layer::UI()
 		if (Button("Continue"))
 		{
 			SetViewDefault();
-			decalParts.lines.pop_back();
+			decalParts.lines.pop_back(); // state hack
 		}
 	}
 

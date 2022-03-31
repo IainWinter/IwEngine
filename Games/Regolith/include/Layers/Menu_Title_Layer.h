@@ -173,6 +173,7 @@ struct Menu_Title_Layer : Menu_Layer
 		RegisterImage("deathMovie", (void*)movie.m_texture->Handle()->Id());
 		target_menu = MenuTarget::POST_GAME;
 		//target_fade = 0.4f;
+		m_decalPostGameTime = 0;
 	}
 
 	void SetViewUpgrade()

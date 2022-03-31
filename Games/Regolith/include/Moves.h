@@ -34,7 +34,7 @@ struct Dash_Move : Move
 
 		if (Timer >= 0.f)
 		{
-			player.get<iw::Rigidbody>().Velocity += Speed * Move * Timer / Time;
+			player.get<Player>().DashVelocity += Speed * Move * Timer / Time;
 		}
 	}
 };

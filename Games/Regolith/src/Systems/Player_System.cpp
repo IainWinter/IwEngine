@@ -60,31 +60,30 @@ void PlayerSystem::FixedUpdate()
 
 	// movement
 
-	player.move = glm::vec3(iw::norm(glm::vec2(player.i_moveX, player.i_moveY)), 0.f);
-	rigidbody.Velocity = player.move * player.u_speed;
+	//rigidbody.Velocity = player.move * player.u_speed + player.DashVelocity;
 
-	//glm::vec3& imp = player->imp;
-	//glm::vec3& acc = rigidbody->Velocity;
-	//glm::vec3 nacc = iw::norm(acc);
-	//acc *= .95f;
-	//if (glm::length(move.x) > 0.f) acc.x = player->CalcImp(move.x);
-	//if (glm::length(move.y) > 0.f) acc.y = player->CalcImp(move.y);
+	glm::vec3& imp = player.imp;
+	glm::vec3& acc = rigidbody.Velocity;
+	glm::vec3 nacc = iw::norm(acc);
+	acc *= .95f;
+	if (glm::length(player.move.x) > 0.f) acc.x = player.CalcImp(player.move.x);
+	if (glm::length(player.move.y) > 0.f) acc.y = player.CalcImp(player.move.y);
 
-	////acc.x = player->CalcAcc(acc.x, nacc.x, move.x, iw::FixedTime());
-	////acc.y = player->CalcAcc(acc.y, nacc.y, move.y, iw::FixedTime());
+	acc.x = player.CalcAcc(acc.x, nacc.x, player.move.x, iw::FixedTime());
+	acc.y = player.CalcAcc(acc.y, nacc.y, player.move.y, iw::FixedTime());
 
-	////glm::vec3 vel = /*imp + */acc;
-	////LOG_INFO << vel.x;
+	glm::vec3 vel = /*imp + */acc;
+	LOG_INFO << vel.x;
 
-	//float speed = glm::length(acc);
-	//rigidbody->Velocity = iw::norm(acc) * glm::clamp(speed, 0.f, player->u_speed);
+	float speed = glm::length(acc);
+	rigidbody.Velocity = iw::norm(acc) * glm::clamp(speed, 0.f, player.u_speed);
 
-	//if (speeds.size() > 400)
-	//{
-	//	speeds.erase(speeds.begin());
-	//}
+	if (speeds.size() > 400)
+	{
+		speeds.erase(speeds.begin());
+	}
 
-	//speeds.push_back(speed);
+	speeds.push_back(speed);
 }
 
 void PlayerSystem::Update()
@@ -92,6 +91,8 @@ void PlayerSystem::Update()
 	timer.Tick();
 
 	Player& player = m_player.get<Player>();
+
+	player.move = glm::vec3(iw::norm(glm::vec2(player.i_moveX, player.i_moveY)), 0.f);
 
 	// special actions
 
