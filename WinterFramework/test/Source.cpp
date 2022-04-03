@@ -1,6 +1,17 @@
 #include "../Entity.h"
 #include <cstdio>
 
+#include "unit_test.h"
+
+void test_free_list_mark()
+{
+	free_list<int> freelist(0, 30);
+	freelist.mark(0, 10);
+
+	//assert_equal(freelist.m_list.at(0).m_begin, 0);
+
+}
+
 void print_list(const free_list<int>& list)
 {
 	printf("\n");

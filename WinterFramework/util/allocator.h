@@ -6,7 +6,7 @@ struct allocator
 {
 	virtual char* alloc_bytes(size_t size) = 0;
 	virtual void free_bytes(void* address, size_t size) = 0;
-	virtual	bool has_space(size_t size) const = 0;
+	virtual bool has_space(size_t size) const = 0;
 	virtual bool has_allocated(void* address) const = 0;
 	virtual bool contains(void* address) const = 0;
 
@@ -16,9 +16,13 @@ struct allocator
 	template<typename _t>
 	_t* alloc(size_t count)
 	{
-		char* ptr = alloc_bytes(sizeof(_t) * count);
-		new (ptr) _t();
-		return (_t*)ptr;
+		char* address = alloc_bytes(sizeof(_t) * count);
+		for (size_t i = 0; i < count; i++)
+		{
+			new (address + sizeof(_t)) _t();
+		}
+
+		return (_t*)address;
 	}
 
 	template<typename _t>
