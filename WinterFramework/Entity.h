@@ -1,18 +1,19 @@
 #pragma once
 
-#include "iw/util/set/sparse_set.h"
-#include "iw/util/memory/pool_allocator.h"
+#include "util/pool_allocator.h"
 #include <initializer_list>
 #include <type_traits>
 #include <functional>
+#include <algorithm>
 #include <assert.h>
 #include <tuple>
+#include <stdint.h>
 
 using hash_t = uint64_t;
 using rep_t  = uint16_t; // low bits of the hash to represent repeat components in archetype 
 
-using hash_bits = std::integral_constant<int, ~(hash_t)rep_t(-1) & hash_t(-1)>;
-using rep_bits  = std::integral_constant<int,  (hash_t)rep_t(-1)>;
+using hash_bits = std::integral_constant<hash_t, ~(hash_t)rep_t(-1) & hash_t(-1)>;
+using rep_bits  = std::integral_constant<hash_t,  (hash_t)rep_t(-1)>;
 
 constexpr void set_repeats(hash_t& hash, rep_t count) { hash = (hash & hash_bits::value) | (hash_t)count; }
 constexpr rep_t get_repeats(const hash_t& hash) { return (rep_t)(hash & rep_bits::value); }
@@ -183,6 +184,13 @@ bool is_in_archetype(
 	return false;
 }
 
+// Currently components are stored in an AOS format
+// Entity1|Component1|Component2|Entity2|Component1|Component2
+// Havent tested which is better for cache could store SOA
+// Entity1|Entity2|Component1|Component1|Component2|Component2
+
+// todo: find a way to profile this...
+
 inline
 int offset_of_component(
 	const archetype& archetype,
@@ -300,138 +308,104 @@ std::tuple<_t&...> tie_from_offsets(
 	return tie_from_offsets_i<_t...>(raw, offsets, std::make_index_sequence<sizeof...(_t)>{});
 }
 
-constexpr hash_t hash_int3(int x, int y, hash_t z)
-{
-	hash_t hash = 0x9e3779b9;
-	hash = (hash ^ (hash_t)x) * 0x56a34beefff;
-	hash = (hash ^ (hash_t)y) * 0x56ff3eea4;
-	hash = (hash ^         z) * 0xfabcdef1;
-	return hash;
-}
-
 struct entity_handle
 {
-	int    m_index     = 0;
+	void*  m_entity    = 0; // pointer to entity_data inside entity_store
 	int    m_version   = 0;
 	hash_t m_archetype = 0;
 
-	bool operator==(const entity_handle& other) const { return hash() == other.hash(); }
-	bool operator!=(const entity_handle& other) const { return !operator==(other); }
+	size_t hash() const { return size_t(m_entity); } // no need for real hash
+};
 
-	hash_t hash() const
-	{
-		return hash_int3(m_index, m_version, m_archetype);
-	}
+struct entity_data
+{
+	void* m_components; // ptr to the first component in archetype
+	int m_version;      // for if entity coming in is stale
 };
 
 struct entity_storage
 {
-	struct entity_data
-	{
-		int m_index;   // for query iterator only
-		int m_version; // for if entity coming in is stale
-		void* m_addr;
-	};
-
-	using store_t = iw::sparse_set<int, entity_data>;
-	using itr = decltype(store_t::m_items)::iterator;
+	using itr = pool_allocator_iterator;
+	itr get_itr() { return pool_allocator_iterator(m_pool); }
 
 	archetype m_archetype;
-	iw::pool_allocator m_pool;
+	pool_allocator m_pool;
 	int m_instance;
 	int m_count;   // number of alive entities
-
-	store_t m_entities;
 
 	entity_storage(
 		const archetype& archetype
 	)
 		: m_archetype (archetype)
-		, m_pool      (archetype.m_size, 16)
+		, m_pool      (16)
 		, m_instance  (0)
 		, m_count     (0)
-	{}
-
-	entity_handle create_entity(
-		int version = 0)
 	{
-		int index = -1;
+		m_pool.m_block_size = archetype.m_size + sizeof(entity_data);
+	}
 
-		for (int i = 0; i < m_entities.m_sparse.size(); i++)
-		{
-			if (m_entities.m_sparse.at(i) == -1)
-			{
-				index = i;
-				break;
-			}
-		}
+	entity_handle create_entity()
+	{
+		char* raw = m_pool.alloc_block();
 
-		if (index == -1)
-		{
-			index = m_entities.m_sparse.size();
-		}
-
-		m_entities.emplace(index);
-
-		entity_data& data = m_entities.at(index);
-		data.m_index = index;
-		data.m_version = m_instance;
-
-		data.m_addr = m_pool.alloc(m_archetype.m_size);
-
+		entity_data* entity = (entity_data*)raw;
+		entity->m_components = raw + sizeof(entity_data);
+		entity->m_version = m_instance;
+		
 		for (const component& component : m_archetype.m_components)
 		{
-			component.m_default(offset_raw_pointer(data.m_addr, component));
+			component.m_default(offset_raw_pointer(entity->m_components, component));
 		}
 
 		m_count += 1;
 		m_instance += 1;
 
-		return wrap(data);
+		return wrap(entity);
 	}
 
 	void destroy_entity(
 		entity_handle handle,
 		bool destroy_components = true)
 	{
-		assert(handle.m_archetype == m_archetype.m_hash                    && "entity_storage::destroy_entity failed, archetype mismatch");
-		assert(handle.m_version == m_entities.at(handle.m_index).m_version && "entity_storage::destroy_entity failed, version mismatch");
+		assert(handle.m_archetype == m_archetype.m_hash && "entity_storage::destroy_entity failed, archetype mismatch");
+		assert(handle.m_version == unwrap(handle)->m_version && "entity_storage::destroy_entity failed, version mismatch");
 
-		entity_data& data = m_entities.at(handle.m_index);
-		
+		entity_data* entity = unwrap(handle);
+
 		if (destroy_components)
 		{
 			for (const component& component : m_archetype.m_components)
 			{
-				component.m_destructor(offset_raw_pointer(data.m_addr, component));
+				component.m_destructor(offset_raw_pointer(entity->m_components, component));
 			}
 		}
 		
-		m_pool.free(data.m_addr, m_archetype.m_size);
-		m_entities.erase(handle.m_index);
+		m_pool.free_block(entity);
 		m_count -= 1;
 	}
 
 	bool is_entity_alive(
 		entity_handle handle)
 	{
-		assert(handle.m_archetype == m_archetype.m_hash                    && "entity_storage::is_entity_alive failed, archetype mismatch");
-		return  m_entities.contains(handle.m_index)
-			&& handle.m_version == m_entities.at(handle.m_index).m_version;
+		assert(handle.m_archetype == m_archetype.m_hash && "entity_storage::is_entity_alive failed, archetype mismatch");
+		
+		entity_data* entity = unwrap(handle);
+
+		return m_pool.has_allocated(entity)
+			&& handle.m_version == entity->m_version;
 	}
 
 	std::pair<bool, entity_handle> find_from_component(
 		const component& component,
 		void* component_addr)
 	{
-		void* addr = (char*)component_addr - offset_of_component(m_archetype, component);
-
-		for (const entity_data& data : m_entities)
+		if (m_pool.has_allocated(component_addr))
 		{
-			if (data.m_addr == addr)
-			{
-				return std::make_pair(true, wrap(data));
-			}
+			// Entity data is stored before the first component
+			// see offset_of_component, that would change this code 
+
+			void* raw = (char*)component_addr - offset_of_component(m_archetype, component) - sizeof(entity_data);
+			return std::make_pair(true, wrap((entity_data*)raw));
 		}
 
 		return std::make_pair(false, entity_handle {});
@@ -441,13 +415,16 @@ struct entity_storage
 		entity_handle handle,
 		entity_storage& new_store)
 	{
-		assert(handle.m_archetype == m_archetype.m_hash                    && "entity_storage::move_entity failed, archetype mismatch");
-		assert(handle.m_version == m_entities.at(handle.m_index).m_version && "entity_storage::move_entity failed, version mismatch");
+		assert(handle.m_archetype == m_archetype.m_hash      && "entity_storage::move_entity failed, archetype mismatch");
+		assert(handle.m_version == unwrap(handle)->m_version && "entity_storage::move_entity failed, version mismatch");
 
-		entity_handle new_handle = new_store.create_entity(handle.m_version + 1);
+		entity_handle new_handle = new_store.create_entity();
 
-		void* old_data =           m_entities.at(    handle.m_index).m_addr;
-		void* new_data = new_store.m_entities.at(new_handle.m_index).m_addr;
+		entity_data* old_entity = unwrap(handle);
+		entity_data* new_entity = unwrap(new_handle);
+
+		void* old_data = old_entity->m_components;
+		void* new_data = new_entity->m_components;
 
 		int old_length =           m_archetype.m_components.size();
 		int new_length = new_store.m_archetype.m_components.size();
@@ -471,6 +448,7 @@ struct entity_storage
 		}
 
 		destroy_entity(handle, false);
+
 		return new_handle;
 	}
 
@@ -479,23 +457,21 @@ struct entity_storage
 		const component& component,
 		void* data)
 	{
-		assert(handle.m_archetype == m_archetype.m_hash                    && "entity_storage::set_component failed, archetype mismatch");
-		assert(handle.m_version == m_entities.at(handle.m_index).m_version && "entity_storage::set_component failed, version mismatch");
+		assert(handle.m_archetype == m_archetype.m_hash      && "entity_storage::set_component failed, archetype mismatch");
+		assert(handle.m_version == unwrap(handle)->m_version && "entity_storage::set_component failed, version mismatch");
+		assert(data                                          && "entity_storage::set_component failed, data is null");
 
-		if (data)
-		{
-			component.m_move(get_raw_pointer(handle, component), data);
-		}
+		component.m_move(get_raw_pointer(handle, component), data);
 	}
 
 	void* get_raw_pointer(
 		entity_handle handle,
 		const component& component)
 	{
-		assert(handle.m_archetype == m_archetype.m_hash                    && "entity_storage::get_raw_pointer failed, archetype mismatch");
-		assert(handle.m_version == m_entities.at(handle.m_index).m_version && "entity_storage::get_raw_pointer failed, version mismatch");
+		assert(handle.m_archetype == m_archetype.m_hash      && "entity_storage::get_raw_pointer failed, archetype mismatch");
+		assert(handle.m_version == unwrap(handle)->m_version && "entity_storage::get_raw_pointer failed, version mismatch");
 
-		return offset_raw_pointer(m_entities.at(handle.m_index).m_addr, component);
+		return offset_raw_pointer(unwrap(handle)->m_components, component);
 	}
 
 	void* offset_raw_pointer(
@@ -505,13 +481,15 @@ struct entity_storage
 		return (char*)ptr + offset_of_component(m_archetype, component);
 	}
 
-	itr begin() { return m_entities.m_items.begin(); }
-	itr end()   { return m_entities.m_items.end();   }
-
 private:
-	entity_handle wrap(const entity_data& data)
+	entity_handle wrap(const entity_data* data) const
 	{
-		return { data.m_index, data.m_version, m_archetype.m_hash };
+		return { (void*)data, data->m_version, m_archetype.m_hash };
+	}
+
+	entity_data* unwrap(const entity_handle& handle) const
+	{
+		return (entity_data*)handle.m_entity;
 	}
 };
 
@@ -524,9 +502,8 @@ struct entity
 	entity_storage* m_store   = nullptr;
 	entity_manager* m_manager = nullptr;
 
-	bool operator==(const entity& other) const { return m_handle.operator==(other.m_handle); }
-	bool operator!=(const entity& other) const { return m_handle.operator!=(other.m_handle); }
-	hash_t hash() const { return m_handle.hash(); }
+	bool operator==(const entity& other) const { return m_handle.m_entity == other.m_handle.m_entity; }
+	bool operator!=(const entity& other) const { return !operator==(other); }
 
 	void destroy(); // defined under entity_manager
 
@@ -539,32 +516,6 @@ struct entity
 
 		assert(m_store && "entity::is_alive failed, no store");
 		return m_store->is_entity_alive(m_handle);
-	}
-
-	template<typename _t, typename... _args>
-	entity& set(_args&&... args)
-	{
-		// cant use store because of events
-
-		assert(m_store && "entity::set failed, no manager");
-		m_manager->set<_t>(m_handle, std::forward<_args>(args)...);
-		return *this;
-	}
-
-	template<typename _t, typename... _args>
-	entity& add(_args&&... args)
-	{
-		assert(m_manager && "entity::add failed, no manager");
-		*this = m_manager->add<_t>(m_handle, std::forward<_args>(args)...);
-		return *this;
-	}
-
-	template<typename _t>
-	entity& remove()
-	{
-		assert(m_manager && "entity::remove failed, no manager");
-		*this = m_manager->remove<_t>(m_handle);
-		return *this;
 	}
 
 	template<typename _t>
@@ -580,6 +531,15 @@ struct entity
 		assert(m_store && "entity::has failed, no store");
 		return is_in_archetype(m_store->m_archetype, make_component<_t>());
 	}
+
+	template<typename _t, typename... _args>
+	entity& set(_args&&... args);
+
+	template<typename _t, typename... _args>
+	entity& add(_args&&... args);
+
+	template<typename _t>
+	entity& remove();
 
 	// listen
 
@@ -605,22 +565,20 @@ struct entity_query
 	{
 		struct itr_part
 		{
-			std::array<int, sizeof...(_q)> m_offsets;
-			int m_more;
-			entity_storage::itr m_itr;
 			entity_storage* m_store; // this is ONLY to return an 'entity', ONLY needs archetype hash from it...
+			entity_storage::itr m_itr;
+			std::array<int, sizeof...(_q)> m_offsets;
 		};
 
+		entity_manager* m_manager; // ref to manager, ONLY for returning entity instead of entity_handle
+		
 		std::vector<itr_part> m_parts;
 		typename std::vector<itr_part>::iterator m_current;
 		int m_more;
 
-		entity_manager* m_manager; // ref to manager, ONLY for returning entity instead of entity_handle
-
 		itr(
-			std::vector<entity_storage*> matches,
 			entity_manager* manager,
-			bool is_end
+			std::vector<entity_storage*> matches
 		)
 			: m_manager (manager)
 			, m_more    (0)
@@ -629,66 +587,17 @@ struct entity_query
 			// If its an end iterator, and there is a back and its not empty, add it to parts
 			// If parts is empty, add a null iterator to fake end
 
-			if (is_end)
+			for (entity_storage* storage : matches)
 			{
-				for (auto itr = matches.rbegin(); itr != matches.rend(); ++itr)
-				{
-					entity_storage* store = *itr;
-					if (store->m_count > 0)
-					{
-						itr_part& part = m_parts.emplace_back();
-						part.m_itr = store->end();
-						break; // only need the last matches end iterator
-					}
-				}
+				if (storage->m_count == 0) continue;
+				m_parts.emplace_back(itr_part {
+					storage,
+					storage->get_itr(),
+					query_offsets<_q...>(storage->m_archetype)
+				});
+
+				m_more += 1;
 			}
-
-			else
-			{
-				for (entity_storage* storage : matches)
-				{
-					if (storage->m_count == 0) continue;
-			
-					entity_storage::itr begin = storage->begin();
-					entity_storage::itr end   = storage->end();
-			
-					itr_part& part = m_parts.emplace_back();
-					part.m_offsets = query_offsets<_q...>(storage->m_archetype);
-					part.m_more = std::distance(begin, end);
-					part.m_itr = begin;
-					part.m_store = storage;
-			
-					m_more += part.m_more;
-				}
-			}
-
-			//if (is_end) // lots of checks...
-			//{
-			//	if (matches.size() > 0 && matches.back()->m_count > 0)
-			//	{
-			//		itr_part& part = m_parts.emplace_back();
-			//		part.m_itr = matches.back()->end();
-			//	}
-			//}
-
-			//else
-			//{
-			//	for (entity_storage* storage : matches)
-			//	{
-			//		if (storage->m_count == 0) continue;
-
-			//		entity_storage::itr begin = storage->begin();
-			//		entity_storage::itr end   = storage->end();
-
-			//		itr_part& part = m_parts.emplace_back();
-			//		part.m_offsets = query_offsets<_q...>(storage->m_archetype);
-			//		part.m_more = std::distance(begin, end);
-			//		part.m_itr = begin;
-			//		part.m_store = storage;
-
-			//		m_more += part.m_more;
-			//	}
-			//}
 
 			if (m_parts.size() == 0)
 			{
@@ -700,21 +609,28 @@ struct entity_query
 
 		std::tuple<_q&...> just_components() const
 		{
-			return tie_from_offsets<_q...>(m_current->m_itr->m_addr, m_current->m_offsets);
+			entity_data* data = m_current->m_itr.template get<entity_data>();
+
+			return tie_from_offsets<_q...>(
+				data->m_components,
+				m_current->m_offsets
+			);
 		}
 
 		result_t operator*() const
 		{
 			if constexpr (_with_entity)
 			{
+				entity_data* data = m_current->m_itr.template get<entity_data>();
+				
 				entity_handle handle = {
-					m_current->m_itr->m_index,
-					m_current->m_itr->m_version,
+					data,
+					data->m_version,
 					m_current->m_store->m_archetype.m_hash
 				};
 
 				return std::tuple_cat(
-					std::make_tuple<entity>({ handle, m_current->m_store, m_manager }),
+					std::make_tuple<entity>({handle, m_current->m_store, m_manager}),
 					just_components()
 				);
 			}
@@ -727,19 +643,20 @@ struct entity_query
 
 		itr& operator++()
 		{
-			++m_current->m_itr;
-			--m_current->m_more;
-			--m_more;
-			if (m_more > 0 && m_current->m_more == 0) ++m_current;
-
-			// checking for m_more keeps begin -> end at final end iterator
+			m_current->m_itr.next();
+			if (!m_current->m_itr.more())
+			{
+				--m_more;
+				if (m_more > 0) ++m_current;
+			}
 
 			return *this;
 		}
 
 		bool operator==(const itr& other) const 
 		{
-			return m_more == other.m_more && m_current->m_itr == other.m_current->m_itr;
+			return m_more == other.m_more
+				&& m_current->m_itr.more() == other.m_current->m_itr.more(); // note more check if correct
 		}
 
 		bool operator!=(const itr& other) const
@@ -766,8 +683,8 @@ struct entity_query
 		return c;
 	}
 
-	itr begin() { return itr(m_matches, m_manager, false); }
-	itr end()   { return itr(m_matches, m_manager, true);  }
+	itr begin() { return itr(m_manager, m_matches); }
+	itr end()   { return itr(m_manager, {});  }
 
 	// these cant be referemces cus the thing pops off the stack, might need std::move bc I think these are copying the vector
 
@@ -831,7 +748,7 @@ struct entity_manager
 
 	bool is_alive(entity_handle handle)
 	{
-		m_storage.at(handle.m_archetype).is_entity_alive(handle);
+		return m_storage.at(handle.m_archetype).is_entity_alive(handle);
 	}
 
 	std::pair<bool, entity> find(const component& component, void* ptr_to_component)
@@ -970,7 +887,7 @@ struct entity_manager
 		std::array<hash_t, sizeof...(_q)> query = make_query<_q...>();
 		for (auto& [_, storage] : m_storage)
 		{
-			if (is_query_match(storage.m_archetype, query))
+			if (is_query_match<sizeof...(_q)>(storage.m_archetype, query))
 			{
 				result.m_matches.push_back(&storage);
 			}
@@ -1142,17 +1059,18 @@ struct command_buffer
 
 	void destroy(entity entity)
 	{
+#ifdef IW_ENTITY_DEBUG
 		for (command_buffer::command* c : m_queue)
 		{
 			if (c->m_type == entity_command::DESTROY)
 			{
 				command_destroy* cd = (command_destroy*)c;
 
-				if (cd->m_handle == entity.m_handle)
+				if (cd->m_handle.m_entity == entity.m_handle.m_entity)
 				{
 					printf("\n[Entity] Tried to double queue a delete");
-					printf("\n[Entity]\t 1. Index: %d from %s", cd->   m_handle.m_index, cd->m_where);
-					printf("\n[Entity]\t 2. Index: %d from %s", entity.m_handle.m_index, m_where_current);
+					printf("\n[Entity]\t 1. Index: %d from %s", cd->   m_handle.m_entity, cd->m_where);
+					printf("\n[Entity]\t 2. Index: %d from %s", entity.m_handle.m_entity, m_where_current);
 					//__debugbreak();
 					return;
 				}
@@ -1162,8 +1080,9 @@ struct command_buffer
 		if (!entity.is_alive())
 		{
 			printf("\n[Entity] Tried queue a delete with a dead entity");
-			printf("\n[Entity]\t 1. Index: %d from %s", entity.m_handle.m_index, m_where_current);
+			printf("\n[Entity]\t 1. Index: %d from %s", entity.m_handle.m_entity, m_where_current);
 		}
+#endif
 		command_destroy* command = queue<command_destroy>();
 		command->m_type = entity_command::DESTROY;
 		command->m_handle = entity.m_handle;
@@ -1259,6 +1178,32 @@ void entity::destroy()
 	m_manager = nullptr;
 }
 
+template<typename _t, typename... _args>
+entity& entity::set(_args&&... args)
+{
+	// cant use store because of events
+
+	assert(m_manager && "entity::set failed, no manager");
+	m_manager->set<_t>(m_handle, std::forward<_args>(args)...);
+	return *this;
+}
+
+template<typename _t, typename... _args>
+entity& entity::add(_args&&... args)
+{
+	assert(m_manager && "entity::add failed, no manager");
+	*this = m_manager->add<_t>(m_handle, std::forward<_args>(args)...);
+	return *this;
+}
+
+template<typename _t>
+entity& entity::remove()
+{
+	assert(m_manager && "entity::remove failed, no manager");
+	*this = m_manager->remove<_t>(m_handle);
+	return *this;
+}
+
 inline entity& entity::on_destroy(const std::function<void(entity)>                  & func) { assert(m_manager && "entity::on_destroy failed, no manager"); m_manager->on_destroy(m_handle, func); return *this; }
 inline entity& entity::on_set    (const std::function<void(entity)>                  & func) { assert(m_manager && "entity::on_add failed, no manager");     m_manager->on_set    (m_handle, func); return *this; }
 inline entity& entity::on_set    (const std::function<void(entity, const component&)>& func) { assert(m_manager && "entity::on_add failed, no manager");     m_manager->on_set    (m_handle, func); return *this; }
@@ -1270,9 +1215,14 @@ inline entity& entity::on_remove (const std::function<void(entity, const compone
 /*
 	If you want to use singletons, note dll bounds
 */
-#define USE_SINGLETONS
+#define IW_USE_SINGLETONS
 
-#ifdef USE_SINGLETONS
+/*
+	If you want to log the location of the dispatcher
+*/
+#define IW_LOG_DEFER
+
+#ifdef IW_USE_SINGLETONS
 	inline
 	entity_manager& entities()
 	{
@@ -1288,12 +1238,7 @@ inline entity& entity::on_remove (const std::function<void(entity, const compone
 		return buffer;
 	}
 
-	/*
-		If you want to log the location of the dispatcher
-	*/
-#	define LOG_DEFER
-
-#	ifdef LOG_DEFER
+#	ifdef IW_LOG_DEFER
 #		ifndef iw_as_string
 #			define iw_line_as_string(x) iw_as_string(x)
 #			define iw_as_string(x) #x
