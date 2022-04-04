@@ -6,65 +6,62 @@
 void test_free_list_mark()
 {
 	free_list<int> freelist(0, 30);
+
+	// range should resize if marked adjacent
+	// mark (0, 10)
+	// mark (20, 10)
+	// (0 30] -> (10 20]
+
 	freelist.mark(0, 10);
+	freelist.mark(20, 10);
 
+	assert_equal(freelist.m_list.size(), 1);
 	assert_equal(freelist.m_list.at(0).m_begin, 10);
-	assert_equal(freelist.m_list.at(0).m_size,  20);
+	assert_equal(freelist.m_list.at(0).m_size,  10);
 
-	freelist.mark(15, 5);
+	// range should split if marked in the middle
+	// mark (15, 10)
+	// (10 30] -> (10 15] (25 30]
+
+	freelist.mark(15, 10);
 
 	assert_equal(freelist.m_list.size(), 2);
 	assert_equal(freelist.m_list.at(0).m_begin, 10);
 	assert_equal(freelist.m_list.at(0).m_size, 5);
-	assert_equal(freelist.m_list.at(1).m_begin, 20);
-	assert_equal(freelist.m_list.at(1).m_size, 10);
+	assert_equal(freelist.m_list.at(1).m_begin, 25);
+	assert_equal(freelist.m_list.at(1).m_size, 5);
+
+	// ramge should be removed if marked fully
+	// mark (25, 5)
+	// (10 15] (25 30] -> (10 15]
+
+	freelist.mark(25, 5);
+
+	assert_equal(freelist.m_list.size(), 1);
+	assert_equal(freelist.m_list.at(0).m_begin, 10);
+	assert_equal(freelist.m_list.at(0).m_size, 5);
 }
 
 void test_free_list_unmark()
 {
 	free_list<int> freelist(0, 30);
-	freelist.mark(0, 10);
-	freelist.unmark(3, 3);
+	freelist.mark(20, 10);
 
-	// (0, 30)
-	// (10, 30)
-	// (3 6) (10 30)
-
+	// range should be created if not adjacent
+	// unmark (25 5)
+	// (0 20] -> (0 20] (25 30]
+	
+	freelist.unmark(25, 5);
+	
 	assert_equal(freelist.m_list.size(), 2);
-	assert_equal(freelist.m_list.at(0).m_begin, 3);
-	assert_equal(freelist.m_list.at(0).m_size, 3);
-	assert_equal(freelist.m_list.at(1).m_begin, 10);
-	assert_equal(freelist.m_list.at(1).m_size, 20);
-
-	// (3 6)
-	// (3 6) (15 20)
-
-	freelist.mark(10, 20);
-	freelist.unmark(15, 5);
-
-	assert_equal(freelist.m_list.size(), 2);
-	assert_equal(freelist.m_list.at(0).m_begin, 3);
-	assert_equal(freelist.m_list.at(0).m_size, 3);
-	assert_equal(freelist.m_list.at(1).m_begin, 15);
-	assert_equal(freelist.m_list.at(1).m_size, 5);
-
-	// (3 6)
-	// (3 20)
-
-	freelist.unmark(6, 9);
-
-	assert_equal(freelist.m_list.size(), 1);
-	assert_equal(freelist.m_list.at(0).m_begin, 3);
-	assert_equal(freelist.m_list.at(0).m_size, 17);
-
-	// (0 20)
-
-	freelist.unmark(0, 3);
-	freelist.unmark(20, 10);
-
-	assert_equal(freelist.m_list.size(), 1);
 	assert_equal(freelist.m_list.at(0).m_begin, 0);
-	assert_equal(freelist.m_list.at(0).m_size, 30);
+	assert_equal(freelist.m_list.at(0).m_size, 20);
+	assert_equal(freelist.m_list.at(1).m_begin, 25);
+	assert_equal(freelist.m_list.at(1).m_size, 30);
+
+	// range should expand if adjacent left & right
+	// (0 20] (25 30]
+
 
 }
 
