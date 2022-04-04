@@ -23,14 +23,14 @@ struct unit_test_state
 
 #define _ut_state unit_test_state::instance()
 
-inline void print_fail()   { printf("\033[0;31m failed \033[0m"); }
-inline void print_passed() { printf("\033[0;32m passed \033[0m"); }
+inline void print_fail()   { printf("\033[0;31m failed \033[0m\n"); }
+inline void print_passed() { printf("\033[0;32m passed \033[0m\n"); }
 
 #define EPSILON .0005
 
 #define run_test(test) \
 	_ut_state.test_count++;\
-	info("%d. Running test '%s' ...", _ut_state.test_count, #test);\
+	printf("%d. Running test '%s' ...", _ut_state.test_count, #test);\
 	_ut_state.reset();\
 	test();\
 	if (_ut_state.failed) {\
@@ -45,7 +45,7 @@ inline void print_passed() { printf("\033[0;32m passed \033[0m"); }
 	_ut_state.failed = !(a == b);\
 	if (_ut_state.failed) {\
 		print_fail();\
-		error("\tValue mismatch '%s' = %d but '%s' = %d.\n", #a, a, #b, b);\
+		printf("\tValue mismatch '%s' = %d but '%s' = %d.\n", #a, a, #b, b);\
 		_ut_state.failed = true;\
 		return;\
 	}
@@ -54,7 +54,7 @@ inline void print_passed() { printf("\033[0;32m passed \033[0m"); }
 	_ut_state.failed = fabsf(a - b) > e;\
 	if (_ut_state.failed) {\
 		print_fail();\
-		error("Value too far '%s' = %f but '%s' = %f. Difference of %f with an epsilon of %f.\n", #a, a, #b, b, fabsf(a - b), e);\
+		printf("Value too far '%s' = %f but '%s' = %f. Difference of %f with an epsilon of %f.\n", #a, a, #b, b, fabsf(a - b), e);\
 		_ut_state.failed = true;\
 		return;\
 	}

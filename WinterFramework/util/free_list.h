@@ -91,12 +91,7 @@ struct free_list
 	void unmark(_t begin, _t size)
 	{
 		assert(size > 0 && "Tried to unmark a size of zero");
-
-		if (m_list.size() == 0) // insert the first free zone if none exist
-		{
-			m_list.push_back(free_range { begin, size });
-			return; // early exit
-		}
+		assert(begin >= m_limit_begin && begin + size <= m_limit_begin + m_limit_size && "Tried to unmark outside limits");
 
 		int index = -1;
 
@@ -111,7 +106,11 @@ struct free_list
 			}
 		}
 
-		assert(index != -1 && "Mark already empty");
+		if (index == -1) // insert the first free zone if none exist
+		{
+			m_list.push_back(free_range { begin, size });
+			return; // early exit
+		}
 
 		free_range& range = m_list.at(index);
 

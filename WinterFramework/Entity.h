@@ -2,6 +2,7 @@
 
 #include "util/pool_allocator.h"
 #include <initializer_list>
+#include <unordered_map>
 #include <type_traits>
 #include <functional>
 #include <algorithm>
@@ -385,7 +386,7 @@ struct entity_storage
 	}
 
 	bool is_entity_alive(
-		entity_handle handle)
+		entity_handle handle) const
 	{
 		assert(handle.m_archetype == m_archetype.m_hash && "entity_storage::is_entity_alive failed, archetype mismatch");
 		
@@ -397,7 +398,7 @@ struct entity_storage
 
 	std::pair<bool, entity_handle> find_from_component(
 		const component& component,
-		void* component_addr)
+		void* component_addr) const
 	{
 		if (m_pool.has_allocated(component_addr))
 		{
@@ -466,7 +467,7 @@ struct entity_storage
 
 	void* get_raw_pointer(
 		entity_handle handle,
-		const component& component)
+		const component& component) const
 	{
 		assert(handle.m_archetype == m_archetype.m_hash      && "entity_storage::get_raw_pointer failed, archetype mismatch");
 		assert(handle.m_version == unwrap(handle)->m_version && "entity_storage::get_raw_pointer failed, version mismatch");
@@ -476,7 +477,7 @@ struct entity_storage
 
 	void* offset_raw_pointer(
 		void* ptr,
-		const component& component)
+		const component& component) const
 	{
 		return (char*)ptr + offset_of_component(m_archetype, component);
 	}
@@ -753,15 +754,15 @@ struct entity_manager
 
 	std::pair<bool, entity> find(const component& component, void* ptr_to_component)
 	{
-		for (auto& [_, store] : m_storage) // could use query if it didnt need types... (ezish fix)
+		for (const std::pair<hash_t, entity_storage>& store : m_storage) // could use query if it didnt need types... (ezish fix)
 		{
-			if (is_in_archetype(store.m_archetype, component))
+			if (is_in_archetype(store.second.m_archetype, component))
 			{
-				auto [found, handle] = store.find_from_component(component, ptr_to_component);
+				std::pair<bool, entity_handle> out = store.second.find_from_component(component, ptr_to_component);
 
-				if (found)
+				if (out.first)
 				{
-					return std::make_pair(true, wrap(handle));
+					return std::make_pair(true, wrap(out.second));
 				}
 			}
 		}
@@ -940,7 +941,7 @@ private:
 		void call(entity entity, const component* component) override
 		{
 			if constexpr (_include_component) m_callback(entity, *component);
-			else						    m_callback(entity);
+			else                              m_callback(entity);
 		}
 	};
 
@@ -1159,7 +1160,7 @@ private:
 	template<typename _t>
 	_t* queue()
 	{
-		static_assert(std::is_base_of<command, _t>::value);
+		static_assert(std::is_base_of<command, _t>::value, "_t must inherit from command");
 
 		_t* t = new _t();
 		m_queue.emplace_back(t);

@@ -8,105 +8,155 @@ void test_free_list_mark()
 	free_list<int> freelist(0, 30);
 	freelist.mark(0, 10);
 
-	//assert_equal(freelist.m_list.at(0).m_begin, 0);
+	assert_equal(freelist.m_list.at(0).m_begin, 10);
+	assert_equal(freelist.m_list.at(0).m_size,  20);
 
+	freelist.mark(15, 5);
+
+	assert_equal(freelist.m_list.size(), 2);
+	assert_equal(freelist.m_list.at(0).m_begin, 10);
+	assert_equal(freelist.m_list.at(0).m_size, 5);
+	assert_equal(freelist.m_list.at(1).m_begin, 20);
+	assert_equal(freelist.m_list.at(1).m_size, 10);
 }
 
-void print_list(const free_list<int>& list)
+void test_free_list_unmark()
 {
-	printf("\n");
-	for (const auto& range : list.m_list)
-	{
-		printf("(%d, %d] ", range.m_begin, range.m_begin + range.m_size);
-	}
+	free_list<int> freelist(0, 30);
+	freelist.mark(0, 10);
+	freelist.unmark(3, 3);
+
+	// (0, 30)
+	// (10, 30)
+	// (3 6) (10 30)
+
+	assert_equal(freelist.m_list.size(), 2);
+	assert_equal(freelist.m_list.at(0).m_begin, 3);
+	assert_equal(freelist.m_list.at(0).m_size, 3);
+	assert_equal(freelist.m_list.at(1).m_begin, 10);
+	assert_equal(freelist.m_list.at(1).m_size, 20);
+
+	// (3 6)
+	// (3 6) (15 20)
+
+	freelist.mark(10, 20);
+	freelist.unmark(15, 5);
+
+	assert_equal(freelist.m_list.size(), 2);
+	assert_equal(freelist.m_list.at(0).m_begin, 3);
+	assert_equal(freelist.m_list.at(0).m_size, 3);
+	assert_equal(freelist.m_list.at(1).m_begin, 15);
+	assert_equal(freelist.m_list.at(1).m_size, 5);
+
+	// (3 6)
+	// (3 20)
+
+	freelist.unmark(6, 9);
+
+	assert_equal(freelist.m_list.size(), 1);
+	assert_equal(freelist.m_list.at(0).m_begin, 3);
+	assert_equal(freelist.m_list.at(0).m_size, 17);
+
+	// (0 20)
+
+	freelist.unmark(0, 3);
+	freelist.unmark(20, 10);
+
+	assert_equal(freelist.m_list.size(), 1);
+	assert_equal(freelist.m_list.at(0).m_begin, 0);
+	assert_equal(freelist.m_list.at(0).m_size, 30);
+
 }
 
 int main()
 {
-	free_list<int> test;
+	run_test(test_free_list_mark);
+	run_test(test_free_list_unmark);
 
-	for (int i = 0; i < 29; i++)
-	{
-		test.mark(i, 1);
-	}
+	// free_list<int> test;
 
-	// test.mark(5, 5);
+	// for (int i = 0; i < 29; i++)
+	// {
+	// 	test.mark(i, 1);
+	// }
+
+	// // test.mark(5, 5);
+	// // print_list(test);
+	// // test.mark(11, 1);
+	// // test.mark(12, 3);
+	// // print_list(test);
+	// // test.unmark(5, 5);
+	// // print_list(test);
+	// // test.mark(0, 2);
+
+	// // //test.mark(29, 1);
+	// // print_list(test);
+
+	// test.unmark(7, 3);
 	// print_list(test);
-	// test.mark(11, 1);
-	// test.mark(12, 3);
+	// test.unmark(0, 2);
 	// print_list(test);
-	// test.unmark(5, 5);
+	// test.unmark(10, 9);
+	// print_list(test);
+
+	// for (int i = 18; i >= 7; i--)
+	// {
+	// 	test.mark(i, 1);
+	// 	print_list(test);
+	// }
+
+	// test.mark(29, 1);
 	// print_list(test);
 	// test.mark(0, 2);
-
-	// //test.mark(29, 1);
 	// print_list(test);
 
-	test.unmark(7, 3);
-	print_list(test);
-	test.unmark(0, 2);
-	print_list(test);
-	test.unmark(10, 9);
-	print_list(test);
+	// test.reset();
+	// print_list(test);
 
-	for (int i = 18; i >= 7; i--)
-	{
-		test.mark(i, 1);
-		print_list(test);
-	}
+	// pool_allocator pool(1);
+	// pool.m_block_size = 10;
 
-	test.mark(29, 1);
-	print_list(test);
-	test.mark(0, 2);
-	print_list(test);
+	// int* ints = pool.alloc<int>(100);
+	// char* block = pool.alloc_block();
+	// char* bytes = pool.alloc_bytes(100);
 
-	test.reset();
-	print_list(test);
+	// linear_allocator lin(100);
+	// lin.m_block_size = 10;
+	// lin.alloc_block();
+	// lin.alloc_block();
+	// char* gggg = lin.alloc_block();
+	// lin.alloc_block();
+	// lin.alloc_block();
 
-	pool_allocator pool(1);
-	pool.m_block_size = 10;
+	// lin.free_block(gggg);
 
-	int* ints = pool.alloc<int>(100);
-	char* block = pool.alloc_block();
-	char* bytes = pool.alloc_bytes(100);
+	// for (linear_allocator_iterator itr(lin); itr.more(); itr.next())
+	// {
+	// 	printf("\n%p", itr.get_bytes());
+	// }
 
-	linear_allocator lin(100);
-	lin.m_block_size = 10;
-	lin.alloc_block();
-	lin.alloc_block();
-	char* gggg = lin.alloc_block();
-	lin.alloc_block();
-	lin.alloc_block();
+	// for (pool_allocator_iterator itr(pool); itr.more(); itr.next())
+	// {
+	// 	printf("\n%p", itr.get_bytes());
+	// }
 
-	lin.free_block(gggg);
+	// entity_manager manager;
 
-	for (linear_allocator_iterator itr(lin); itr.more(); itr.next())
-	{
-		printf("\n%p", itr.get_bytes());
-	}
+	// manager.create<int>();
+	// manager.create<int>();
+	// manager.create<int, float>();
+	// entity ef = manager.create<int, float>();
+	// entity e = manager.create<int>();
 
-	for (pool_allocator_iterator itr(pool); itr.more(); itr.next())
-	{
-		printf("\n%p", itr.get_bytes());
-	}
+	// e.get<int>() += 1;
+	// ef.get<int>() = 10;
 
-	entity_manager manager;
+	// e.destroy();
 
-	manager.create<int>();
-	manager.create<int>();
-	manager.create<int, float>();
-	entity ef = manager.create<int, float>();
-	entity e = manager.create<int>();
-
-	e.get<int>() += 1;
-	ef.get<int>() = 10;
-
-	e.destroy();
-
-	for (auto [e, i] : manager.query<int>().with_entity())
-	{
-		printf("\n%d", i);
-	}
+	// for (auto [e, i] : manager.query<int>().with_entity())
+	// {
+	// 	printf("\n%d", i);
+	// }
 
 	return 0;
 }
