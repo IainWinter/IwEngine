@@ -1,6 +1,4 @@
-#include "../Entity.h"
-#include <cstdio>
-
+#include "../util/free_list.h"
 #include "unit_test.h"
 
 void test_free_list_mark()
@@ -10,7 +8,7 @@ void test_free_list_mark()
 	// range should resize if marked adjacent
 	// mark (0, 10)
 	// mark (20, 10)
-	// (0 30] -> (10 20]
+	// (0 30] -> (10 30] -> (10 20]
 
 	freelist.mark(0, 10);
 	freelist.mark(20, 10);
@@ -18,6 +16,9 @@ void test_free_list_mark()
 	assert_equal(freelist.m_list.size(), 1);
 	assert_equal(freelist.m_list.at(0).m_begin, 10);
 	assert_equal(freelist.m_list.at(0).m_size,  10);
+
+	freelist.reset();
+	freelist.mark(0, 10);
 
 	// range should split if marked in the middle
 	// mark (15, 10)
@@ -57,103 +58,57 @@ void test_free_list_unmark()
 	assert_equal(freelist.m_list.at(0).m_begin, 0);
 	assert_equal(freelist.m_list.at(0).m_size, 20);
 	assert_equal(freelist.m_list.at(1).m_begin, 25);
-	assert_equal(freelist.m_list.at(1).m_size, 30);
+	assert_equal(freelist.m_list.at(1).m_size, 5);
 
 	// range should expand if adjacent left & right
-	// (0 20] (25 30]
+	// unmark (20 2)
+	// unmark (23 2)
+	// (0 20] (25 30] -> (0 22] (23 30]
 
+	freelist.unmark(20, 2);
+	freelist.unmark(23, 2);
+	
+	assert_equal(freelist.m_list.size(), 2);
+	assert_equal(freelist.m_list.at(0).m_begin, 0);
+	assert_equal(freelist.m_list.at(0).m_size, 22);
+	assert_equal(freelist.m_list.at(1).m_begin, 23);
+	assert_equal(freelist.m_list.at(1).m_size, 7);
 
+	// range should combine left and right is full adjacent
+	// unmark (22 1)
+	// (0 22] (23 30] -> (0 30]
+
+	freelist.unmark(22, 1);
+
+	assert_equal(freelist.m_list.size(), 1);
+	assert_equal(freelist.m_list.at(0).m_begin, 0);
+	assert_equal(freelist.m_list.at(0).m_size, 30);
+}
+
+void test_free_list_helpers()
+{
+	free_list<int> freelist(0, 30);
+	
+	assert_equal(freelist.mark_first(10), 0);
+
+	assert_equal(freelist.m_list.size(), 1);
+	assert_equal(freelist.m_list.at(0).m_begin, 10);
+	assert_equal(freelist.m_list.at(0).m_size, 20);
+
+	assert_equal(freelist.first_fits(1), 10);
+
+	assert_equal(freelist.has_space(100), false);
+	assert_equal(freelist.has_space(5), true);
+
+	assert_equal(freelist.is_marked(20), false);
+	assert_equal(freelist.is_marked(5), true);
 }
 
 int main()
 {
 	run_test(test_free_list_mark);
 	run_test(test_free_list_unmark);
-
-	// free_list<int> test;
-
-	// for (int i = 0; i < 29; i++)
-	// {
-	// 	test.mark(i, 1);
-	// }
-
-	// // test.mark(5, 5);
-	// // print_list(test);
-	// // test.mark(11, 1);
-	// // test.mark(12, 3);
-	// // print_list(test);
-	// // test.unmark(5, 5);
-	// // print_list(test);
-	// // test.mark(0, 2);
-
-	// // //test.mark(29, 1);
-	// // print_list(test);
-
-	// test.unmark(7, 3);
-	// print_list(test);
-	// test.unmark(0, 2);
-	// print_list(test);
-	// test.unmark(10, 9);
-	// print_list(test);
-
-	// for (int i = 18; i >= 7; i--)
-	// {
-	// 	test.mark(i, 1);
-	// 	print_list(test);
-	// }
-
-	// test.mark(29, 1);
-	// print_list(test);
-	// test.mark(0, 2);
-	// print_list(test);
-
-	// test.reset();
-	// print_list(test);
-
-	// pool_allocator pool(1);
-	// pool.m_block_size = 10;
-
-	// int* ints = pool.alloc<int>(100);
-	// char* block = pool.alloc_block();
-	// char* bytes = pool.alloc_bytes(100);
-
-	// linear_allocator lin(100);
-	// lin.m_block_size = 10;
-	// lin.alloc_block();
-	// lin.alloc_block();
-	// char* gggg = lin.alloc_block();
-	// lin.alloc_block();
-	// lin.alloc_block();
-
-	// lin.free_block(gggg);
-
-	// for (linear_allocator_iterator itr(lin); itr.more(); itr.next())
-	// {
-	// 	printf("\n%p", itr.get_bytes());
-	// }
-
-	// for (pool_allocator_iterator itr(pool); itr.more(); itr.next())
-	// {
-	// 	printf("\n%p", itr.get_bytes());
-	// }
-
-	// entity_manager manager;
-
-	// manager.create<int>();
-	// manager.create<int>();
-	// manager.create<int, float>();
-	// entity ef = manager.create<int, float>();
-	// entity e = manager.create<int>();
-
-	// e.get<int>() += 1;
-	// ef.get<int>() = 10;
-
-	// e.destroy();
-
-	// for (auto [e, i] : manager.query<int>().with_entity())
-	// {
-	// 	printf("\n%d", i);
-	// }
+	run_test(test_free_list_helpers);
 
 	return 0;
 }
