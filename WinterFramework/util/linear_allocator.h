@@ -60,7 +60,7 @@ public:
 // This iterator only supports iterating over blocks of memory
 // asserts will fail if there is a non-uniform range of memory allocated 
 
-struct linear_allocator_iterator : allocator_iterator
+struct linear_iterator : allocator_iterator
 {
 	size_t m_block_size;
 
@@ -71,8 +71,8 @@ struct linear_allocator_iterator : allocator_iterator
 	free_list<size_t>::const_iterator m_range_limit_current;
 	free_list<size_t>::const_iterator m_range_limit_end;
 
-	linear_allocator_iterator(
-		linear_allocator& alloc
+	linear_iterator(
+		const linear_allocator& alloc
 	)
 		: m_block_size          (alloc.m_block_size)
 		, m_begin               (alloc.address(0))

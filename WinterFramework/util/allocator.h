@@ -14,7 +14,7 @@ struct allocator
 	size_t m_block_size = 0;
 
 	template<typename _t>
-	_t* alloc(size_t count)
+	_t* alloc(size_t count = 1)
 	{
 		char* address = alloc_bytes(sizeof(_t) * count);
 		for (size_t i = 0; i < count; i++)

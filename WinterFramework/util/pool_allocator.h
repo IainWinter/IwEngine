@@ -107,22 +107,24 @@ struct pool_allocator : allocator
 	}
 };
 
-struct pool_allocator_iterator : allocator_iterator
-{
-	std::vector<linear_allocator_iterator> m_pages;
-	std::vector<linear_allocator_iterator>::iterator m_current;
+// need a way for this to be const
 
-	pool_allocator_iterator()
+struct pool_iterator : allocator_iterator
+{
+	std::vector<linear_iterator> m_pages;
+	std::vector<linear_iterator>::iterator m_current;
+
+	pool_iterator()
 	{
 		m_current = m_pages.begin();
 	}
 
-	pool_allocator_iterator(pool_allocator& alloc)
+	pool_iterator(const pool_allocator& alloc)
 	{
 		m_pages.reserve(alloc.m_pages.size());
-		for (linear_allocator* page : alloc.m_pages)
+		for (const linear_allocator* page : alloc.m_pages)
 		{
-			m_pages.push_back(linear_allocator_iterator(*page));
+			m_pages.push_back(linear_iterator(*page));
 		}
 
 		m_current = m_pages.begin();

@@ -326,8 +326,8 @@ struct entity_data
 
 struct entity_storage
 {
-	using itr = pool_allocator_iterator;
-	itr get_itr() { return pool_allocator_iterator(m_pool); }
+	using itr = pool_iterator;
+	itr get_itr() { return pool_iterator(m_pool); }
 
 	archetype m_archetype;
 	pool_allocator m_pool;
@@ -482,7 +482,6 @@ struct entity_storage
 		return (char*)ptr + offset_of_component(m_archetype, component);
 	}
 
-private:
 	entity_handle wrap(const entity_data* data) const
 	{
 		return { (void*)data, data->m_version, m_archetype.m_hash };
@@ -848,7 +847,8 @@ struct entity_manager
 	template<typename _t, typename... _args>
 	void set(entity_handle handle, _args&&... args)
 	{
-		set(handle, make_component<_t>(), &_t(args...));
+		_t temp = _t(args...); // this gets moved
+		set(handle, make_component<_t>(), &temp);
 	}
 
 	template<typename _t, typename... _args>

@@ -1,4 +1,4 @@
-BUILD_CMD = g++ test/Source.cpp
+BUILD_CMD = g++ test/Serial_Test.cpp
 
 release:
 	$(BUILD_CMD)
