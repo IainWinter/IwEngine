@@ -24,18 +24,20 @@ namespace meta
 	// Vectors
 	//
 
-	// see serial, these dont get found if they are here
-	// template<typename _t> void serial_write(tag<std::vector<_t>>, serial_writer* writer, const std::vector<_t>& instance)
-	// {
-	// 	writer->write_length(instance.size());
-	// 	writer->write_array(meta::get_class<_t>(), (void*)instance.data(), instance.size());
-	// }
+	// g++ doesnt find these
+	// clang does find these
 
-	// template<typename _t> void serial_read(tag<std::vector<_t>>, serial_reader* reader, std::vector<_t>& instance)
-	// {
-	// 	instance.resize(reader->read_length());
-	// 	reader->read_array(meta::get_class<_t>(), instance.data(), instance.size());
-	// }
+	template<typename _t> void serial_write(tag<std::vector<_t>>, serial_writer* writer, const std::vector<_t>& instance)
+	{
+		writer->write_length(instance.size());
+		writer->write_array(meta::get_class<_t>(), (void*)instance.data(), instance.size());
+	}
+
+	template<typename _t> void serial_read(tag<std::vector<_t>>, serial_reader* reader, std::vector<_t>& instance)
+	{
+		instance.resize(reader->read_length());
+		reader->read_array(meta::get_class<_t>(), instance.data(), instance.size());
+	}
 
 	// typenames, todo: add all of the common ones
 

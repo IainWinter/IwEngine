@@ -9,6 +9,7 @@
 #include <assert.h>
 #include <tuple>
 #include <stdint.h>
+#include <array>
 
 #define ENTITY_USE_SERIAL
 
