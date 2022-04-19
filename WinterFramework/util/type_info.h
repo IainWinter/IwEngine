@@ -30,9 +30,16 @@ namespace internal
 		return typeid(_t).name();
 	}
 
+	template<typename _t>
+	size_t type_hash(tag<_t>)
+	{
+		return typeid(_t).hash_code();
+	}
+
 	struct type_info
 	{
 		std::string m_name;
+		size_t m_hash;
 		size_t m_size;
 	};
 
@@ -43,6 +50,7 @@ namespace internal
 	{
 		type_info* info = new type_info();
 		info->m_name = type_name(tag<_t>{});
+		info->m_hash = type_hash(tag<_t>{});
 		info->m_size = sizeof(_t);
 		
 		return info;

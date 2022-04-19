@@ -62,7 +62,7 @@ struct meta_entity
 {
 	int m_index;
 	int m_version;
-	meta::multi_vector components;
+	meta::multi_vector m_components;
 };
 
 struct meta_entity_store
@@ -133,7 +133,7 @@ int main()
 		.name("entity")
 		.member<&meta_entity::m_index>("index")
 		.member<&meta_entity::m_version>("version")
-		.member<&meta_entity::components>("components");
+		.member<&meta_entity::m_components>("components");
 
 	meta::describe<meta_entity_store>()
 		.name("entity store")
@@ -155,11 +155,31 @@ int main()
 		meta_entity m;
 		m.m_index = entity.m_handle.m_index;
 		m.m_version = entity.m_handle.m_version;
-		m.components.push<::transform>(&transform);
-		m.components.push<::enemy>(&enemy);
+		m.m_components.push<::transform>(&transform);
+		m.m_components.push<::enemy>(&enemy);
 		these.m_entities.push_back(m);
+	}
+
+	for (const auto& [_, store] : entities().m_storage)
+	{
+		meta_entity_store meta_store(store.m_archetype);
+
+		for (pool_iterator itr(store.m_pool); itr.more(); itr.next())
+		{
+			entity_data* data = itr.get<entity_data>();
+
+			meta_entity& ent = meta_store.m_entities.emplace_back();
+			ent.m_index = data->m_index;
+			ent.m_version = data->m_version;
+
+			for (int i = 0; i < store.m_archetype.m_components.size(); i++)
+			{
+				ent.m_components.push(
+					store.m_archetype.m_components.at(i).m_type,
+					(char*)data->m_components + store.m_archetype.m_offsets.at(i));
+			}
+		}
 	}
 
 	json.write(these);
 }
-

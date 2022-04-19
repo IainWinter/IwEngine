@@ -10,7 +10,13 @@
 #include <tuple>
 #include <stdint.h>
 
-#include "util/type_info.h" // couples slightly with meta, but should be fine
+#define ENTITY_USE_SERIAL
+
+#ifdef ENTITY_USE_SERIAL
+#	include "Serial.h"
+#else
+#	include "util/type_info.h"
+#endif
 
 using hash_t = uint64_t;
 using rep_t  = uint16_t; // low bits of the hash to represent repeat components in archetype 
@@ -23,15 +29,18 @@ constexpr rep_t get_repeats(const hash_t& hash) { return (rep_t)(hash & rep_bits
 constexpr hash_t just_hash(const hash_t hash) { return hash & hash_bits::value; }
 
 #ifndef max // Windows.h and other system headers define these
-template<typename _t> constexpr _t max(_t a, _t b) { return a > b ? a : b; }
-template<typename _t> constexpr _t min(_t a, _t b) { return a < b ? a : b; }
+	template<typename _t> constexpr _t max(_t a, _t b) { return a > b ? a : b; }
+	template<typename _t> constexpr _t min(_t a, _t b) { return a < b ? a : b; }
 #endif
 
 struct component
 {
-	hash_t m_hash = 0; // low 16 bits are the repeat count
-	int m_size    = 0;
-	const char* m_name = nullptr;
+#ifdef ENTITY_USE_SERIAL
+	meta::type* m_type;
+#endif
+
+	meta::type_info* m_info;
+
 	std::function<void(void*)>        m_destructor;
 	std::function<void(void*)>        m_default;
 	std::function<void(void*, void*)> m_move;
@@ -44,9 +53,12 @@ component make_component()  //	everyother template function is short-hand back t
 
 	if (c.m_hash == 0)
 	{
-		c.m_hash = just_hash(typeid(_t).hash_code());
-		c.m_size = meta::get_type_info<_t>()->m_size;
-		c.m_name = meta::get_type_info<_t>()->m_name.c_str();
+#ifdef ENTITY_USE_SERIAL
+		c.m_type = meta::get_class<_t>();
+#endif
+
+		c.m_info = meta::get_type_info<_t>();
+
 		c.m_destructor = [](void* ptr)             { ((_t*)ptr)->~_t(); };
 		c.m_default    = [](void* ptr)             { new (ptr) _t(); };
 		c.m_move       = [](void* ptr, void* data) { new (ptr) _t(std::move(*(_t*)data)); };
@@ -125,7 +137,7 @@ archetype make_archetype(
 	for (auto c = a.m_components.begin(); c != a.m_components.end(); ++c)
 	{
 		a.m_offsets.push_back(a.m_size);
-		a.m_size += c->m_size;
+		a.m_size += c->m_info->m_size;
 	}
 
 	// count backwards for repeats
@@ -205,7 +217,7 @@ int offset_of_component(
 
 		if (just_hash(c.m_hash) == just_hash(component.m_hash))
 		{
-			return archetype.m_offsets.at(i) + c.m_size * get_repeats(component.m_hash);
+			return archetype.m_offsets.at(i) + c.m_info->m_size * get_repeats(component.m_hash);
 		}
 
 		else

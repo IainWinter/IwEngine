@@ -22,9 +22,13 @@ namespace meta
 		{
 			m_items.push_back(multi_item { get_class<_t>(), (void*)item });
 		}
+		
+		void push(const _t* item)
+		{
+			m_items.push_back(multi_item { get_class<_t>(), (void*)item });
+		}
 
-		template<typename _t>
-		void erase(const _t* item)
+		void erase(const void* item)
 		{
 			for (int i = 0; i < m_items.size(); i++)
 			{
