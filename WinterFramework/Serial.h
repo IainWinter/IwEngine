@@ -213,21 +213,6 @@ namespace meta
 		serial->read_value(value);
 	}
 
-	// I have absolutly no idea why these need to be here specifically and arn't even found if I move them just below the internal namespace????
-	// is this a bug in the compiler, or is there somehting I am missing???????????????? super annoying
-
-	template<typename _t> void serial_write(tag<std::vector<_t>>, serial_writer* writer, const std::vector<_t>& instance)
-	{
-		writer->write_length(instance.size());
-		writer->write_array(meta::get_class<_t>(), (void*)instance.data(), instance.size());
-	}
-
-	template<typename _t> void serial_read(tag<std::vector<_t>>, serial_reader* reader, std::vector<_t>& instance)
-	{
-		instance.resize(reader->read_length());
-		reader->read_array(meta::get_class<_t>(), instance.data(), instance.size());
-	}
-
 namespace internal
 {
 	template<typename _t>

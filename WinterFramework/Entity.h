@@ -9,6 +9,7 @@
 #include <assert.h>
 #include <tuple>
 #include <stdint.h>
+#include <array>
 
 #include "util/type_info.h" // couples slightly with meta, but should be fine
 
