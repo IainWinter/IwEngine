@@ -87,68 +87,18 @@ int main()
 		printf("%s\n", type->m_info->m_name.c_str());
 	});
 
-
 	json_writer(std::cout).write(type, &test);
-
-
 	
-
 	std::stringstream ss;
 	bin_writer(ss).write(type, &test);
-
 	std::string s = ss.str();
 	std::cout << s;
-
-	std::istringstream ssi(s);
-
-	my_type test2;
-
-	bin_reader(ssi).read(type, &test2);
 	
+	std::istringstream ssi(s);
+	
+	my_type test2;
+	bin_reader(ssi).read(type, &test2);
 }
-
-// serializer
-
-template<> void meta_serial_write(meta_tag<std::string>, serial_writer* writer, const std::string& instance)
-{
-	writer->write_length(instance.size());
-	writer->write_string(instance.data(), instance.size());
-}
-
-template<> void meta_serial_read(meta_tag<std::string>, serial_reader* reader, std::string& instance)
-{
-	instance.resize(reader->read_length());
-	reader->read_string(instance.data(), instance.size());
-}
-
-template<typename _t> void meta_serial_write(meta_tag<std::vector<_t>>, serial_writer* writer, const std::vector<_t>& instance)
-{
-	writer->write_length(instance.size());
-	writer->write_array(meta::get_class<_t>(), (void*)instance.data(), instance.size());
-}
-
-template<typename _t> void meta_serial_read(meta_tag<std::vector<_t>>, serial_reader* reader, std::vector<_t>& instance)
-{
-	instance.resize(reader->read_length());
-	reader->read_array(meta::get_class<_t>(), instance.data(), instance.size());
-}
-
-// typenames
-
-template<> std::string meta_typename(meta_tag<int>)   { return "int"; }
-template<> std::string meta_typename(meta_tag<float>) { return "float"; }
-template<> std::string meta_typename(meta_tag<std::string>) { return "std::string"; }
-
-template<typename _i>
-std::string meta_typename(meta_tag<std::vector<_i>>)
-{
-	std::stringstream ss;
-	ss << "std::vector<" << meta_typename(meta_tag<_i>{}) << ">"; 
-	return ss.str();
-}
-
-
-
 
 
 

@@ -6,9 +6,23 @@ struct allocator
 {
 	virtual char* alloc_bytes(size_t size) = 0;
 	virtual void free_bytes(void* address, size_t size) = 0;
+	
 	virtual bool has_space(size_t size) const = 0;
 	virtual bool has_allocated(void* address) const = 0;
+	
 	virtual bool contains(void* address) const = 0;
+	virtual bool contains_block(size_t index) const = 0;
+
+	virtual size_t get_block_index(void* address) const = 0;
+	virtual void*  get_block_address(size_t index) const = 0;
+
+	virtual size_t capacity() const = 0;
+
+	size_t block_capacity() const
+	{
+		assert(m_block_size > 0 && "Block size needs to be set to use this");
+		return capacity() / m_block_size;
+	}
 
 	// allows for setting a block size to allocate fixed size byte arrays
 	size_t m_block_size = 0;

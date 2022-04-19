@@ -10,6 +10,8 @@
 #include <tuple>
 #include <stdint.h>
 
+#include "util/type_info.h" // couples slightly with meta, but should be fine
+
 using hash_t = uint64_t;
 using rep_t  = uint16_t; // low bits of the hash to represent repeat components in archetype 
 
@@ -43,8 +45,8 @@ component make_component()  //	everyother template function is short-hand back t
 	if (c.m_hash == 0)
 	{
 		c.m_hash = just_hash(typeid(_t).hash_code());
-		c.m_size = sizeof(_t);
-		c.m_name = typeid(_t).name();
+		c.m_size = meta::get_type_info<_t>()->m_size;
+		c.m_name = meta::get_type_info<_t>()->m_name.c_str();
 		c.m_destructor = [](void* ptr)             { ((_t*)ptr)->~_t(); };
 		c.m_default    = [](void* ptr)             { new (ptr) _t(); };
 		c.m_move       = [](void* ptr, void* data) { new (ptr) _t(std::move(*(_t*)data)); };
@@ -309,19 +311,23 @@ std::tuple<_t&...> tie_from_offsets(
 	return tie_from_offsets_i<_t...>(raw, offsets, std::make_index_sequence<sizeof...(_t)>{});
 }
 
+// does 8byte-8byte-4bytes align to 24?
+
 struct entity_handle
 {
-	void*  m_entity    = 0; // pointer to entity_data inside entity_store
+	size_t m_index     = 0;
 	int    m_version   = 0;
 	hash_t m_archetype = 0;
 
-	size_t hash() const { return size_t(m_entity); } // no need for real hash
+	hash_t hash() const { return m_archetype + hash_t(m_index); } // no need for real hash
 };
 
 struct entity_data
 {
 	void* m_components; // ptr to the first component in archetype
 	int m_version;      // for if entity coming in is stale
+
+	size_t m_index;        // annoying but for itr to return entity_handle without a search through the pool's pages
 };
 
 struct entity_storage
@@ -352,7 +358,8 @@ struct entity_storage
 		entity_data* entity = (entity_data*)raw;
 		entity->m_components = raw + sizeof(entity_data);
 		entity->m_version = m_instance;
-		
+		entity->m_index = m_pool.get_block_index(raw); // search, alloc_block could return this
+
 		for (const component& component : m_archetype.m_components)
 		{
 			component.m_default(offset_raw_pointer(entity->m_components, component));
@@ -484,12 +491,12 @@ struct entity_storage
 
 	entity_handle wrap(const entity_data* data) const
 	{
-		return { (void*)data, data->m_version, m_archetype.m_hash };
+		return { data->m_index, data->m_version, m_archetype.m_hash };
 	}
 
 	entity_data* unwrap(const entity_handle& handle) const
 	{
-		return (entity_data*)handle.m_entity;
+		return (entity_data*)m_pool.get_block_address(handle.m_index);
 	}
 };
 
@@ -502,7 +509,7 @@ struct entity
 	entity_storage* m_store   = nullptr;
 	entity_manager* m_manager = nullptr;
 
-	bool operator==(const entity& other) const { return m_handle.m_entity == other.m_handle.m_entity; }
+	bool operator==(const entity& other) const { return m_handle.hash() == other.m_handle.hash(); }
 	bool operator!=(const entity& other) const { return !operator==(other); }
 
 	void destroy(); // defined under entity_manager
@@ -624,7 +631,7 @@ struct entity_query
 				entity_data* data = m_current->m_itr.template get<entity_data>();
 				
 				entity_handle handle = {
-					data,
+					data->m_index,
 					data->m_version,
 					m_current->m_store->m_archetype.m_hash
 				};

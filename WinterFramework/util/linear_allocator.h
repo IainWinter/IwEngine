@@ -55,6 +55,32 @@ public:
 		return (char*)address >= (char*)m_address 
 			&& (char*)address <  (char*)m_address + m_freelist.m_limit_size; 
 	}
+
+	bool contains_block(size_t index) const override
+	{
+		return contains((char*)m_address + m_block_size * index);
+	}
+
+	size_t get_block_index(void* address) const override
+	{
+		assert(contains(address) && "Address is not owned by allocator");
+		assert(((size_t)address - (size_t)m_address) % m_block_size == 0 && "Address isn't the start of a block");
+
+		return ((size_t)address - (size_t)m_address) / m_block_size;
+	}
+
+	void* get_block_address(size_t index) const override
+	{
+		void* address = (char*)m_address + m_block_size * index;
+		assert(contains(address) && "Address is not owned by allocator");
+
+		return address;
+	}
+
+	size_t capacity() const override
+	{
+		return m_freelist.m_limit_size;
+	}
 };
 
 // This iterator only supports iterating over blocks of memory

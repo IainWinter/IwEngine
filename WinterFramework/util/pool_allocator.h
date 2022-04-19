@@ -105,6 +105,54 @@ struct pool_allocator : allocator
 		for (linear_allocator* page : m_pages) if (page->contains(address)) return true;
 		return false;
 	}
+
+	bool contains_block(size_t index) const override
+	{
+		for (linear_allocator* page : m_pages) if (page->contains_block(index)) return true;
+		return false;
+	}
+
+	size_t get_block_index(void* address) const override
+	{
+		size_t index = 0;
+		
+		for (linear_allocator* page : m_pages)
+		{
+			if (page->contains(address))
+			{
+				index += page->get_block_index(address);
+				return index;
+			}
+
+			index += page->block_capacity();
+		}
+
+		assert(false && "Address is not in allocator");
+		throw nullptr;
+	}
+
+	void* get_block_address(size_t index) const override
+	{
+		for (linear_allocator* page : m_pages)
+		{
+			if (page->contains_block(index))
+			{
+				return page->get_block_address(index);
+			}
+
+			index -= page->block_capacity();
+		}
+
+		assert(false && "Address is not in allocator");
+		throw nullptr;
+	}
+
+	size_t capacity() const override
+	{
+		size_t size = 0;
+		for (linear_allocator* page : m_pages) size += page->capacity();
+		return size;
+	}
 };
 
 // need a way for this to be const
