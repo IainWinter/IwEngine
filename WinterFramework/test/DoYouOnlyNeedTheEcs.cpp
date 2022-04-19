@@ -1,8 +1,7 @@
 #include "../Entity.h"
-#include "../Serial.h"
-#include "../ext/serial_json.h"
 #include "../ext/serial_common.h"
 #include "../ext/multi_vector.h"
+#include "../ext/serial_json.h"
 #include <iostream>
 
 struct window
