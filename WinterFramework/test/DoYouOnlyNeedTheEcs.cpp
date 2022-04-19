@@ -1,5 +1,8 @@
 #include "../Entity.h"
 #include "../Serial.h"
+#include "../ext/serial_json.h"
+#include "../ext/serial_common.h"
+#include "../ext/multi_vector.h"
 #include <iostream>
 
 struct window
@@ -144,7 +147,7 @@ int main()
 	entities().create<transform, enemy>();
 	entities().create<transform, enemy>();
 
-	meta::json_writer json(std::cout);
+	json_writer json(std::cout);
 
 	meta_entity_store these(make_archetype<transform, enemy>());
 

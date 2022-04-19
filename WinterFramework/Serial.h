@@ -15,7 +15,7 @@
 namespace meta
 {
 	//
-	// serial forward declare for internal call to specialized serial_write/read
+	// serial forward declare
 	//
 
 	struct serial_writer;
@@ -55,8 +55,7 @@ namespace meta
 	template<typename _t>
 	type* get_class();
 
-	// this is a map representation of a type that any serializer can use
-	// this way there doesnt need to be so many tree marching functions in the type itself
+	// this is a map representation of a type instance
 
 	struct walker
 	{
@@ -110,7 +109,6 @@ namespace meta
 			}
 		}
 	};
-
 
 	//
 	// serialization
@@ -200,188 +198,6 @@ namespace meta
 		}
 	};
 
-	struct bin_writer : serial_writer
-	{ 
-		bin_writer(std::ostream& out)
-			: serial_writer(out, true)
-		{}
-
-		void write_type(type* type, void* instance) override
-		{
-			auto& members = type->get_members();
-
-			if (members.size() > 0)
-			{
-				for (int i = 0; i < members.size(); i++)
-				{
-					meta::type* member = members.at(i);
-					write_type(member, member->walk_ptr(instance));
-				}
-			}
-
-			else
-			{
-				type->serial_write(this, instance);
-			}
-		}
-
-		void write_length(size_t length) override
-		{
-			serial_writer::write_value(length);
-		}
-
-		void write_array(type* type, void* instance, size_t repeat) override
-		{
-			for (int i =  0; i < repeat; i++)
-			{
-				write_type(type, (char*)instance + i * type->m_info->m_size);
-			}
-		}
-
-		void write_string(const char* str, size_t length) override
-		{
-			m_out.write(str, sizeof(char) * length);
-		}
-	};
-
-	struct bin_reader : serial_reader
-	{ 
-		bin_reader(std::istream& in)
-			: serial_reader (in, true)
-		{}
-
-		void read_type(type* type, void* instance) override
-		{
-			auto& members = type->get_members();
-
-			if (members.size() > 0)
-			{
-				for (int i = 0; i < members.size(); i++)
-				{
-					meta::type* member = members.at(i);
-					read_type(member, member->walk_ptr(instance));
-				}
-			}
-
-			else
-			{
-				type->serial_read(this, instance);
-			}
-		}
-
-		size_t read_length() override
-		{
-			size_t length = 0;
-			read_value<size_t>(length);
-			return length;
-		}
-
-		void read_array(type* type, void* instance, size_t repeat) override
-		{
-			for (int i =  0; i < repeat; i++)
-			{
-				read_type(type, (char*)instance + i * type->m_info->m_size);
-			}
-		}
-
-		void read_string(char* str, size_t length) override
-		{
-			m_in.read(str, sizeof(char) * length);
-		}
-	};
-
-	struct json_writer : serial_writer
-	{
-		json_writer(std::ostream& out)
-			: serial_writer(out, false)
-		{}
-
-		void write_type(type* type, void* instance) override
-		{
-			auto& members = type->get_members();
-
-			if (members.size() > 0) // json objects
-			{
-				m_out << '{';
-				for (int i = 0; i < members.size(); i++)
-				{
-					meta::type* member = members.at(i);
-					m_out << '"' << member->member_name() << '\"' << ':';
-					write_type(member, member->walk_ptr(instance));
-
-					if (i != members.size() - 1)
-					{
-						m_out << ',';
-					}
-				}
-				m_out << '}';
-			}
-
-			else // json values
-			{
-				type->serial_write(this, instance);
-			}
-		}
-
-		void write_length(size_t length) override
-		{
-			// do nothing
-		}
-
-		void write_array(type* type, void* instance, size_t repeat) override
-		{
-			m_out << '[';
-			for (int i =  0; i < repeat; i++)
-			{
-				write_type(type, (char*)instance + i * type->m_info->m_size);
-
-				if (i != repeat - 1)
-				{
-					m_out << ',';
-				}
-			}
-			m_out << ']';
-		}
-
-		void write_string(const char* str, size_t length) override
-		{
-			m_out << '"' << str << '"';
-		}
-	};
-
-	//
-	// helpers
-	//
-
-	struct multi_item
-	{
-		type* m_type;
-		void* m_instance;
-	};
-
-	struct multi_vector
-	{
-		std::vector<multi_item> m_items;
-
-		template<typename _t>
-		void push(const _t* item)
-		{
-			m_items.push_back(multi_item { get_class<_t>(), (void*)item });
-		}
-
-		template<typename _t>
-		void erase(const _t* item)
-		{
-			for (int i = 0; i < m_items.size(); i++)
-			{
-				if (m_items.at(i).m_instance == item)
-				{
-					m_items.erase(m_items.begin() + i);
-				}
-			}
-		}
-	};
-
 	// default behaviour is to just write the value
 	// specialize these for custom types
 
@@ -395,70 +211,6 @@ namespace meta
 	void serial_read(tag<_t>, serial_reader* serial, _t& value)
 	{
 		serial->read_value(value);
-	}
-
-	template<>
-	void serial_write(tag<multi_item>, serial_writer* serial, const multi_item& value)
-	{
-		serial->write_type(value.m_type, value.m_instance);
-	}
-
-	template<>
-	void serial_read(tag<multi_item>, serial_reader* serial, multi_item& value)
-	{
-		serial->read_type(value.m_type, value.m_instance);
-	}
-
-	template<>
-	void serial_write(tag<multi_vector>, serial_writer* serial, const multi_vector& value)
-	{
-		serial->write(value.m_items);
-	}
-
-	template<>
-	void serial_read(tag<multi_vector>, serial_reader* serial, multi_vector& value)
-	{
-		serial->read(value.m_items);
-	}
-
-	// common std types
-
-	template<> void serial_write(tag<std::string>, serial_writer* writer, const std::string& instance)
-	{
-		writer->write_length(instance.size());
-		writer->write_string(instance.data(), instance.size());
-	}
-
-	template<> void serial_read(tag<std::string>, serial_reader* reader, std::string& instance)
-	{
-		instance.resize(reader->read_length());
-		reader->read_string(instance.data(), instance.size());
-	}
-
-	template<typename _t> void serial_write(tag<std::vector<_t>>, serial_writer* writer, const std::vector<_t>& instance)
-	{
-		writer->write_length(instance.size());
-		writer->write_array(meta::get_class<_t>(), (void*)instance.data(), instance.size());
-	}
-
-	template<typename _t> void serial_read(tag<std::vector<_t>>, serial_reader* reader, std::vector<_t>& instance)
-	{
-		instance.resize(reader->read_length());
-		reader->read_array(meta::get_class<_t>(), instance.data(), instance.size());
-	}
-
-	// typenames, todo: add all of the common ones
-
-	template<> std::string type_name(tag<int>)   { return "int"; }
-	template<> std::string type_name(tag<float>) { return "float"; }
-	template<> std::string type_name(tag<std::string>) { return "std::string"; }
-
-	template<typename _i>
-	std::string type_name(tag<std::vector<_i>>)
-	{
-		std::stringstream ss;
-		ss << "std::vector<" << type_name(tag<_i>{}) << ">"; 
-		return ss.str();
 	}
 
 namespace internal
@@ -599,31 +351,5 @@ namespace internal
 	type* get_class()
 	{
 		return internal::get_class<_t>();
-	}
-}
-
-// helper for if ide has no memory viewer
-// this should go into a util/__memory_debug file or something
-
-inline
-void __debug_print_memory(void* address, size_t columns, size_t rows)
-{
-	for (size_t j = 0; j < rows; j++)
-	{
-		char* addr = (char*)address + columns * j;
-
-		printf("\n 0x%p |", addr);
-		for (size_t i = 0; i < columns; i++)
-		{
-			printf(" %02hhx", *(addr + i));
-		}
-
-		printf(" | ");
-		for (size_t i = 0; i < columns; i++)
-		{
-			char c = *(addr + i);
-			if (c > 31 && c < 127) printf("%c", c);
-			else                   printf("_");
-		}
 	}
 }
