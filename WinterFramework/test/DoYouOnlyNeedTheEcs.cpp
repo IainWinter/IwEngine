@@ -70,27 +70,18 @@ struct meta_entity_store
 	hash_t m_archetype;
 	std::vector<std::string> m_components;
 	std::vector<meta_entity> m_entities;
-
-	meta_entity_store(archetype arch)
-	{
-		m_archetype = arch.m_hash;
-		for(const component& c : arch.m_components)
-		{
-			m_components.push_back(c.m_name);
-		}
-	}
 };
 
 namespace meta
 {
 	template<>
-	void serial_write(tag<entity>, serial_writer* serial, const entity& value)
+	void serial_write(serial_writer* serial, const entity& value)
 	{
 		serial->write(value.m_handle);
 	}
 
 	template<>
-	void serial_read(tag<entity>, serial_reader* serial, entity& value)
+	void serial_read(serial_reader* serial, entity& value)
 	{
 		serial->read(value.m_handle);
 	}
@@ -148,21 +139,17 @@ int main()
 
 	json_writer json(std::cout);
 
-	meta_entity_store these(make_archetype<transform, enemy>());
-
-	for (auto [entity, transform, enemy] : entities().query<transform, enemy>().with_entity())
-	{
-		meta_entity m;
-		m.m_index = entity.m_handle.m_index;
-		m.m_version = entity.m_handle.m_version;
-		m.m_components.push<::transform>(&transform);
-		m.m_components.push<::enemy>(&enemy);
-		these.m_entities.push_back(m);
-	}
+	std::vector<meta_entity_store> these;
 
 	for (const auto& [_, store] : entities().m_storage)
 	{
-		meta_entity_store meta_store(store.m_archetype);
+		meta_entity_store& meta_store = these.emplace_back();
+
+		meta_store.m_archetype = store.m_archetype.m_hash;
+		for(const component& c : store.m_archetype.m_components)
+		{
+			meta_store.m_components.push_back(c.m_info->m_name);
+		}
 
 		for (pool_iterator itr(store.m_pool); itr.more(); itr.next())
 		{

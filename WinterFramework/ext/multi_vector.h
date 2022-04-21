@@ -20,12 +20,12 @@ namespace meta
 		template<typename _t>
 		void push(const _t* item)
 		{
-			m_items.push_back(multi_item { get_class<_t>(), (void*)item });
+			return push(get_class<_t>(), (void*)item);
 		}
 		
-		void push(const _t* item)
+		void push(meta::type* type, void* item)
 		{
-			m_items.push_back(multi_item { get_class<_t>(), (void*)item });
+			m_items.push_back(multi_item { type, (void*)item });
 		}
 
 		void erase(const void* item)
@@ -41,25 +41,25 @@ namespace meta
 	};
 
 	template<>
-	void serial_write(tag<multi_item>, serial_writer* serial, const multi_item& value)
+	void serial_write(serial_writer* serial, const multi_item& value)
 	{
 		serial->write_type(value.m_type, value.m_instance);
 	}
 
 	template<>
-	void serial_read(tag<multi_item>, serial_reader* serial, multi_item& value)
+	void serial_read(serial_reader* serial, multi_item& value)
 	{
 		serial->read_type(value.m_type, value.m_instance);
 	}
 
 	template<>
-	void serial_write(tag<multi_vector>, serial_writer* serial, const multi_vector& value)
+	void serial_write(serial_writer* serial, const multi_vector& value)
 	{
 		serial->write(value.m_items);
 	}
 
 	template<>
-	void serial_read(tag<multi_vector>, serial_reader* serial, multi_vector& value)
+	void serial_read(serial_reader* serial, multi_vector& value)
 	{
 		serial->read(value.m_items);
 	}

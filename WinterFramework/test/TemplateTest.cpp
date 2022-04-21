@@ -3,45 +3,26 @@
 template<typename _t>
 struct test_thing {};
 
-template<typename _t>
-struct tag {};
+void test_3(int)  { printf("A"); }
+template<typename _t> void test_2(_t) { printf("A"); }
 
 template<typename _t>
-void test(tag<_t>)
+void test()
 {
-    printf("This is a test of a concrete function\n");
+	//test_2<_t>({}); // prints: ABC
+	::test_2<_t>({}); // prints: ABA    <-- namespace op, searching different?
 }
 
-template<typename _t>
-void test(tag<test_thing<_t>>);
+template<>            void test_2(double)         { printf("B"); }
+template<typename _t> void test_2(test_thing<_t>) { printf("C"); }
 
-struct concrete 
-{
-    virtual void test_func() = 0;
-};
-
-template<typename _t>
-struct templated_struct : concrete
-{
-    void test_func() override
-    {
-        test(tag<_t>{});
-    }
-};
+void test_3(double) { printf("B"); }
 
 int main()
 {
-    concrete* t_int  = new templated_struct<int>();
-    concrete* t_test = new templated_struct<test_thing<int>>();
-
-    t_int ->test_func();
-    t_test->test_func();
+    test<int>();
+    test<double>();
+    test<test_thing<int>>();
 
     return 0;
-}
-
-template<typename _t>
-void test(tag<test_thing<_t>>)
-{
-    printf("This is a tet of a partial function\n");
 }

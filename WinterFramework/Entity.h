@@ -9,7 +9,6 @@
 #include <assert.h>
 #include <tuple>
 #include <stdint.h>
-#include <array>
 
 #define ENTITY_USE_SERIAL
 
@@ -27,7 +26,7 @@ using rep_bits  = std::integral_constant<hash_t,  (hash_t)rep_t(-1)>;
 
 constexpr void set_repeats(hash_t& hash, rep_t count) { hash = (hash & hash_bits::value) | (hash_t)count; }
 constexpr rep_t get_repeats(const hash_t& hash) { return (rep_t)(hash & rep_bits::value); }
-constexpr hash_t just_hash(const hash_t hash) { return hash & hash_bits::value; }
+constexpr hash_t just_hash(const hash_t& hash) { return hash & hash_bits::value; }
 
 #ifndef max // Windows.h and other system headers define these
 	template<typename _t> constexpr _t max(_t a, _t b) { return a > b ? a : b; }
@@ -37,11 +36,12 @@ constexpr hash_t just_hash(const hash_t hash) { return hash & hash_bits::value; 
 struct component
 {
 #ifdef ENTITY_USE_SERIAL
-	meta::type* m_type;
+	meta::type* m_type = nullptr;
 #endif
 
-	meta::type_info* m_info;
-
+	meta::type_info* m_info = nullptr;
+	size_t m_hash = 0; // this needs to not be in the type_info because it changes to track repeats
+	
 	std::function<void(void*)>        m_destructor;
 	std::function<void(void*)>        m_default;
 	std::function<void(void*, void*)> m_move;
@@ -50,7 +50,7 @@ struct component
 template<typename _t>       // this should be the only place that templates are necessary for storage
 component make_component()  //	everyother template function is short-hand back to this
 {					  
-	static component c = { 0, 0 }; // dll bounds..., could remove 'static'
+	static component c;// dll bounds..., could remove 'static'
 
 	if (c.m_hash == 0)
 	{
@@ -59,6 +59,7 @@ component make_component()  //	everyother template function is short-hand back t
 #endif
 
 		c.m_info = meta::get_type_info<_t>();
+		c.m_hash = just_hash(typeid(_t).hash_code());
 
 		c.m_destructor = [](void* ptr)             { ((_t*)ptr)->~_t(); };
 		c.m_default    = [](void* ptr)             { new (ptr) _t(); };
