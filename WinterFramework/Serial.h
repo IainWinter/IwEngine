@@ -50,6 +50,13 @@ namespace meta
 		// calls serial_read with the correct templated type
 		// instance should already be walked...
 		virtual void _serial_read(serial_reader* serial, void* instance) const = 0;
+		
+		// helpers
+
+		bool has_members() const
+		{
+			return get_members().size() > 0;
+		}
 	};
 
 	template<typename _t>

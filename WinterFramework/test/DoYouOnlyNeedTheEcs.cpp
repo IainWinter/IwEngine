@@ -137,12 +137,31 @@ int main()
 	entities().create<transform, enemy>();
 	entities().create<transform, enemy>();
 
-	json_writer json(std::cout);
+	std::stringstream ss;
+
+	json_writer json(ss);
 
 	std::vector<meta_entity_store> these;
 
 	for (const auto& [_, store] : entities().m_storage)
 	{
+		bool skip = false;
+
+		for(const component& c : store.m_archetype.m_components)
+		{
+			if (!c.m_type->has_members())
+			{
+				skip = true;
+				printf("Component '%s' has no members.\n", c.m_info->m_name.c_str());
+			}
+		}
+
+		if (skip) 
+		{
+			printf("skipping...\n");
+			continue;
+		}
+
 		meta_entity_store& meta_store = these.emplace_back();
 
 		meta_store.m_archetype = store.m_archetype.m_hash;
@@ -169,4 +188,6 @@ int main()
 	}
 
 	json.write(these);
+
+	std::cout << ss.str();
 }

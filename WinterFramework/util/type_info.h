@@ -4,6 +4,9 @@
 
 namespace meta
 {
+	// allows would be funcs with no args the abilityto compile an overload template
+	// by passing this as a (nameless) argument
+
 	template<typename _t>
 	struct tag {};
 
@@ -36,19 +39,19 @@ namespace internal
 namespace internal
 {
 	template<typename _t>
-	static type_info* make_type_info()
+	type_info* make_type_info()
 	{
 		type_info* info = new type_info();
 		info->m_name = type_name(tag<_t>{});
 		info->m_size = sizeof(_t);
-		
 		return info;
 	}
 }
 
 	// static store for type information, note dll bounds
+	
 	template<typename _t>
-	static type_info* get_type_info()
+	type_info* get_type_info()
 	{
 		static type_info* info = internal::make_type_info<_t>();
 		return info;
