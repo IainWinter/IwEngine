@@ -146,7 +146,9 @@ int main()
 	entities().create<transform, enemy>();
 	entities().create<transform, enemy>();
 
-	json_writer json(std::cout);
+	std::stringstream ss;
+
+	json_writer json(ss);
 
 	meta_entity_store these(make_archetype<transform, enemy>());
 
@@ -161,5 +163,9 @@ int main()
 	}
 
 	json.write(these);
+
+	std::istringstream iss(ss.str());
+
+	
 }
 
