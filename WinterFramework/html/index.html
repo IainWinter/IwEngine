@@ -1,0 +1,41 @@
+<html>
+    <head>
+        <title>Winter Framework Editor</title>
+    </head>
+    <body>
+
+        <div class="docker-pannel">
+            
+        </div>
+    </body>
+    <style>
+        html, body
+        {
+            margin: 0;
+            overflow: hidden;
+        }
+        
+        .docker-pannel
+        {
+            background: rgb(60, 60, 60);
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            left: 20;
+            top: 10;
+        }
+
+    </style>
+
+    <script>
+        let pannels = document.getElementsByClassName("docker-pannel");
+
+        for (let pannel of pannels)
+        {
+            pannel.addEventListener("mouseover", (e) => {
+                pannel.style.left = e.x;
+                pannel.style.top  = e.y;
+            });
+        }
+    </script>
+</html>
