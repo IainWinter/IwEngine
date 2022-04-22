@@ -8,13 +8,13 @@ namespace meta
 	// Strings
 	//
 
-	template<> void serial_write(tag<std::string>, serial_writer* writer, const std::string& instance)
+	template<> void serial_write(serial_writer* writer, const std::string& instance)
 	{
 		writer->write_length(instance.size());
 		writer->write_string(instance.data(), instance.size());
 	}
 
-	template<> void serial_read(tag<std::string>, serial_reader* reader, std::string& instance)
+	template<> void serial_read(serial_reader* reader, std::string& instance)
 	{
 		instance.resize(reader->read_length());
 		reader->read_string(instance.data(), instance.size());
@@ -27,13 +27,13 @@ namespace meta
 	// g++ doesnt find these
 	// clang does find these
 
-	template<typename _t> void serial_write(tag<std::vector<_t>>, serial_writer* writer, const std::vector<_t>& instance)
+	template<typename _t> void serial_write(serial_writer* writer, const std::vector<_t>& instance)
 	{
 		writer->write_length(instance.size());
 		writer->write_array(meta::get_class<_t>(), (void*)instance.data(), instance.size());
 	}
 
-	template<typename _t> void serial_read(tag<std::vector<_t>>, serial_reader* reader, std::vector<_t>& instance)
+	template<typename _t> void serial_read(serial_reader* reader, std::vector<_t>& instance)
 	{
 		instance.resize(reader->read_length());
 		reader->read_array(meta::get_class<_t>(), instance.data(), instance.size());

@@ -22,9 +22,6 @@ namespace internal
 	using ptrtype = typename internal::_ptrtype<decltype(_m)>::type;
 
 	template<typename _t>
-	std::string type_name(tag<_t>);
-
-	template<typename _t>
 	std::string type_name(tag<_t>)
 	{
 		return typeid(_t).name();

@@ -17,7 +17,7 @@ struct Player
 	bool  i_fire2 = false;
 
 	float u_speed = 200;           // max speed
-	float u_acceleration = 300;  // accelerate to max speed
+	float u_acceleration = 100;  // accelerate to max speed
 	float u_impulse = 200;       // initial speed on button press
 
 	//float rotation = 0.f;

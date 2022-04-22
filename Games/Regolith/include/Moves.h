@@ -12,7 +12,7 @@ struct Move
 
 struct Dash_Move : Move
 {
-	float Speed = 1000;
+	float Speed = 10;
 	float Time  = 0.1f;
 	float Timer = 0.f;
 	float Cooldown = 1.f;

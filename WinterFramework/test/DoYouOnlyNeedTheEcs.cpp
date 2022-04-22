@@ -62,7 +62,7 @@ struct meta_entity
 {
 	int m_index;
 	int m_version;
-	meta::multi_vector components;
+	meta::multi_vector m_components;
 };
 
 struct meta_entity_store
@@ -70,27 +70,18 @@ struct meta_entity_store
 	hash_t m_archetype;
 	std::vector<std::string> m_components;
 	std::vector<meta_entity> m_entities;
-
-	meta_entity_store(archetype arch)
-	{
-		m_archetype = arch.m_hash;
-		for(const component& c : arch.m_components)
-		{
-			m_components.push_back(c.m_name);
-		}
-	}
 };
 
 namespace meta
 {
 	template<>
-	void serial_write(tag<entity>, serial_writer* serial, const entity& value)
+	void serial_write(serial_writer* serial, const entity& value)
 	{
 		serial->write(value.m_handle);
 	}
 
 	template<>
-	void serial_read(tag<entity>, serial_reader* serial, entity& value)
+	void serial_read(serial_reader* serial, entity& value)
 	{
 		serial->read(value.m_handle);
 	}
@@ -133,7 +124,7 @@ int main()
 		.name("entity")
 		.member<&meta_entity::m_index>("index")
 		.member<&meta_entity::m_version>("version")
-		.member<&meta_entity::components>("components");
+		.member<&meta_entity::m_components>("components");
 
 	meta::describe<meta_entity_store>()
 		.name("entity store")
@@ -150,16 +141,33 @@ int main()
 
 	json_writer json(ss);
 
-	meta_entity_store these(make_archetype<transform, enemy>());
+	std::vector<meta_entity_store> these;
 
-	for (auto [entity, transform, enemy] : entities().query<transform, enemy>().with_entity())
+	for (const auto& [_, store] : entities().m_storage)
 	{
-		meta_entity m;
-		m.m_index = entity.m_handle.m_index;
-		m.m_version = entity.m_handle.m_version;
-		m.components.push<::transform>(&transform);
-		m.components.push<::enemy>(&enemy);
-		these.m_entities.push_back(m);
+		meta_entity_store& meta_store = these.emplace_back();
+
+		meta_store.m_archetype = store.m_archetype.m_hash;
+		for(const component& c : store.m_archetype.m_components)
+		{
+			meta_store.m_components.push_back(c.m_info->m_name);
+		}
+
+		for (pool_iterator itr(store.m_pool); itr.more(); itr.next())
+		{
+			entity_data* data = itr.get<entity_data>();
+
+			meta_entity& ent = meta_store.m_entities.emplace_back();
+			ent.m_index = data->m_index;
+			ent.m_version = data->m_version;
+
+			for (int i = 0; i < store.m_archetype.m_components.size(); i++)
+			{
+				ent.m_components.push(
+					store.m_archetype.m_components.at(i).m_type,
+					(char*)data->m_components + store.m_archetype.m_offsets.at(i));
+			}
+		}
 	}
 
 	json.write(these);
@@ -168,4 +176,3 @@ int main()
 
 	
 }
-

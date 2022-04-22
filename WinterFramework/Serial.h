@@ -45,11 +45,11 @@ namespace meta
 
 		// calls serial_write with the correct templated type
 		// instance should already be walked...
-		virtual void serial_write(serial_writer* serial, void* instance) const = 0;
+		virtual void _serial_write(serial_writer* serial, void* instance) const = 0;
 
 		// calls serial_read with the correct templated type
 		// instance should already be walked...
-		virtual void serial_read(serial_reader* serial, void* instance) const = 0;
+		virtual void _serial_read(serial_reader* serial, void* instance) const = 0;
 	};
 
 	template<typename _t>
@@ -202,13 +202,13 @@ namespace meta
 	// specialize these for custom types
 
 	template<typename _t>
-	void serial_write(tag<_t>, serial_writer* serial, const _t& value)
+	void serial_write(serial_writer* serial, const _t& value)
 	{
 		serial->write_value(value);
 	}
 
 	template<typename _t>
-	void serial_read(tag<_t>, serial_reader* serial, _t& value)
+	void serial_read(serial_reader* serial, _t& value)
 	{
 		serial->read_value(value);
 	}
@@ -247,14 +247,14 @@ namespace internal
 			return instance;
 		}
 
-		void serial_write(serial_writer* serial, void* instance) const override
+		void _serial_write(serial_writer* serial, void* instance) const override
 		{
-			meta::serial_write(tag<_t>{}, serial, *(_t*)instance);
+			serial_write(serial, *(_t*)instance);
 		}
 
-		void serial_read(serial_reader* serial, void* instance) const override
+		void _serial_read(serial_reader* serial, void* instance) const override
 		{
-			meta::serial_read(tag<_t>{}, serial, *(_t*)instance);
+			serial_read(serial, *(_t*)instance);
 		}
 	};
 
@@ -295,14 +295,14 @@ namespace internal
 			return & ( ((_t*)instance)->*_m );
 		}
 
-		void serial_write(serial_writer* serial, void* instance) const override
+		void _serial_write(serial_writer* serial, void* instance) const override
 		{
-			meta::serial_write(tag<_mtype>{}, serial, *(_mtype*)instance);
+			serial_write(serial, *(_mtype*)instance);
 		}
 
-		void serial_read(serial_reader* serial, void* instance) const override
+		void _serial_read(serial_reader* serial, void* instance) const override
 		{
-			meta::serial_read(tag<_mtype>{}, serial, *(_mtype*)instance);
+			serial_read(serial, *(_mtype*)instance);
 		}
 	};
 

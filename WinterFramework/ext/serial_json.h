@@ -31,7 +31,7 @@ struct json_writer : meta::serial_writer
 
 		else // json values
 		{
-			type->serial_write(this, instance);
+			type->_serial_write(this, instance);
 		}
 	}
 
