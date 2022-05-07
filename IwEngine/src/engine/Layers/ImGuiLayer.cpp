@@ -120,49 +120,55 @@ namespace Engine {
 		if (m_window) ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
 
-		// temp Dockspace
+		// Dockspace
+		// should put if statement for if this should be enabled
+		// could also make a seperate layer
+		// I really dont like the layering system rn there is no
+		// way to edit the ordering only push front or back...
 
-		//ImGuiWindowFlags window_flags =
-		//	  ImGuiWindowFlags_MenuBar
-		//	| ImGuiWindowFlags_NoDocking
-		//	| ImGuiWindowFlags_NoTitleBar
-		//	| ImGuiWindowFlags_NoCollapse
-		//	| ImGuiWindowFlags_NoResize
-		//	| ImGuiWindowFlags_NoMove
-		//	| ImGuiWindowFlags_NoBringToFrontOnFocus
-		//	| ImGuiWindowFlags_NoNavFocus;
+		ImGuiWindowFlags window_flags =
+			  ImGuiWindowFlags_MenuBar
+			| ImGuiWindowFlags_NoDocking
+			| ImGuiWindowFlags_NoTitleBar
+			| ImGuiWindowFlags_NoCollapse
+			| ImGuiWindowFlags_NoResize
+			| ImGuiWindowFlags_NoMove
+			| ImGuiWindowFlags_NoBringToFrontOnFocus
+			| ImGuiWindowFlags_NoNavFocus;
 
-		//ImGuiViewport* viewport = ImGui::GetMainViewport();
-		//ImGui::SetNextWindowPos(viewport->Pos);
-		//ImGui::SetNextWindowSize(viewport->Size);
-		//ImGui::SetNextWindowViewport(viewport->ID);
-		//ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-		//ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-		//ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(viewport->Pos);
+		ImGui::SetNextWindowSize(viewport->Size);
+		ImGui::SetNextWindowViewport(viewport->ID);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 
-		//ImGui::Begin("Dockspace", nullptr, window_flags);
+		ImGui::Begin("Dockspace", nullptr, window_flags);
 
-		//ImGui::PopStyleVar();
-		//ImGui::PopStyleVar(2);
+		ImGui::PopStyleVar();
+		ImGui::PopStyleVar(2);
 
-		//// Dockspace
-		//ImGuiIO& io = ImGui::GetIO();
-		//ImGuiID dockspace_id = ImGui::GetID("Dockspace");
+		// Dockspace
+		ImGuiIO& io = ImGui::GetIO();
+		ImGuiID dockspace_id = ImGui::GetID("Dockspace");
 
-		//ImGui::DockSpace(dockspace_id);
+		ImGui::DockSpace(dockspace_id);
 
-		//if (ImGui::BeginMenuBar()) {
-		//	if (ImGui::BeginMenu("File")) {
-		//		ImGui::Separator();
-		//		if (ImGui::MenuItem("Exit", NULL, false)) {
-		//			Console->QueueCommand("quit");
-		//		}
+		if (ImGui::BeginMenuBar()) {
+			if (ImGui::BeginMenu("File")) {
+				ImGui::Separator();
+				if (ImGui::MenuItem("Exit", NULL, false)) {
+					Console->QueueCommand("quit");
+				}
 
-		//		ImGui::EndMenu();
-		//	}
+				ImGui::EndMenu();
+			}
 
-		//	ImGui::EndMenuBar();
-		//}
+			ImGui::EndMenuBar();
+		}
+
+		ImGui::End();
 
 		//// temp times
 

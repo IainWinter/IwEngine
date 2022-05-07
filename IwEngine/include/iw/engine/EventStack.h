@@ -90,7 +90,7 @@ namespace Engine {
 						case InputEventType::MouseWheel:  e.Handled = On((MouseWheelEvent&) e); break;
 						case InputEventType::MouseMoved:  e.Handled = On((MouseMovedEvent&) e); break;
 						case InputEventType::MouseButton: e.Handled = On((MouseButtonEvent&)e); break;
-						case InputEventType::Key:    	  e.Handled = On((KeyEvent&)        e); break;
+						case InputEventType::Key:    	    e.Handled = On((KeyEvent&)        e); break;
 						case InputEventType::KeyTyped:    e.Handled = On((KeyTypedEvent&)   e); break;
 						case InputEventType::Command:     /* handle command event in layers!*/  break;
 						default: error = true;

@@ -1,0 +1,170 @@
+<html>
+	<head>
+
+	</head>
+	<body>
+		<h1>UI Test</h1>
+
+		<div class="row">
+			<p class="row_title">Position</p>
+			<div class="row_item">
+				<div class="titled_draggable_textbox">
+					<input class="titled_draggable_textbox_input" value="0.00" type="number" step="0.01"/>	
+					<p class="titled_draggable_textbox_title red">X</p>
+				</div>
+				<div class="titled_draggable_textbox">
+					<input class="titled_draggable_textbox_input" value="0.00" type="number" step="0.01"/>	
+					<p class="titled_draggable_textbox_title green">Y</p>
+				</div>
+				<div class="titled_draggable_textbox">
+					<input class="titled_draggable_textbox_input" value="0.00" type="number" step="0.01"/>	
+					<p class="titled_draggable_textbox_title blue">Z</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<p class="row_title">Position</p>
+			<div class="row_item">
+				<div class="titled_draggable_textbox">
+					<input class="titled_draggable_textbox_input" value="0.00" type="number" step="0.01"/>	
+					<p class="titled_draggable_textbox_title red">X</p>
+				</div>
+				<div class="titled_draggable_textbox">
+					<input class="titled_draggable_textbox_input" value="0.00" type="number" step="0.01"/>	
+					<p class="titled_draggable_textbox_title green">Y</p>
+				</div>
+			</div>
+		</div>
+	</body>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+	<script>
+		let g_obj_dragged, 
+			g_mouse_x = 0, 
+			g_mouse_y = 0;
+
+		function g_update_mouse(e)
+		{
+			g_mouse_x = e.pageX;
+			g_mouse_y = e.pageY;
+		}
+
+		function g_update_dragged(e)
+		{
+			let dist_x = g_mouse_x - g_obj_dragged.start_x;
+			let dist_y = g_mouse_y - g_obj_dragged.start_y;
+
+			let step = 100; // e.shiftKey ? 1000 : 
+			let offset = (dist_x - dist_y) / step;
+
+			g_obj_dragged.dom.value = (g_obj_dragged.initial + offset).toFixed(2) + "";
+		}
+
+		function dragging_continue(e)
+		{
+			g_update_dragged(e);
+			g_update_mouse(e);
+		}
+
+		function dragging_end(e)
+		{
+			$(document).unbind("mousemove", dragging_continue);
+			$(document).unbind("mouseup", dragging_end);
+		}
+
+		function dragging_start(e)
+		{
+			g_update_mouse(e);
+
+			let input = $(this)[0].getElementsByClassName("titled_draggable_textbox_input")[0];
+
+			g_obj_dragged = {
+				dom: input,
+				initial: parseFloat(input.value),
+				start_x: g_mouse_x,
+				start_y: g_mouse_y,
+			};
+
+			g_update_dragged(e);
+			
+			$(document).bind("mousemove", dragging_continue);
+			$(document).bind("mouseup",   dragging_end);
+		}
+
+		$(".titled_draggable_textbox").bind("mousedown", dragging_start);
+	</script>
+
+	<style>
+
+		html, body
+		{
+			margin: 10;
+			background: #222;
+			color: white;
+		}
+
+		.titled_draggable_textbox
+		{
+			position: relative;
+			width: 150px;
+			height: 30px;
+			margin-left: 3px;
+		}
+
+		.titled_draggable_textbox_input
+		{
+			position: absolute;
+			width: 100%;
+			height: 30px;
+			user-select: none;
+			border: none;
+			outline: none;
+			border-radius: 0 3px 3px 0;
+			padding-left: 4px;
+			font-size: 20px;
+			background: white;
+		}
+
+		.titled_draggable_textbox_title
+		{
+			margin: 0;
+			background: black;
+			line-height: 30px;
+			font-size: 26px;
+			right: 0;
+			position: absolute;
+			width: auto;
+			padding: 0 5px;
+			border: none;
+			user-select: none;
+			border-radius: 0 2px 2px 0;
+		}
+
+		.row
+		{
+			display: flex;
+			font-family: 'Gill Sans MT';
+			justify-content: space-between;
+			margin-bottom: 3px; /* double the left */
+		}
+
+		.row_title
+		{
+			margin: 0;
+			line-height: 30px;
+			font-size: 26px;
+		}
+
+		.row_item
+		{
+			width: 90%;
+			margin-left: 20px;
+			display: flex;
+		}
+
+		.red { background: rgb(212, 53, 38); }
+		.green { background: rgb(38, 190, 53); }
+		.blue { background: rgb(38, 53, 212); }
+	</style>
+</html>

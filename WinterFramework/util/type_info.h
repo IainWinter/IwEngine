@@ -29,11 +29,16 @@ namespace internal
 	{
 		return typeid(_t).name();
 	}
-
+	
 	struct type_info
 	{
 		std::string m_name;
 		size_t m_size;
+
+		bool m_is_floating;
+		bool m_is_integral;
+		
+		bool m_is_structure;
 	};
 
 namespace internal
@@ -44,6 +49,10 @@ namespace internal
 		type_info* info = new type_info();
 		info->m_name = type_name(tag<_t>{});
 		info->m_size = sizeof(_t);
+		info->m_is_floating  = std::is_floating_point<_t>::value;
+		info->m_is_integral  = std::is_integral<_t>::value;
+		info->m_is_structure = !info->m_is_floating && !info->m_is_integral;
+
 		return info;
 	}
 }

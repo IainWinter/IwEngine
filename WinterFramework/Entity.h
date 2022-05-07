@@ -1000,7 +1000,7 @@ private:
 		{
 			for (callback_base* callback : itr->second)
 			{
-				delete callback;										  // see above //
+				delete callback;								    // see above //
 			}
 
 			m_callbacks.erase(itr);
@@ -1261,10 +1261,7 @@ inline entity& entity::on_remove (const std::function<void(entity, const compone
 	}
 
 #	ifdef IW_LOG_DEFER
-#		ifndef iw_as_string
-#			define iw_line_as_string(x) iw_as_string(x)
-#			define iw_as_string(x) #x
-#		endif
-#		define entities_defer() entities_defer(__FUNCTION__ " " iw_line_as_string(__LINE__))
+#		include "Macros.h"
+#		define entities_defer() entities_defer(__LOCATION)
 #	endif
 #endif

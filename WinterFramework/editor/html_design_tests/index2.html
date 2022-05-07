@@ -1,0 +1,276 @@
+<html>
+    <head>
+        <title>Winter Framework Editor</title>
+    </head>
+    <body>
+		<div id="no-slot">
+			<div class="docker-pannel docker-slot draggable resizable">
+				<div class="docker-pannel-header docker-slot-header"></div>
+			</div>
+
+			<div class="docker-pannel docker-slot draggable resizable">
+				<div class="docker-pannel-header docker-slot-header"></div>
+			</div>
+				
+			<div class="docker-pannel draggable resizable">
+				<div class="docker-pannel-header">
+					<p>Settings</p>
+				</div>
+			</div>
+			<div class="docker-pannel draggable resizable">
+				<div class="docker-pannel-header">
+					<p>Inspector</p>
+				</div>
+			</div>
+
+		</div>
+    </body>
+    <style>
+        html, body
+        {
+            margin: 0;
+            overflow: hidden;
+			background: #111;
+			width: 100%;
+			height: 100%;
+        }
+		
+		p, h1, h2, h3, h4, h5, h6
+		{
+			margin: 0;
+		}
+
+		#no-slot
+		{
+			position: absolute;
+			top: 0;
+			left: 0;
+			margin: 0;
+			width: 100%;
+			height: 100%;
+		}
+
+		.resizable
+		{
+			position: absolute;
+			overflow: hidden;
+  			resize: both;
+
+			min-width: 300px; /* these are the default min values from makeresizable */
+            min-height: 200px;
+		}
+
+        .docker-pannel
+        {
+            background: #333;
+			border: solid 1px grey;
+        }
+
+		.docker-pannel-header
+		{
+			padding: 5px;
+			margin: 0;
+			font-family: Arial;
+			
+			background: #555;
+			color: #ddd;
+
+			user-select: none;
+		}
+
+		.docker-slot-header
+		{
+			background: #5555;
+			height: 10px;
+		}
+
+		.docker-slot
+		{
+			background: #171717;
+			border: 1px dashed grey;
+
+			transition: ease .1s background;
+		}
+
+			.docker-slot-hovered
+			{
+				background: #444;
+			}
+
+			.docker-slot-filled
+			{
+				border: 1px solid grey;
+			}
+
+    </style>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+	<script>
+		// global state
+
+		let g_obj_dragged, 
+			g_slots = [], 
+			g_mouse_x = 0, 
+			g_mouse_y = 0,
+			g_zindex = 0;
+
+		function update_dragged_obj_pos()
+		{
+			let max_left = window.innerWidth  - g_obj_dragged.dom.width();
+			let max_top  = window.innerHeight - g_obj_dragged.dom.height();
+			
+			let left = Math.min(Math.max(g_mouse_x - g_obj_dragged.mouse_off_x, 0), max_left);
+			let top  = Math.min(Math.max(g_mouse_y - g_obj_dragged.mouse_off_y, 0), max_top);
+
+			g_obj_dragged.dom.css(
+			{
+				"left": left,
+				"top":  top,
+				"position": "absolute"
+			});
+		}
+
+		function update_global_mouse(e)
+		{
+			g_mouse_x = e.pageX;
+			g_mouse_y = e.pageY;
+		}
+
+		// program start
+
+		function dragging_continue(e)
+		{
+			update_dragged_obj_pos();
+			update_global_mouse(e);
+
+			for (let slot of g_slots)
+			{
+				if (slot.dom[0] == g_obj_dragged.dom[0]) 
+				{
+					continue;
+				}
+
+				slot.dom.removeClass("docker-slot-hovered");
+			
+				if (   g_mouse_x >= slot.left && g_mouse_x <= slot.right
+					&& g_mouse_y >= slot.top  && g_mouse_y <= slot.bottom)
+				{
+					slot.dom.addClass("docker-slot-hovered");
+				}
+			}
+		}
+
+		function dragging_end(e)
+		{
+			$(document).unbind("mousemove", dragging_continue);
+			$(document).unbind("mouseup", dragging_end);
+
+			for (let slot of g_slots)
+			{
+				if (slot.dom.hasClass("docker-slot-hovered"))
+				{
+					// add the obj as a child on the slot and add docker-slot-filled class
+
+					slot.dom.removeClass("docker-slot-hovered");
+					slot.dom.addClass("docker-slot-filled");
+					slot.dom.append(g_obj_dragged.dom);
+
+					g_obj_dragged.dom.removeClass("resizable");
+
+					g_obj_dragged.dom.css({
+						"transition": "ease .1s top, ease .1s left, ease .1s width, ease .1s height",
+						"left":   0,
+						"top":    0,
+						"width":  "100%",
+						"height": "100%",
+						"border": "none"
+					});
+
+					break;
+				}
+			}
+		}
+
+		function dragging_start(e)
+		{
+			update_global_mouse(e);
+			
+			let obj = $(this).parent(); // get the pannel from the header
+			g_zindex += 1;
+			obj.css({ 
+				"z-index": g_zindex,
+				"transition": "",
+			});
+
+			if (obj.parent().hasClass("docker-slot"))
+			{
+				obj.parent().removeClass("docker-slot-filled");
+
+				$("#no-slot").append(obj); // remove from slot back into the global space
+
+				g_obj_dragged.dom.css({
+					"left": g_mouse_x - 10,
+					"top": g_mouse_y - 10,
+					"width": "300", // should store values before endering a slot
+					"height": "200",
+					"border": ""
+				});
+
+				g_obj_dragged.dom.addClass("resizable");
+			}
+
+			$(".docker-slot").each(function()
+			{
+				if ($(this).hasClass("docker-slot-filled"))
+				{
+					return true; // continue
+				}
+
+				var lefttop = $(this).offset();
+				g_slots = [];
+				g_slots.push(
+				{
+					dom:    $(this),
+					left:   lefttop.left,
+					top:    lefttop.top,
+					right:  lefttop.left + $(this).width(),
+					bottom: lefttop.top  + $(this).height()
+				});
+			});
+
+			if (e.type == "mousedown")
+			{
+				g_obj_dragged = {
+					dom:         obj,
+					mouse_off_x: g_mouse_x - obj.offset().left,
+					mouse_off_y: g_mouse_y - obj.offset().top,
+				};
+
+				update_dragged_obj_pos();
+				
+				$(document).bind("mousemove", dragging_continue);
+				$(document).bind("mouseup",   dragging_end);
+			}
+		}
+
+		$(".docker-pannel").each(function() 
+		{
+			//makeResizable($(this).get(0));
+		});
+				
+		$(".docker-pannel-header").bind("mousedown", dragging_start);
+		//$(".docker-pannel").bind("mouseover", dragging_preview);
+	</script>
+
+    <script>
+        // let pannels = document.getElementsByClassName("docker-pannel");
+
+        // for (let pannel of pannels)
+        // {
+        //     pannel.addEventListener("mouseover", (e) => {
+        //         pannel.style.left = e.x;
+        //         pannel.style.top  = e.y;
+        //     });
+        // }
+    </script>
+</html>

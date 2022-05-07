@@ -153,6 +153,11 @@ namespace meta
 			{
 				m_out << value;
 			}
+
+			// should assert
+			// this is where types without a serial_write override come
+
+			// could rework above, its a catch all for simple types for text based outputs
 		}
 
 		template<typename _t>
@@ -193,9 +198,11 @@ namespace meta
 			else if constexpr (std::is_integral<_t>::value || std::is_floating_point<_t>::value) // should just test for << op
 			{
 				m_in >> value;
+				// this cant be here because of json.h needs to read the values
+				// reader seems to be able to handle the input in a way to never call this
 			}
 
-			// could assert for not writing
+			// could assert for not reading
 		}
 
 		template<typename _t>
@@ -357,4 +364,14 @@ namespace internal
 	{
 		return internal::get_class<_t>();
 	}
+
+// should add a function that can describe templated types
+// would get called like get type name
+
+// template<typename _t>
+// void describe_type(tag<_t>)
+// {
+// 	return typeid(_t).name();
+// }
 }
+

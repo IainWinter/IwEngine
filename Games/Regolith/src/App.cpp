@@ -58,124 +58,10 @@ int App::Initialize(
 	PushLayer<StaticLayer>(this);
 	PushLayer<Audio_Layer>();
 
-	//PushLayer<iw::DebugLayer>();
+	PushLayer<iw::DebugLayer>();
 
 	int err = Application::Initialize(options);
 	if (err) return err;
-
-	entity_manager test;
-	test.create<int>();
-	test.create<int>();
-	test.create<int>();
-	test.create<int>();
-	test.create<int>();
-	test.create<int>();
-	entity_query<false, int> query = test.query<int>();
-
-	std::vector<int> ints;
-	ints.emplace_back();
-	ints.emplace_back();
-	ints.emplace_back();
-	ints.emplace_back();
-	ints.emplace_back();
-	ints.emplace_back();
-
-	auto end = ints.end();
-	auto itr = ints.begin();
-	for (; itr != end; ++itr)
-	{
-		*itr += 1;
-	}
-
-	auto eend = query.end();
-	auto iitr = query.begin();
-	for (; iitr != eend; ++iitr)
-	{
-		std::get<0>(*iitr) += 1;
-	}
-
-	
-
-
-
-
-	test_handler handler1("test1");
-	test_handler handler2("test2");
-	test_handler handler3("test3");
-
-	events().handle<int>(&handler1).only_if([](int i) {return i > 10; });
-	events().handle<int>(&handler2).only_if([](int i) {return i > 9; });
-	events().handle<int>(&handler3).only_if([](int i) {return i > 15; });
-	events().send(10);
-	events().send(20);
-	events().send(30);
-
-	events().handle<float>(&handler1);
-	events().send(1.4f);
-
-	events_defer().queue(50);
-	events_defer().queue(1.2f);
-
-	events_defer().execute();
-
-	events().unhandle(&handler1);
-	
-	//// test
-	//entities().create<iw::Transform, iw::Rigidbody>()
-	//	.set<iw::Transform>();
-	//entities().create<int, double>()
-	//	.set<int>(21)
-	//	.set<double>(1.);
-	//entities().query<int>().for_each([](int i) {
-	//	printf("%d ", i); 
-	//});
-	//for (auto [i] : entities().query<int>())
-	//{
-	//	printf("%d ", i);
-	//}
-	//archetype a = make_archetype<int, double, int, int>();
-	//entity_manager manager;
-	//{
-	//	Timer timer("create 1 mil");
-	//	entity_storage& store = manager.get_storage(a);
-	//	component int_comp = make_component<int>();
-	//	component dbl_comp = make_component<double>();
-	//	double d = 1.;
-	//	for (int i = 1e6; i > 0; i--)
-	//	{
-	//		entity_handle e = store.create_entity();
-	//		store.set_component(e, int_comp, &i);
-	//		store.set_component(e, dbl_comp, &d);
-	//	}
-	//}
-	//entity_query<false, int> ints = manager.query<int>();
-	//int sum = 0;
-	//{
-	//	Timer timer("iterate 1 mil");
-	//	for (auto& [entity, i] : ints.with_entity())
-	//	{
-	//		sum += i;
-	//	}
-	//}
-	//printf("\n\n%d\n\n", sum);
-	//std::vector<int> benchmark;
-	//{
-	//	Timer timer("create 1 mil in vector");
-	//	for (int i = 1e6; i > 0; i--)
-	//	{
-	//		benchmark.push_back(i);
-	//	}
-	//}
-	//sum = 0;
-	//{
-	//	Timer timer("iterate 1 mil vector");
-	//	for (auto& i : benchmark)
-	//	{
-	//		sum += i;
-	//	}
-	//}
-	//// test
-	//printf("\n\n%d\n\n", sum);
 
 	m_fonts = new iw::FontMap();
 	m_fonts->Load("verdana",   18, "fonts/ttf/verdana.ttf");
@@ -189,6 +75,47 @@ int App::Initialize(
 	m_fonts->Load("Quicksand", 120, "fonts/ttf/Quicksand-Medium.ttf");
 
 	PushLayer<iw::ImGuiLayer>(Window, m_fonts)->BindContext();
+
+	iw::ref<iw::Context> context_game = Input->CreateContext("game");
+	context_game->MapButton(iw::InputName::D     , "+right");
+	context_game->MapButton(iw::InputName::A     , "-right");
+	context_game->MapButton(iw::InputName::W     , "+up");
+	context_game->MapButton(iw::InputName::S     , "-up");
+	context_game->MapButton(iw::InputName::LMOUSE, "+fire");
+	context_game->MapButton(iw::InputName::RMOUSE, "+alt-fire");
+	context_game->MapButton(iw::InputName::ESCAPE, "escape");
+	context_game->MapButton(iw::InputName::X     , "toolbox");
+
+	context_game->MapButton(iw::InputName::E , "+a"); // buttons for upgrades
+	context_game->MapButton(iw::InputName::Q , "+b");
+	context_game->MapButton(iw::InputName::F , "+x");
+	context_game->MapButton(iw::InputName::C , "+y");
+
+	iw::ref<iw::Context> context_menu = Input->CreateContext("menu");
+	context_menu->MapButton(iw::InputName::LMOUSE, "+execute");
+	context_menu->MapButton(iw::InputName::ESCAPE, "escape");
+
+	iw::ref<iw::Device> mouse        = Input->CreateDevice<iw::Mouse>();
+	iw::ref<iw::Device> keyboard_raw = Input->CreateDevice<iw::RawKeyboard>();
+
+	context_game->AddDevice(mouse);
+	context_game->AddDevice(keyboard_raw);
+
+	context_menu->AddDevice(mouse);
+	context_menu->AddDevice(keyboard_raw);
+
+	return 0;
+
+	// menu states could be switched to through commands
+
+	// game-play   -- starts game
+	// game-end    -- ends game, brings you to post game menus
+	// game-exit   -- exits game to main menu
+	// game-exit d -- exits game to desktop
+	// game-pause  -- opens escape menu
+
+	// todo: all the m_menus-> calls should be handled by the manu layer itself
+	//		 all the Input-> calls should be handled in a event listener for state changes
 
 	Console->QueueCommand("set-state menus");
 
@@ -242,45 +169,6 @@ int App::Initialize(
 
 	//	iw::WriteFile("install_id.txt", szGuid);
 	//}
-
-	iw::ref<iw::Context> context_game = Input->CreateContext("game");
-	context_game->MapButton(iw::InputName::D     , "+right");
-	context_game->MapButton(iw::InputName::A     , "-right");
-	context_game->MapButton(iw::InputName::W     , "+up");
-	context_game->MapButton(iw::InputName::S     , "-up");
-	context_game->MapButton(iw::InputName::LMOUSE, "+fire");
-	context_game->MapButton(iw::InputName::RMOUSE, "+alt-fire");
-	context_game->MapButton(iw::InputName::ESCAPE, "escape");
-	context_game->MapButton(iw::InputName::X     , "toolbox");
-
-	context_game->MapButton(iw::InputName::E , "+a"); // buttons for upgrades
-	context_game->MapButton(iw::InputName::Q , "+b");
-	context_game->MapButton(iw::InputName::F , "+x");
-	context_game->MapButton(iw::InputName::C , "+y");
-
-	iw::ref<iw::Context> context_menu = Input->CreateContext("menu");
-	context_menu->MapButton(iw::InputName::LMOUSE, "+execute");
-	context_menu->MapButton(iw::InputName::ESCAPE, "escape");
-
-	iw::ref<iw::Device> mouse        = Input->CreateDevice<iw::Mouse>();
-	iw::ref<iw::Device> keyboard_raw = Input->CreateDevice<iw::RawKeyboard>();
-
-	context_game->AddDevice(mouse);
-	context_game->AddDevice(keyboard_raw);
-
-	context_menu->AddDevice(mouse);
-	context_menu->AddDevice(keyboard_raw);
-
-	// menu states could be switched to through commands
-
-	// game-play   -- starts game
-	// game-end    -- ends game, brings you to post game menus
-	// game-exit   -- exits game to main menu
-	// game-exit d -- exits game to desktop
-	// game-pause  -- opens escape menu
-
-	// todo: all the m_menus-> calls should be handled by the manu layer itself
-	//		 all the Input-> calls should be handled in a event listener for state changes
 
 	Console->AddHandler([&](
 		const iw::Command& command)

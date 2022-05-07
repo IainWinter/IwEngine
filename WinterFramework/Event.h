@@ -10,6 +10,7 @@
 #include <functional>
 #include <unordered_map>
 #include <vector>
+#include <stdint.h>
 
 using hash_t = uint64_t;
 
@@ -263,12 +264,8 @@ struct event_queue
 		If you want to log the location of the dispatcher
 	*/
 #	define LOG_DEFER
-
 #	ifdef LOG_DEFER
-#		ifndef iw_as_string
-#			define iw_line_as_string(x) iw_as_string(x)
-#			define iw_as_string(x) #x
-#		endif
-#		define events_defer() events_defer(__FUNCTION__ " " iw_line_as_string(__LINE__))
+#		include "Macros.h"
+#		define events_defer() events_defer(__LOCATION)
 #	endif
 #endif

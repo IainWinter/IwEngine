@@ -13,7 +13,4 @@ void Menu_Bg_Render_Layer::UI()
 		ImGui::Image(Image("bg"), ImVec2(bg_w, bg_h), ImVec2(0, 1), ImVec2(1, 0));
 	}
 	ImGui::End();
-
-	//ImGui::SetNextWindowFocus();
-	//ImGui::ShowMetricsWindow();
 }

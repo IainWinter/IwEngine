@@ -1,0 +1,178 @@
+:root {
+	--component-item-title-font-size: 14px;
+	--component-item-value-font-size: 14px;
+	--component-item-row-height: 20px;
+	--component-item-space-between: 3px;
+
+	--component-title-font-size: 13px;
+	--component-title-height: 22px;
+	--component-title-background: rgb(37, 37, 38);
+}
+
+body
+{
+	padding: 0;
+	background: rgb(37, 37, 38);
+}
+
+#inputs
+{
+	margin: 5px 0 0 5px;
+}
+
+.component
+{
+}
+
+.component_title
+{
+	background: var(--component-title-background);
+	font-size: var(--component-title-font-size);
+	line-height: var(--component-title-height);
+	height: var(--component-title-height);
+	font-weight: bold;
+	cursor: pointer;
+	user-select: none;
+
+	border-left: 10px solid var(--vscode-focusBorder);
+	padding-left: 5px;
+}
+
+.component_items
+{
+	/*
+	fix animation, for now no animation
+	transition: .1s ease transform, .25s ease max-height;
+	transform: scaleY(1);
+	transform-origin: top; */
+	/* max-height: 1000px; get this out of here and use js */
+	
+	overflow: hidden;
+	margin-left: 10px;
+	/* border-top: 1px solid grey; */
+	/* margin-top: -1px; */
+	padding: 10px;
+}
+
+.collapsed
+{
+	height: 0;
+	padding: 0;
+	/* transform: scaleY(0); */
+	/* max-height: 0; */
+}
+
+.row
+{
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 3px; /* double the left */
+}
+
+.row_title
+{
+	/* width: 20%; */
+	margin: 0;
+	line-height: var(--component-item-row-height);
+	font-size: var(--component-item-title-font-size);
+
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+
+	margin: auto 0;
+}
+
+.row_item
+{
+	/* min-width: 80%; */
+	margin-left: 20px;
+	display: flex;
+}
+
+.input_string
+{
+	min-width: 280px;
+	height: 24px;
+}
+
+.input_titled_number
+{
+	position: relative;
+	margin-right: 3px;
+	width: 100px;
+
+	height: var(--component-item-row-height);
+}
+
+.input_titled_number_input
+{
+	position: absolute;
+	width: 100%;
+	user-select: none;
+	border: none;
+	outline: none;
+	border-radius: 0 3px 3px 0;
+	padding-left: 4px;
+	background: white;
+	
+	height: var(--component-item-row-height);
+	line-height: var(--component-item-row-height);
+	font-size: var(--component-item-value-font-size);
+}
+
+.input_titled_number_title
+{
+	margin: 0;
+	background: black;
+	right: 0;
+	position: absolute;
+	border: none;
+	user-select: none;
+	border-radius: 0 2px 2px 0;
+	
+	width:  var(--component-item-row-height);
+	height: var(--component-item-row-height);
+	padding: 0;
+	text-align: center;
+
+	line-height: var(--component-item-row-height);
+	font-size: var(--component-item-title-font-size);
+}
+
+@media (max-width: 475px)
+{
+	.input_titled_number
+	{
+		width: 100%;
+		margin-bottom: 1px;
+	}
+
+	.input_string
+	{
+		min-width: 100%;
+	}
+
+	.row
+	{
+		justify-content: space-between;
+	}
+
+	.row_title
+	{
+		min-width: 30%;
+		margin: 0;
+	}
+
+	.row_item
+	{
+		min-width: 50%;
+		margin-bottom: 3px;
+		flex-direction: column;
+	}
+}
+
+.red { background: rgb(212, 53, 38); }
+.green { background: rgb(38, 140, 53); }
+.blue { background: rgb(38, 53, 212); }
+.orange {background:rgb(212, 100, 38)}

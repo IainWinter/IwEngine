@@ -14,6 +14,7 @@
 #include "iw/engine/Layers/DebugLayer.h"
 #include "iw/engine/Systems/PhysicsSystem.h"
 #include "iw/engine/Systems/EntityCleanupSystem.h"
+#include "iw/engine/Systems/SpaceInspectorSystem.h"
 
 #include "Layers/Game_Layer.h"
 #include "Layers/Game_UI_Layer.h"
@@ -28,6 +29,8 @@
 #include <stack>
 
 #include "iw/util/io/File.h"
+
+#include "imgui/imgui.h"
 
 struct temp_PhysicsSystem
 	: iw::SystemBase
@@ -83,6 +86,7 @@ struct StaticLayer : iw::Layer
 		//PushSystem<iw::PhysicsSystem>();
 		//PushSystem<iw::EntityCleanupSystem>();
 		PushSystem<temp_PhysicsSystem>();
+		//PushSystem<iw::SpaceInspectorSystem>();
 
 		if (int e = LoadAssets(Asset.get(), Renderer->Now.get()))
 		{
@@ -93,6 +97,11 @@ struct StaticLayer : iw::Layer
 		Physics->AddSolver(new iw::ImpulseSolver());
 
 		return Layer::Initialize();
+	}
+
+	void ImGui() override
+	{
+		ImGui::ShowMetricsWindow();
 	}
 };
 

@@ -41,22 +41,11 @@ workspace (name)
 		}
 
 		links {
-			"wLog",
-			"wMath",
-			"wUtil",
-			"wAudio",
-			"wEvents",
-			"wCommon",
-			"wEntity",
-			"wGraphics",
-			"wRenderer", -- only beacuse of MakeLayout
-			"wInput",
-			"wPhysics",
-			"wEngine",
-			"ImGui",
-			"GLEW",
+			"wSand",
+			"wEverything",
 			"opengl32.lib",
-			"wSand"
+			"ImGui",
+			"GLEW"
 		}
 
 		prebuildcommands {
