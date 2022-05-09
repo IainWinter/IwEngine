@@ -6,10 +6,6 @@
 
 #include <iostream>
 
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_sdl.h"
-#include "glad/glad.h"
-
 // temp globals
 
 float mouseX, mouseY;
@@ -47,8 +43,9 @@ entity CreateTexturedBox(PhysicsWorld& world)
 
 struct System
 {
-	virtual void Update() {};
-	virtual void FixedUpdate() {};
+	virtual void Update() {}
+	virtual void FixedUpdate() {}
+	virtual void ImGui() {}
 };
 
 struct PhysicsInterpolationSystem : System
@@ -107,6 +104,31 @@ struct ForceTwoardwsMouseSystem : System
 	}
 };
 
+struct SpriteRenderer2D : System
+{
+	void Update() override
+	{
+		auto [window] = entities().query<Window>().first();
+
+		for (auto [transform, sprite] : entities().query<Transform2D, Texture>())
+		{
+			window.DrawSprite(transform, &sprite);
+		}
+	}
+
+	void ImGui() override 
+	{
+		ImGui::Begin("Rendering state");
+
+		for (auto [transform] : entities().query<Transform2D>())
+		{
+			ImGui::SliderFloat3("Position", (float*)&transform.x, -10, 10);
+		}
+
+		ImGui::End();
+	}
+};
+
 	// b2EdgeShape shape;
 	// shape.SetTwoSided(b2Vec2(-40.0f, 0.0f), b2Vec2(40.0f, 0.0f));
 
@@ -138,65 +160,49 @@ Application app;
 
 void setup()
 {
+	events().handle<event_Shutdown> (&app);
+	events().handle<event_MouseMove>(&app);
+
 	WindowConfig windowConfig = {
 		"Winter Framework Testbed", 1280, 720
 	};
 
-	archetype plugins = make_archetype(
+	archetype modules = make_archetype(
 	{
 		make_component<Window>(),
 		make_component<PhysicsWorld>()
 	});
 
-	app.modules = entities()
-		.create(plugins)
-		.set<Window>(windowConfig, &events());
-
-	events().handle<event_Shutdown>(&app);
-	events().handle<event_MouseMove>(&app);
+	app.modules = entities().create(modules).set<Window>(windowConfig, &events());
+	//app.systems.push_back(new PhysicsInterpolationSystem());
+	//app.systems.push_back(new ForceTwoardwsMouseSystem());
+	app.systems.push_back(new SpriteRenderer2D());
 
 	PhysicsWorld& world = app.modules.get<PhysicsWorld>();
-
 	CreateTexturedBox(world);
-
-	app.systems.push_back(new PhysicsInterpolationSystem());
-	app.systems.push_back(new ForceTwoardwsMouseSystem());
-
-	Time::SetFixedTime(1.0f);
-
-	// setup imgui window
-
-	SDL_Window* window = app.modules.get<Window>().m_window;
-	SDL_GLContext gl_context = SDL_GL_CreateContext(window);
-    SDL_GL_MakeCurrent(window, gl_context);
-
-	unsigned ff;
-	glCreateBuffers(1, &ff);
-
-	std::cout << "[INFO] OpenGL renderer: "
-			<< glGetString(GL_RENDERER)
-			<< std::endl;
-
 }
 
-float totalTime = 0.f;
+float fixedTimeAcc = 0.f;
 
 bool loop()
 {
-
-
 	Time::UpdateTime();
 
 	auto [window, world] = entities().query<Window, PhysicsWorld>().first();
  
 	// main loop
 
-	totalTime += Time::DeltaTime();
+	// fixed update
+	// start render
+	// update
+	// imgui
+	// end render
+	// pump events
 
-	if (totalTime > Time::FixedTime())
+	fixedTimeAcc += Time::DeltaTime();
+	if (fixedTimeAcc > Time::FixedTime())
 	{
-		totalTime = 0;
-
+		fixedTimeAcc = 0;
 		for (System* system : app.systems)
 		{
 			system->FixedUpdate();
@@ -208,17 +214,17 @@ bool loop()
 		world.Step(Time::FixedTime());
 	}
 
+	window.BeginRender();
 	for (System* system : app.systems)
 	{
 		system->Update();
 	}
-
-	window.BeginRender();
-
-	for (auto [transform, sprite] : entities().query<Transform2D, Texture>())
+	window.BeginImgui();
+	for (System* system : app.systems)
 	{
-		window.DrawSprite(transform, &sprite);
+		system->ImGui();
 	}
+	window.EndImgui();
 
 	window.EndRender();
 	window.PumpEvents();
