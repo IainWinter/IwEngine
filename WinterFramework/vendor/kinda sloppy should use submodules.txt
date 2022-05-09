@@ -1,5 +1,0 @@
-Entity system - entt https://raw.githubusercontent.com/skypjack/entt/master/single_include/entt/entt.hpp
-Audio - FMOD - https://www.fmod.com/
-Physics - Physx
-Rendering - Filament https://github.com/google/filament/releases
-IO - json.h + various libraries

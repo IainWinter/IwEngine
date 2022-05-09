@@ -1,4 +1,5 @@
 #include "../serial_json.h"
+#include <cstring>
 
 // writer
 

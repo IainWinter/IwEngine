@@ -1,28 +1,29 @@
 #pragma once
 
+// if sdl is a wrapper around os calls, then hiding it is stupid
+// keep it simple!
+
 #include "Event.h"
+#include "Common.h"
+#include "sdl/SDL.h"
 #include <string>
-#include <stdint.h>
 #include <cmath>
 
-using u32 = uint32_t;
-using u8 = uint8_t;
+/*
 
-struct Color
+	Events
+
+*/
+
+
+struct event_Shutdown
 {
-	union {
-		u32 u32;
-		struct { u8 r, g, b, a; };
-	};
 
-	Color(
-		u8 r, u8 g, u8 b, u8 a = 255
-	)
-		: r (r)
-		, g (g)
-		, b (b)
-		, a (a)
-	{}
+};
+
+struct event_MouseMove
+{
+	int x, y;
 };
 
 /*
@@ -31,67 +32,78 @@ struct Color
 
 */
 
-struct ISprite
+
+using u32 = uint32_t;
+using u8 = uint8_t;
+
+struct Color
 {
-	virtual ~ISprite() = default;
-
-	virtual int Width() const = 0;
-	virtual int Height() const = 0;
-
-	virtual bool OnHost() const = 0;
-	virtual bool OnDevice() const = 0;
-	virtual void FreeHost() = 0;
+	union { u32 as_u32; struct { u8 r, g, b, a; }; };
+	Color(u8 r, u8 g, u8 b, u8 a = 255) : r(r), g(g), b(b), a(a) {}
 };
 
-struct Sprite
+struct Texture
 {
-private: // only above public for init order
-	ISprite* m_sprite;
+	SDL_Surface* m_host;   // this is on the cpu
+	SDL_Texture* m_device; // this is on the gpu
 
-public:
-	int Width; // should be const but move doesnt allow that...
-	int Height;
-
-	Sprite()
-		: m_sprite (nullptr)
-		, Width    (0)
-		, Height   (0)
+	Texture()
+		: m_host   (nullptr)
+		, m_device (nullptr)
 	{}
 
-	Sprite(
+	Texture(
 		const std::string& path
 	)
-		: m_sprite (Sprite::Create(path))
-		, Width    (m_sprite->Width())
-		, Height   (m_sprite->Height())
-	{}
-
-	~Sprite()
+		: m_device (nullptr)
 	{
-		delete m_sprite;
+		// So this could want to do many things
+
+		// Blank render target
+		// Texture on the gpu
+		// Texture on the gpu, but keep original colors on the cpu for state
+
+		m_host = SDL_LoadBMP(path.c_str());
+		SDL_assert(m_host && "Sprite failed to load");
 	}
 
-	ISprite* _ptr() { return m_sprite; }
+	~Texture()
+	{
+		SDL_FreeSurface(m_host);
+		SDL_DestroyTexture(m_device);
+	}
+
+	int Width() const { return m_host->w; }
+	int Height() const {return m_host->h; }
+	bool OnHost() { return m_host; }
+	bool OnDevice() { return m_device; }
+
+	void FreeHost()
+	{
+		SDL_assert(m_host && "Nothing to free on the host");
+		SDL_FreeSurface(m_host);
+		m_host = nullptr;
+	}
 
 	// yes moves
 	//  no copys
-	Sprite(Sprite&& move) : m_sprite(move.m_sprite), Width(move.Width), Height(move.Height) { move.m_sprite = nullptr; }
-	Sprite& operator=(Sprite&& move) { Width = move.Width; Height = move.Height; m_sprite = move.m_sprite; move.m_sprite = nullptr; return *this; }
-	Sprite(const Sprite& move) = delete;
-	Sprite& operator=(const Sprite& move) = delete;
-
-	bool OnHost() { return m_sprite->OnHost(); }
-	bool OnDevice() { return m_sprite->OnDevice(); };
-	void FreeHost() { m_sprite->FreeHost(); }
-
-private:
-	static ISprite* Create(const std::string& path);
-};
-
-// x and y get floored
-struct SpriteTransform2D
-{
-	float x, y, r;
+	Texture(Texture&& move)
+		: m_host   (move.m_host)
+		, m_device (move.m_device)
+	{
+		move.m_host = nullptr;
+		move.m_device = nullptr;
+	}
+	Texture& operator=(Texture&& move)
+	{
+		m_host = move.m_host;
+		m_device = move.m_device;
+		move.m_host = nullptr;
+		move.m_device = nullptr;
+		return *this;
+	}
+	Texture(const Texture& move) = delete;
+	Texture& operator=(const Texture& move) = delete;
 };
 
 /*
@@ -107,76 +119,140 @@ struct WindowConfig
 	int Height = 480;
 };
 
-struct IWindow
-{
-	virtual ~IWindow() = default;
-
-	virtual void PollEvents() = 0;
-
-	virtual void BeginRender() = 0;
-	virtual void EndRender() = 0;
-	virtual void DrawSprite(const SpriteTransform2D& transform, Sprite& sprite) = 0;
-	virtual void SendSpriteToDevice(Sprite& sprite) = 0;
-};
-
 struct Window
 {
+public:
+	SDL_Window* m_window;
+	SDL_Renderer* m_render;
+	event_manager* m_events;
 private:
-	IWindow* m_window;
+	inline static bool s_first = true;
 
 public:
 	Window()
 		: m_window (nullptr)
+		, m_render (nullptr)
+		, m_events (nullptr)
 	{}
 
 	Window(
 		const WindowConfig& config,
 		event_manager* events = nullptr
 	)
-		: m_window (Window::Create(config, events))
-	{}
+		: m_events (events)
+	{
+		if (s_first)
+		{
+			s_first = false;
+			FirstVideoInit();
+		}
 
-	~Window()
-	{ 
-		delete m_window;
+		m_window = SDL_CreateWindow(config.Title.c_str(), 0, 0, config.Width, config.Height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL); // opengl only for imgui...
+		m_render = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED); 
+
+		SDL_SetWindowPosition(m_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 	}
 
-	IWindow* _ptr() { return m_window; }
+	~Window()
+	{
+		SDL_DestroyWindow  (m_window);
+		SDL_DestroyRenderer(m_render);
+	}
+
+	void PumpEvents()
+	{
+		SDL_Event event;
+		while (SDL_PollEvent(&event))
+		{
+			if (!m_events) continue; // pump but do nothing, maybe log
+
+			switch (event.type)
+			{
+				case SDL_QUIT: 
+				{
+					m_events->send(event_Shutdown {});
+					break;
+				}
+				case SDL_MOUSEMOTION:
+				{
+					m_events->send(event_MouseMove {
+						event.motion.x,
+						event.motion.y
+					});
+					break;
+				}
+			}
+		}
+	}
+
+	void BeginRender()
+	{
+		Color cc = Color(22, 22, 22, 22);
+		SDL_SetRenderDrawColor(m_render, cc.r, cc.g, cc.b, cc.a);
+		SDL_RenderClear(m_render);
+	}
+
+	void EndRender() 
+	{
+		SDL_RenderPresent(m_render);
+	}
+
+	void DrawSprite(const Transform2D& transform, Texture* sprite)
+	{
+		if (!sprite->OnDevice())
+		{
+			SendTextureToDevice(sprite);
+		}
+
+		SDL_Rect dest;
+		dest.x = -sprite->m_host->w / 2 + floor(transform.x);
+		dest.y = -sprite->m_host->h / 2 + floor(transform.y);
+		dest.w = sprite->m_host->w;
+		dest.h = sprite->m_host->h;
+
+		SDL_RenderCopyEx(m_render, sprite->m_device, nullptr, &dest, transform.r, nullptr, SDL_FLIP_NONE);
+	}
+
+	void SendTextureToDevice(Texture* sprite)
+	{
+		if (sprite->m_device) 
+		{
+			SDL_UpdateTexture(sprite->m_device, nullptr, sprite->m_host->pixels, sprite->m_host->pitch);
+		}
+
+		else
+		{
+			sprite->m_device = SDL_CreateTextureFromSurface(m_render, sprite->m_host);
+		}
+	}
 
 	// yes moves
 	//  no copys
-	Window(Window&& move) : m_window(move.m_window) { move.m_window = nullptr; }
-	Window& operator=(Window&& move) { m_window = move.m_window; move.m_window = nullptr; return *this; }
+	Window(Window&& move)
+		: m_window (move.m_window)
+		, m_render (move.m_render)
+		, m_events (move.m_events)
+	{
+		move.m_window = nullptr;
+		move.m_render = nullptr;
+		move.m_events = nullptr;
+	}
+	Window& operator=(Window&& move)
+	{
+		m_window = move.m_window;
+		m_render = move.m_render;
+		m_events = move.m_events;
+		move.m_window = nullptr;
+		move.m_render = nullptr;
+		move.m_events = nullptr;
+		return *this;
+	}
 	Window(const Window& move) = delete;
 	Window& operator=(const Window& move) = delete;
-	
-	void PollEvents() { m_window->PollEvents(); }
-
-	void BeginRender() { m_window->BeginRender(); }
-	void EndRender() { m_window->EndRender(); }
-	void DrawSprite(const SpriteTransform2D& transform, Sprite& sprite) { m_window->DrawSprite(transform, sprite); }
-	void SendSpriteToDevice(Sprite& sprite) { m_window->SendSpriteToDevice(sprite); }
-
-	// call once at start of program before using Window
-	static void InitRendering();
 
 private:
-	// returns a new window, you own the pointer
-	static IWindow* Create(const WindowConfig& config, event_manager* events);
-};
-
-/*
-
-	Window and Renderer events
-
-*/
-
-struct event_Shutdown
-{
-
-};
-
-struct event_MouseMove
-{
-	int x, y;
+	static void FirstVideoInit()
+	{
+		SDL_Init(SDL_INIT_VIDEO);
+	}
 };

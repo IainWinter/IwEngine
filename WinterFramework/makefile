@@ -2,26 +2,34 @@ OBJ_DIR = ./_obj/
 OUT_DIR = ./_bin/
 EXE_NAME = a.exe
 
-CC = g++
+CC = g++ -std=c++17
 
-MAIN_SRC = ./test/Window_Test.cpp
-EXT_SRC = ./ext/cpp/serial_json.cpp ./ext/cpp/RenderingSDL.cpp
+MAIN_SRC = ./test/imgui_test.cpp
 
-VENDOR_INC = asio json sdl box2d
-VENDOR_LIB = sdl/lib box2d/lib
+EXT_SRC = serial_json.cpp RenderingSDL.cpp Time.cpp
 
-VENDOR_BIN = sdl2dll box2d
+# I dont really like how this is the only lib that directly links its file...
+# wish it could just be a static a. like the others
+
+VENDOR_SRC = ./vendor/glad/src/glad.c ./vendor/imgui/backends/imgui_impl_sdl.cpp ./vendor/imgui//backends/imgui_impl_opengl3.cpp
+
+VENDOR_INC = sdl box2d imgui glad asio json
+VENDOR_LIB = sdl box2d imgui
+
+VENDOR_BIN = sdl2dll box2d imgui
 SYSTEM_BIN = gdi32 ws2_32 wsock32 user32 kernel32 shell32
 
+_esrc = $(foreach name, $(EXT_SRC),./ext/cpp/$(name))
+
 _vinc = $(foreach name, $(VENDOR_INC),-I./vendor/$(name)/include)
-_vlib = $(foreach name, $(VENDOR_LIB),-L./vendor/$(name))
+_vlib = $(foreach name, $(VENDOR_LIB),-L./vendor/$(name)/lib)
 _vbin = $(foreach name, $(VENDOR_BIN),-l$(name))
 _sbin = $(foreach name, $(SYSTEM_BIN),-l$(name))
 
 main:
 # if not exist "$(OBJ_DIR)" mkdir "$(OBJ_DIR)"
 	if not exist "$(OUT_DIR)" mkdir "$(OUT_DIR)"
-	$(CC) $(_vinc) $(MAIN_SRC) $(EXT_SRC) $(_vlib) $(_vbin) $(_sbin) -o$(OUT_DIR)$(EXE_NAME) -g
+	$(CC) $(_vinc) $(MAIN_SRC) $(_esrc) $(VENDOR_SRC) $(_vlib) $(_vbin) $(_sbin) -o$(OUT_DIR)$(EXE_NAME) -g
 # copy the vendor bins to OUT DIR
 
 clean:

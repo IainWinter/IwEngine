@@ -157,7 +157,7 @@ struct event_manager
 
 	void send(event_type type, void* event)
 	{
-		auto itr = m_sinks.find(type.m_hash);
+		auto itr = m_sinks.find(type.m_hash); // might cause a problem on large throughput of events
 		if (itr != m_sinks.end())
 		{
 			itr->second.send(event);

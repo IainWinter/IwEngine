@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Rendering.h"
+#include "../RenderingHideSDL.h"
 
 /*
 

@@ -49,7 +49,7 @@ struct session : std::enable_shared_from_this<session<_id>>
 	tsque<owned_message<_id>>& m_in;
 	tsque<message<_id>> m_out;
 
-	owned_message<_id> m_current; // incomming built here
+	owned_message<_id> m_current; // incoming built here
 
     session(
 		asio::ip::tcp::socket&& socket,

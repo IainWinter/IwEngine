@@ -442,8 +442,8 @@ struct entity_storage
 
 		entity_handle new_handle = new_store.create_entity();
 
-		entity_data* old_entity = unwrap(handle);
-		entity_data* new_entity = unwrap(new_handle);
+		entity_data* old_entity =           unwrap(handle);
+		entity_data* new_entity = new_store.unwrap(new_handle);
 
 		void* old_data = old_entity->m_components;
 		void* new_data = new_entity->m_components;
@@ -452,20 +452,26 @@ struct entity_storage
 		int new_length = new_store.m_archetype.m_components.size();
 		int max_length = max(old_length, new_length);
 
-		for (int i = 0; i < max_length; i++)
+		// this needs to find the first index that both match
+		// then could linearly loop this
+		//for (int i = 0; i < max_length; i++)
+		//{
+		//	int o = min(i, old_length - 1);
+		//	int n = min(i, new_length - 1);
+		for (int o = 0; o < old_length; o++)
+		for (int n = 0; n < new_length; n++) // might be able to start at o
 		{
-			int o = min(i, old_length - 1);
-			int n = min(i, new_length - 1);
-
 			const component& old_component =           m_archetype.m_components.at(o);
 			const component& new_component = new_store.m_archetype.m_components.at(n);
 
 			if (old_component.m_hash == new_component.m_hash)
 			{
 				old_component.m_move(
-					offset_raw_pointer(new_data, new_component),
-					offset_raw_pointer(old_data, old_component)
+					new_store.offset_raw_pointer(new_data, new_component),
+					          offset_raw_pointer(old_data, old_component)
 				);
+
+				break; // iterate unique pairs only, verify this
 			}
 		}
 
@@ -868,7 +874,7 @@ struct entity_manager
 	template<typename _t, typename... _args>
 	void set(entity_handle handle, _args&&... args)
 	{
-		_t temp = _t(args...); // this gets moved
+		_t temp = _t{args...}; // this gets moved
 		set(handle, make_component<_t>(), &temp);
 	}
 
@@ -878,7 +884,9 @@ struct entity_manager
 		if constexpr (sizeof...(_args) == 0) {
 			return add(handle, make_component<_t>(), nullptr);
 		}
-		return add(handle, make_component<_t>(), &_t(args...));
+
+		_t temp = _t{args...}; // this gets moved
+		return add(handle, make_component<_t>(), &temp);
 	}
 
 	template<typename _t>
