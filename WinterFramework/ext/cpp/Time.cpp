@@ -9,7 +9,7 @@ namespace Time
 	static size_t ticks    = 0;
 	static float time      = 0.0f;
 	static float rawtime   = 0.0f;
-	static float fixedTime = 0.2f;
+	static float fixedTime = 0.02f;
 	static float timeScale = 1.0f;
 
 	static std::vector<float> pastDt;

@@ -77,6 +77,11 @@ public:
 		return address;
 	}
 
+ 	void reset() override
+	{
+		m_freelist.reset();
+	}
+
 	size_t capacity() const override
 	{
 		return m_freelist.m_limit_size;

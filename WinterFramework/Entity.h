@@ -9,6 +9,7 @@
 #include <assert.h>
 #include <tuple>
 #include <stdint.h>
+#include <array>
 
 #define ENTITY_USE_SERIAL
 
@@ -808,7 +809,11 @@ struct entity_manager
 		entity_storage& new_store = get_storage(archetype_add(old_store.m_archetype, { component }));
 
 		entity_handle new_handle = old_store.move_entity(handle, new_store);
-		new_store.set_component(new_handle, component, data);
+		
+		if (data)
+		{
+			new_store.set_component(new_handle, component, data);
+		}
 
 		call_listener(entity_command::ADD, handle, &component);
 
@@ -872,7 +877,7 @@ struct entity_manager
 	}
 
 	template<typename _t, typename... _args>
-	void set(entity_handle handle, _args&&... args)
+	void set(entity_handle handle, _args&&... args) // aa man this causes a destructor to be called, also forget move should just memcpy
 	{
 		_t temp = _t{args...}; // this gets moved
 		set(handle, make_component<_t>(), &temp);

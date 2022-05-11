@@ -5,18 +5,21 @@
 struct pool_allocator : allocator
 {
 	std::vector<linear_allocator*> m_pages;
+	size_t m_page_size_hint;
 	size_t m_next_page_size;
 	size_t m_next_page_mult;
 
 	pool_allocator()
-		: m_next_page_size (0)
+		: m_page_size_hint (0)
+		, m_next_page_size (0)
 		, m_next_page_mult (2)
 	{}
 
 	pool_allocator(
 		size_t page_expansion
 	)
-		: m_next_page_size (0)
+		: m_page_size_hint (0)
+		, m_next_page_size (0)
 		, m_next_page_mult (page_expansion)
 	{}
 
@@ -24,7 +27,8 @@ struct pool_allocator : allocator
 		size_t page_size,
 		size_t page_expansion
 	)
-		: m_next_page_size (page_size)
+		: m_page_size_hint (page_size)
+		, m_next_page_size (page_size)
 		, m_next_page_mult (page_expansion)
 	{}
 
@@ -145,6 +149,17 @@ struct pool_allocator : allocator
 
 		assert(false && "Address is not in allocator");
 		throw nullptr;
+	}
+
+	void reset() override
+	{
+		for (linear_allocator* page : m_pages)
+		{
+			delete page;
+		}
+
+		m_pages.clear();
+		m_next_page_size = m_page_size_hint;
 	}
 
 	size_t capacity() const override

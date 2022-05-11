@@ -19,15 +19,6 @@ struct Rigidbody2D
 	{
 		m_body.type = b2_dynamicBody;
 	}
-
-	Rigidbody2D(Rigidbody2D&& move)
-		: m_instance    (move.m_instance)
-		, m_body        (move.m_body)
-		, m_collider    (move.m_collider)
-		, LastTransform (move.LastTransform)
-	{
-		move.m_instance = nullptr;
-	}
 	
 	bool InWorld() const
 	{

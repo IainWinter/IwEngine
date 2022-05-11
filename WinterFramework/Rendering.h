@@ -47,18 +47,43 @@ inline bool MessageCallback(
 	const char* fname,
 	int line)
 {
-	int finite = 255;
-	bool hasError = false;
+	int finite = 0;
+	bool hasError = true;
+	GLenum lastErr = 0;
 
-	do {
+	while (hasError && finite < 10)
+	{
 		GLenum err = glGetError();
 		hasError = err != GL_NO_ERROR;
-		if (hasError) {
-			const char* str = GetErrorString(err);
-			printf("GL ERROR: %s in file %s[%d] %s\n", str, fname, line, stmt);
-		}
-	} while (hasError && --finite > 0);
 
+		if (hasError)
+		{
+			const char* str = GetErrorString(err);
+			
+			if (err == lastErr) 
+			{
+				finite += 1;
+				printf("\r");
+			}
+
+			else
+			{
+				finite = 0;
+				printf("\n"); // this inf loops on a set of repeating two errors
+			}
+
+			printf("GL ERROR: %s in file %s[%d] %s", str, fname, line, stmt);
+			if (err == lastErr) printf(" x%d", finite);
+		}
+
+		lastErr = err;
+	}
+
+	if (hasError)
+	{
+		printf("\n");
+	}
+	
 	return hasError;
 }
 
@@ -81,9 +106,51 @@ struct event_Shutdown
 
 };
 
+struct event_WindowResize
+{
+	int width, height;
+};
+
 struct event_MouseMove
 {
 	int x, y;
+};
+
+// should provide a way to map an sdl input to an enum, and read a char from it
+// imgui handles all input typing for me
+
+#include <unordered_map>
+
+enum class InputName
+{
+	_NONE,
+	UP,
+	DOWN,
+	RIGHT,
+	LEFT,
+};
+
+struct InputMapping
+{
+	std::unordered_map<SDL_Scancode, InputName> m_keyboard;
+
+	InputName Map(SDL_Scancode code)
+	{
+		InputName name = InputName::_NONE;
+		auto itr = m_keyboard.find(code);
+		if (itr != m_keyboard.end())
+		{
+			name = itr->second;
+		}
+
+		return name;
+	}
+};
+
+struct event_Input
+{
+	InputName name;
+	float state;
 };
 
 /*
@@ -98,30 +165,30 @@ struct Texture
 	GLuint m_device;       // this is on the gpu
 
 	Color m_tint;
+	bool m_static; // does sending to the device free the host
 
 	Texture()
 		: m_host   (nullptr)
 		, m_device (0)
+		, m_static (true)
 	{}
 
 	Texture(
-		const std::string& path
+		const std::string& path,
+		Color tint = {},
+		bool is_static = true
 	)
 		: m_device (0)
+		, m_tint   (tint)
+		, m_static (is_static)
 	{
-		// So this could want to do many things
-
-		// Blank render target
-		// Texture on the gpu
-		// Texture on the gpu, but keep original colors on the cpu for state
-
 		m_host = SDL_LoadBMP(path.c_str());
 		SDL_assert(m_host && "Sprite failed to load");
 	}
 
 	~Texture()
 	{
-		SDL_FreeSurface(m_host);
+		if (m_host) SDL_FreeSurface(m_host);
 		if (m_device) gl(glDeleteTextures(1, &m_device));
 	}
 
@@ -137,11 +204,47 @@ struct Texture
 		m_host = nullptr;
 	}
 
+	void SendToDevice()
+	{
+		GLint mode = 0;
+		switch (m_host->format->BytesPerPixel)			
+		{
+			case 1: mode = GL_R;    break;
+			case 2: mode = GL_RG;   break;
+			case 3: mode = GL_RGB;  break;
+			case 4: mode = GL_RGBA; break;
+			default: assert(false); break;
+		}
+
+		if (OnDevice())
+		{
+			gl(glBindTexture(GL_TEXTURE_2D, m_device));
+			gl(glTextureSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Width(), Height(), mode, GL_UNSIGNED_BYTE, m_host->pixels));
+		}
+
+		else
+		{
+			gl(glGenTextures(1, &m_device));
+			gl(glBindTexture(GL_TEXTURE_2D, m_device));
+			gl(glTexImage2D(GL_TEXTURE_2D, 0, mode, Width(), Height(), 0, mode, GL_UNSIGNED_BYTE, m_host->pixels));
+			gl(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+			gl(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+		}
+
+		if (m_static)
+		{
+			FreeHost();
+		}
+
+		// state change on GL_TEXTUER_2D
+	}
+
 	// yes moves
 	//  no copys
 	Texture(Texture&& move)
 		: m_host   (move.m_host)
 		, m_device (move.m_device)
+		, m_tint   (move.m_tint)
 	{
 		move.m_host = nullptr;
 		move.m_device = 0;
@@ -150,40 +253,57 @@ struct Texture
 	{
 		m_host = move.m_host;
 		m_device = move.m_device;
+		m_tint = move.m_tint;
 		move.m_host = nullptr;
 		move.m_device = 0;
 		return *this;
 	}
-	Texture(const Texture& move) = delete;
-	Texture& operator=(const Texture& move) = delete;
+	Texture(const Texture& copy) = delete;
+	Texture& operator=(const Texture& copy) = delete;
 };
 
 /*
 
-	Mesh. hardcoded quad with a simple shader
+	Window and Renderer
 
 */
 
-struct Quad2D
+struct Camera
+{
+	float x, y, w, h;
+
+	Camera()
+		: x(0), y(0), w(12), h(8) 
+	{}
+
+	Camera(int x, int y, int w, int h)
+		: x(x), y(y), w(w), h(h)
+	{}
+
+	glm::mat4 Projection() const
+	{
+		glm::mat4 camera = glm::ortho(-w, w, -h, h, -16.f, 16.f);
+		camera = glm::translate(camera, glm::vec3(x, y, 0.f));
+
+		return camera;
+	}
+};
+
+struct SpriteRenderer2D
 {
 	GLuint m_vertices;
 	GLuint m_shader;
 
-	inline static bool m_first = true;
-
-	Quad2D()
+	SpriteRenderer2D()
 	{
-		if (m_first) m_first = false;
-		else assert(false && "create this as static");
-
 		static float verts[6 * 4] = {
-			0, 1, 0, 1,
-			1, 0, 1, 0,
-			0, 0, 0, 0, 
+			-1,  1,  0, 1,
+			 1, -1,  1, 0,
+			-1, -1,  0, 0, 
 		
-			0, 1, 0, 1,
-			1, 1, 1, 1,
-			1, 0, 1, 0
+			-1,  1,  0, 1,
+			 1,  1,  1, 1,
+			 1, -1,  1, 0
 		};
 		
 		GLuint vbo;
@@ -223,7 +343,7 @@ struct Quad2D
 
 								"void main()"
 								"{"
-									"color = tint * texture(sprite, TexCoords);"
+									"color = tint;" //  * texture(sprite, TexCoords)
 								"}";
 
 		GLuint shader_vert = gl(glCreateShader(GL_VERTEX_SHADER));
@@ -269,17 +389,77 @@ struct Quad2D
 		gl(glDeleteShader(shader_frag));
 	}
 
-	~Quad2D()
+	~SpriteRenderer2D()
 	{
+		if (m_vertices == 0) return; // has been moved
+
+		// why does this error loop forever
+		// do the vbos need to be deleted aswell?
+
 		gl(glDeleteVertexArrays(1, &m_vertices));
+		gl(glDeleteProgram(m_shader));
 	}
+
+	struct
+	{
+		glm::mat4 camera_proj;
+	} 
+	m_render_state;
+
+	void Begin(Camera& camera) // include render target
+	{
+		m_render_state.camera_proj = camera.Projection();
+
+		Color cc = Color(22, 22, 22, 22);
+		gl(glClearColor(cc.rf(), cc.gf(), cc.bf(), cc.af()));
+		gl(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+	}
+
+	// should queue and sort by least state change, could also instance
+	// but Ill just go with this until its a problem...
+
+	void DrawSprite(const Transform2D& transform, Texture& sprite)
+	{
+		if (!sprite.OnDevice())
+		{
+			sprite.SendToDevice();
+		}
+
+		gl(glUseProgram(m_shader));
+
+		gl(glBindTexture(GL_TEXTURE_2D, sprite.m_device));
+		gl(glBindVertexArray(m_vertices));
+
+		gl(glUniformMatrix4fv (glGetUniformLocation (m_shader, "projection"), 1, false, glm::value_ptr(m_render_state.camera_proj)));
+		gl(glUniformMatrix4fv (glGetUniformLocation (m_shader, "model"),      1, false, glm::value_ptr(transform.World())));
+		gl(glUniform4fv       (glGetUniformLocation (m_shader, "tint"),       1,        glm::value_ptr(sprite.m_tint.as_v4())));
+
+		gl(glUniform1i(glGetUniformLocation(m_shader, "sprite"), 0));
+		gl(glActiveTexture(GL_TEXTURE0));
+
+		gl(glDrawArrays(GL_TRIANGLES, 0, 6));
+	}
+
+	// yes moves
+	//  no copys
+	SpriteRenderer2D(SpriteRenderer2D&& move)
+		: m_vertices (move.m_vertices)
+		, m_shader   (move.m_shader)
+	{
+		move.m_vertices = 0;
+		move.m_shader = 0;
+	}
+	SpriteRenderer2D& operator=(SpriteRenderer2D&& move)
+	{
+		m_vertices = move.m_vertices;
+		m_shader = move.m_shader;	
+		move.m_vertices = 0;
+		move.m_shader = 0;
+		return *this;
+	}
+	SpriteRenderer2D(const SpriteRenderer2D& copy) = delete;
+	SpriteRenderer2D& operator=(const SpriteRenderer2D& copy) = delete;
 };
-
-/*
-
-	Window and Renderer
-
-*/
 
 struct WindowConfig
 {
@@ -294,6 +474,10 @@ public:
 	SDL_Window* m_window;
 	SDL_GLContext m_opengl;
 	event_manager* m_events;
+
+	WindowConfig m_config;
+	InputMapping m_input;
+
 private:
 	inline static bool s_first = true;
 
@@ -309,6 +493,7 @@ public:
 		event_manager* events = nullptr
 	)
 		: m_events (events)
+		, m_config (config)
 	{
 		if (s_first) s_first = false;
 		else assert(false && "Only a single window has been tested");
@@ -322,9 +507,9 @@ public:
 		SDL_SetWindowPosition(m_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 
 		gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
-		gl(glViewport(0, 0, config.Width, config.Height));
-
 		Init_Imgui(first_glsl_version);
+
+		Resize(config.Width, config.Height);
 	}
 
 	~Window()
@@ -347,7 +532,7 @@ public:
 			{
 				if (event.type == SDL_QUIT)
 				{
-					SDL_Quit(); // allow for quit
+					SDL_Quit(); // allow for quit without events
 				}
 
 				continue; // pump but do nothing, maybe log
@@ -362,103 +547,48 @@ public:
 				}
 				case SDL_MOUSEMOTION:
 				{
-					m_events->send(event_MouseMove {
-						event.motion.x,
-						event.motion.y
-					});
+					m_events->send(event_MouseMove { event.motion.x, event.motion.y });
+					break;
+				}
+				case SDL_WINDOWEVENT:
+				{
+					switch (event.window.event)
+					{
+						case SDL_WINDOWEVENT_RESIZED:
+						{
+							Resize(event.window.data1, event.window.data2);
+							m_events->send(event_WindowResize { m_config.Width, m_config.Height });
+							break;
+						}
+					}
+					break;
+				}
+				case SDL_KEYDOWN:
+				case SDL_KEYUP:
+				{
+					if (event.key.repeat == 0)
+					{
+						m_events->send(event_Input { 
+							m_input.Map(event.key.keysym.scancode),
+							event.key.state == SDL_PRESSED ? 1.f : -1.f // -1 for += e.state math, check for > 0 for is pressed
+						});
+					}
 					break;
 				}
 			}
 		}
 	}
 
-	// A dead simple sprite renderer
-	// draws to the currently bound framebuffer
-	// should queue and draw an instanced version sorted by texture
-
-	void BeginRender()
+	void Resize(int width, int height)
 	{
-		Color cc = Color(22, 22, 22, 22);
-		gl(glClearColor(cc.rf(), cc.gf(), cc.bf(), cc.af()));
-		gl(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+		m_config.Width = width;
+		m_config.Height = height;
+		gl(glViewport(0, 0, m_config.Width, m_config.Height ));
 	}
 
-	void EndRender() 
+	void EndFrame() 
 	{
 		SDL_GL_SwapWindow(m_window);
-	}
-
-	// draw a 1by1 square onto the current framebuffer with a simple texture shader
-
-	void DrawSprite(const Transform2D& transform, Texture* sprite)
-	{
-		if (!sprite->OnDevice())
-		{
-			SendTextureToDevice(sprite);
-		}
-
-		static Quad2D quad;
-
-		gl(glUseProgram(quad.m_shader));
-
-		gl(glBindTexture(GL_TEXTURE_2D, sprite->m_device));
-		gl(glBindVertexArray(quad.m_vertices));
-		
-		glm::mat4 ortho = glm::ortho(0, 100, 0, 100);
-		
-		gl(glUniformMatrix4fv (glGetUniformLocation (quad.m_shader, "projection"), 1, false, glm::value_ptr(ortho)));
-		gl(glUniformMatrix4fv (glGetUniformLocation (quad.m_shader, "model"),      1, false, glm::value_ptr(transform.World())));
-		gl(glUniform4fv       (glGetUniformLocation (quad.m_shader, "tint"),       1,        glm::value_ptr(sprite->m_tint.as_v4())));
-
-		gl(glUniform1i(glGetUniformLocation(quad.m_shader, "sprite"), 0));
-		gl(glActiveTexture(GL_TEXTURE0));
-
-		// bind texture
-		// bind mesh
-		// draw 
-
-		//   3 2
-		//   0 1
-
-		gl(glDrawArrays(GL_TRIANGLES, 0, 6));
-
-		// SDL_Rect dest;
-		// dest.x = -sprite->m_host->w / 2 + floor(transform.x);
-		// dest.y = -sprite->m_host->h / 2 + floor(transform.y);
-		// dest.w = sprite->m_host->w;
-		// dest.h = sprite->m_host->h;
-
-		//SDL_RenderCopyEx(m_render, sprite->m_device, nullptr, &dest, transform.r, nullptr, SDL_FLIP_NONE);
-	}
-
-	void SendTextureToDevice(Texture* tex)
-	{
-		GLint mode = 0;
-		switch (tex->m_host->format->BytesPerPixel)			
-		{
-			case 1: mode = GL_R;    break;
-			case 2: mode = GL_RG;   break;
-			case 3: mode = GL_RGB;  break;
-			case 4: mode = GL_RGBA; break;
-			default: assert(false); break;
-		}
-
-		if (tex->OnDevice())
-		{
-			gl(glBindTexture(GL_TEXTURE_2D, tex->m_device));
-			gl(glTextureSubImage2D(GL_TEXTURE_2D, 0, 0, 0, tex->Width(), tex->Height(), mode, GL_UNSIGNED_BYTE, tex->m_host->pixels));
-		}
-
-		else
-		{
-			gl(glGenTextures(1, &tex->m_device));
-			gl(glBindTexture(GL_TEXTURE_2D, tex->m_device));
-			gl(glTexImage2D(GL_TEXTURE_2D, 0, mode, tex->Width(), tex->Height(), 0, mode, GL_UNSIGNED_BYTE, tex->m_host->pixels));
-			gl(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-			gl(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-		}
-
-		// state change on GL_TEXTUER_2D
 	}
 
 	// imgui renderer
@@ -482,6 +612,8 @@ public:
 		: m_window (move.m_window)
 		, m_opengl (move.m_opengl)
 		, m_events (move.m_events)
+		, m_config (move.m_config)
+		, m_input  (move.m_input)
 	{
 		move.m_window = nullptr;
 		move.m_opengl = nullptr;
@@ -492,13 +624,15 @@ public:
 		m_window = move.m_window;
 		m_opengl = move.m_opengl;
 		m_events = move.m_events;
+		m_config = move.m_config;
+		m_input  = move.m_input;
 		move.m_window = nullptr;
 		move.m_opengl = nullptr;
 		move.m_events = nullptr;
 		return *this;
 	}
-	Window(const Window& move) = delete;
-	Window& operator=(const Window& move) = delete;
+	Window(const Window& copy) = delete;
+	Window& operator=(const Window& copy) = delete;
 
 // init funcs
 

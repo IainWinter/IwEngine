@@ -120,14 +120,14 @@ struct event_manager
 	// needs to be template
 
 	template<typename _e, typename _h>
-	event_pipe_wrapper<_e> handle(_h* handler_ptr)
+	event_pipe_wrapper<_e> attach(_h* handler_ptr)
 	{
 		event_sink& sink = m_sinks[make_event<_e>().m_hash];
 		event_pipe& pipe = sink.add_pipe<_e, _h>(handler_ptr);
 		return event_pipe_wrapper<_e>(pipe);
 	}
 
-	void unhandle(void* handler)
+	void detach(void* handler)
 	{
 		for (auto itr = m_sinks.begin(); itr != m_sinks.end();)
 		{
@@ -144,7 +144,7 @@ struct event_manager
 		}
 	}
 
-	void unhandle(event_type type, void* handler)
+	void detach(event_type type, void* handler)
 	{
 		event_sink& sink = m_sinks.at(type.m_hash);
 		sink.remove_pipe(handler);
@@ -167,9 +167,9 @@ struct event_manager
 	// template headers
 
 	template<typename _t, typename _h>
-	void unhandle(_h* handler_ptr)
+	void detach(_h* handler_ptr)
 	{
-		unhandle(make_event<_t>(), handler_ptr);
+		unattach(make_event<_t>(), handler_ptr);
 	}
 
 	template<typename _t>

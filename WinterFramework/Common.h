@@ -26,14 +26,20 @@ struct Color
 
 struct Transform2D
 {
-	float x, y, z, r, sx, sy;
+	float x, y, z, sx, sy, r;
+
+	Transform2D()
+		:  x(0),  y(0), z(0)
+		, sx(1), sy(1)
+		, r(0)
+	{}
 
 	glm::mat4 World() const
 	{
 		glm::mat4 world = glm::mat4(1.f);
-		world = glm::rotate(world, r, glm::vec3(0, 0, 1.f));
-		world = glm::scale(world, glm::vec3(sx, sy, 1.f));
 		world = glm::translate(world, glm::vec3(x, y, z));
+		world = glm::scale(world, glm::vec3(sx, sy, 1.f));
+		world = glm::rotate(world, r, glm::vec3(0, 0, 1.f));
 
 		return world;
 	}

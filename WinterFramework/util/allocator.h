@@ -16,6 +16,7 @@ struct allocator
 	virtual size_t get_block_index(void* address) const = 0;
 	virtual void*  get_block_address(size_t index) const = 0;
 
+	virtual void reset() = 0;
 	virtual size_t capacity() const = 0;
 
 	size_t block_capacity() const
