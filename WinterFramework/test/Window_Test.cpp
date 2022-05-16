@@ -3,6 +3,7 @@
 #include "../Rendering.h"
 #include "../Physics.h"
 #include "../ext/Time.h"
+#include "../ext/marching_cubes.h"
 
 #include <iostream>
 
@@ -20,25 +21,49 @@ int get_rand(int x)
 	return rand() % x;
 }
 
-entity CreatePhysicsEntity(PhysicsWorld& world)
+entity CreatePhysicsEntity(PhysicsWorld& world, const Transform2D& transform = {})
 {
-	entity e = entities().create<Transform2D, Rigidbody2D>();
+	entity e = entities().create<Transform2D, Rigidbody2D>()
+		.set<Transform2D>(transform)
+		.set<Rigidbody2D>(transform);
+
 	world.Add(e.get<Rigidbody2D>());
 	return e;
 }
 
-entity CreateTexturedBox(PhysicsWorld& world)
+entity CreateTexturedBox(PhysicsWorld& world, const std::string& path, const std::string& collider_mask_path, const Transform2D& transform = {})
 {
-	b2PolygonShape shape;
-	shape.SetAsBox(1, 1);
+	entity entity = CreatePhysicsEntity(world, transform)
+		.add<Texture>(path)
+		.add<Mesh>();
 
-	entity entity = CreatePhysicsEntity(world);
-
-	entity.get<Rigidbody2D>().m_instance->CreateFixture(&shape, 1.0f);
-	entity.add<Texture>(
-		"C:/dev/IwEngine/WinterFramework/test/Untitled.bmp",
-		Color(get_rand(255), get_rand(255), get_rand(255))
+	Texture collider_mask = Texture(collider_mask_path);
+	
+	auto polygons = MakePolygonFromField<u32>(
+		(u32*)collider_mask.m_host->pixels, 
+		collider_mask.Width(), 
+		collider_mask.Height(),
+		[](const u32& color) { return (color & ~0xff000000) == 0; }
 	);
+
+	Rigidbody2D& body = entity.get<Rigidbody2D>();
+	Mesh& mesh = entity.get<Mesh>();
+
+	vec2 scale = vec2(transform.sx, transform.sy);
+
+	for (const std::vector<glm::vec2>& polygon : polygons.first)
+	{
+		b2PolygonShape shape;
+
+		for (int i = 0; i < polygon.size(); i++)
+		{
+			mesh.m_host.push_back(polygon.at(i));
+			shape.m_vertices[i] = b2Vec2(polygon.at(i).x * scale.x, polygon.at(i).y * scale.y);
+		}
+
+		shape.Set(shape.m_vertices, polygon.size());
+		body.m_instance->CreateFixture(&shape, 1.f);
+	}
 
 	return entity;
 }
@@ -103,7 +128,7 @@ struct ForceTwoardwsMouseSystem : System
 			float fx = 0 - transform.x;
 			float fy = 0 - transform.y;
 
-			body.m_instance->ApplyForceToCenter(b2Vec2(fx, fy), true);
+			body.m_instance->ApplyForceToCenter(b2Vec2(fx / 20, fy / 20), true);
 		}
 	}
 };
@@ -114,10 +139,24 @@ struct SpriteRenderer2DSystem : System
 	{
 		auto [camera, renderer] = entities().query<Camera, SpriteRenderer2D>().first();
 
-		renderer.Begin(camera);
+		renderer.Begin(camera, true);
 		for (auto [transform, sprite] : entities().query<Transform2D, Texture>())
 		{
 			renderer.DrawSprite(transform, sprite);
+		}
+	}
+};
+
+struct TriangleRenderer2DSystem : System
+{
+	void Update() override
+	{
+		auto [camera, renderer] = entities().query<Camera, TriangleRenderer2D>().first();
+
+		renderer.Begin(camera, false);
+		for (auto [transform, mesh] : entities().query<Transform2D, Mesh>())
+		{
+			renderer.DrawMesh(transform, mesh);
 		}
 	}
 };
@@ -130,7 +169,7 @@ struct CharacterController : System
 	{
 		x = 0;
 		y = 0;
-		speed = 300;
+		speed = 10;
 		events().attach<event_Input>(this);
 	}
 
@@ -143,10 +182,6 @@ struct CharacterController : System
 	{
 		auto [body] = entities().query<Rigidbody2D>().first();
 		body.m_instance->ApplyForceToCenter(b2Vec2(x * speed, y * speed), true);
-
-		b2Vec2 pos = body.m_instance->GetPosition();
-
-		printf("%.2f, %.2f  %1.0f, %1.0f\n", pos.x, pos.y, x, y);
 	}
 
 	void ImGui() override
@@ -184,6 +219,8 @@ struct CharacterController : System
 
 // need a way to update some systems before others tho
 
+using Order = void*;
+
 struct Application
 {
 	entity m_modules;
@@ -207,9 +244,9 @@ struct Application
 		m_modules = entities().create()
 			.add<Window>(windowConfig, &events())
 			.add<SpriteRenderer2D>()
+			//.add<TriangleRenderer2D>()
 			.add<PhysicsWorld>()
 			.add<Camera>(0, 0, 32, 18);
-
 
 		InputMapping& input = m_modules.get<Window>().m_input;
 
@@ -237,9 +274,22 @@ struct Application
 	}
 
 	template<typename _t, typename... _args>
-	void AddSystem(_args&&... args) // need to be able to queue in an order
+	_t* AddSystem(_args&&... args) // need to be able to queue in an order
 	{
-		m_systems.push_back(new _t(args...));
+		_t* system = new _t(args...);
+		m_systems.push_back(system);
+		return system;
+	}
+
+	template<typename _t, typename... _args>
+	_t* AddSystemAfter(Order after, _args&&... args) // need to be able to queue in an order
+	{
+		auto itr = m_systems.begin();
+		for (; itr != m_systems.end(); ++itr) if (*itr == after) break;
+		
+		_t* system = new _t(args...);
+		m_systems.insert(itr, system);
+		return system;
 	}
 
 	bool Step(float deltaTime)
@@ -303,17 +353,28 @@ Application app;
 
 void setup()
 {
-	app.AddSystem<PhysicsInterpolationSystem>();
 	app.AddSystem<ForceTwoardwsMouseSystem>();
+	app.AddSystem<PhysicsInterpolationSystem>();
 	app.AddSystem<SpriteRenderer2DSystem>();
+	//app.AddSystem<TriangleRenderer2DSystem>();
 	app.AddSystem<CharacterController>();
 
 	PhysicsWorld& world = app.Get<PhysicsWorld>();
 	
-	for (int i = 0; i < 50; i++)
+	for (int i = 0; i < 3; i++)
 	{
-		CreateTexturedBox(world);
+		Transform2D t;
+		t.sx = 2;
+		t.sy = 2;
+		t.x = 10 + i * 10;
+		CreateTexturedBox(world, "C:/dev/IwEngine/_assets/textures/SpaceGame/enemy_station.png", "C:/dev/IwEngine/_assets/textures/SpaceGame/enemy_station_mask.png", t);
 	}
+
+	Transform2D t;
+	t.sx = 2;
+	t.sy = 2;
+
+	entity e = CreateTexturedBox(world, "C:/dev/IwEngine/_assets/textures/SpaceGame/enemy_base.png", "C:/dev/IwEngine/_assets/textures/SpaceGame/enemy_base_mask.png", t);
 }
 
 bool loop()

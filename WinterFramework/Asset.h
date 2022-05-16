@@ -174,7 +174,7 @@ struct asset_manager
 		}
 	}
 
-	const file_name& find_file(std::string name)
+	const file_name& find_file(const std::string& name)
 	{
 		size_t dot = name.find_last_of('.');
 		assert(dot != sizeof(-1) && "asset name needs extension");
@@ -207,9 +207,6 @@ struct asset_manager
 	template<typename _t>
 	void set_loader(const std::string& ext, std::function<void*(const file_name&, allocator*)>&& load)
 	{
-		m_storage[ext] = asset_store(
-			sizeof(_t),
-			load
-		);
+		m_storage[ext] = asset_store(sizeof(_t), load);
 	}
 };

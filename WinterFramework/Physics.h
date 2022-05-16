@@ -14,10 +14,15 @@ struct Rigidbody2D
 	// If null, not in physics world
 	b2Body* m_instance;
 
-	Rigidbody2D()
-		: m_instance (nullptr)
+	Rigidbody2D(
+		Transform2D transform = {}
+	)
+		: m_instance    (nullptr)
+		, LastTransform (transform) 
 	{
 		m_body.type = b2_dynamicBody;
+		m_body.position = b2Vec2(transform.x, transform.y);
+		m_body.angle = transform.r;
 	}
 	
 	bool InWorld() const

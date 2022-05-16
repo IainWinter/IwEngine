@@ -287,7 +287,7 @@ bool WorldSystem::On(iw::ActionEvent& e)
 			//c.DontRemoveCells = true;
 
 			SpawnEnemy_Config c;
-			c.EnemyType = FIGHTER;
+			c.EnemyType = STATION;
 			c.TargetEntity = m_player;
 			c.SpawnLocationX = 201.5;
 			c.SpawnLocationY = 300;

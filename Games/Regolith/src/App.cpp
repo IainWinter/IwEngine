@@ -104,7 +104,7 @@ int App::Initialize(
 	context_menu->AddDevice(mouse);
 	context_menu->AddDevice(keyboard_raw);
 
-	return 0;
+	//return 0;
 
 	// menu states could be switched to through commands
 

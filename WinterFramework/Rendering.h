@@ -7,6 +7,7 @@
 #include "Common.h"
 #include <string>
 #include <cmath>
+#include <tuple>
 
 // renderer ties this to opengl
 // should split this into an ext and seperate the imgui and window
@@ -24,6 +25,9 @@
 #include "imgui/imgui_impl_sdl.h"
 #include "sdl/SDL.h"
 #include "glad/glad.h"
+
+#define STB_IMAGE_IMPLEMENTATION // not great, I guess this should be in a cpp file
+#include "stb/stb_image.h"
 
 inline constexpr char const* GetErrorString(
 	GLenum err) noexcept
@@ -159,12 +163,25 @@ struct event_Input
 
 */
 
+// mesh and texture, which gets used as a sprite, are very similar
+// should think about combining. I want ease of use to be the focus
+
+// struct IGraphicsObject
+// {
+// 	GLuint m_device; // handle to the object in the graphics library
+// 	bool m_static; // if after submitting the data to the device, should the host be freeed
+
+// 	bool OnDevice() const { return m_device != 0; };
+
+// 	virtual bool OnHost() const = 0;
+// 	virtual void SendToDevice() = 0;
+// 	virtual void FreeHost() = 0;
+// };
+
 struct Texture
 {
 	SDL_Surface* m_host;   // this is on the cpu
 	GLuint m_device;       // this is on the gpu
-
-	Color m_tint;
 	bool m_static; // does sending to the device free the host
 
 	Texture()
@@ -175,20 +192,38 @@ struct Texture
 
 	Texture(
 		const std::string& path,
-		Color tint = {},
 		bool is_static = true
 	)
 		: m_device (0)
-		, m_tint   (tint)
 		, m_static (is_static)
 	{
-		m_host = SDL_LoadBMP(path.c_str());
+		// pitch is the size in bytes of each row of image data
+		
+		auto [pixels, width, height, channels] = load_image_using_stb(path);
+		std::array<int, 4> masks = {0, 0, 0, 0};
+		switch (channels)
+		{
+			case 1:                                               masks[0] = 0x000000ff; break;
+			case 2:                        masks[0] = 0x0000ff00; masks[1] = 0x000000ff; break;
+			case 3: masks[0] = 0x00ff0000; masks[1] = 0x0000ff00; masks[2] = 0x000000ff; break;
+			case 4: masks[0] = 0x00ff0000; masks[1] = 0x0000ff00; masks[2] = 0x000000ff; masks[3] = 0xff000000; break;
+			default: assert(false && "no channels?"); break;
+		}
+
+		m_host = SDL_CreateRGBSurfaceFrom(pixels, width, height, channels * 8, width * channels, masks[0], masks[1], masks[2], masks[3]);
 		SDL_assert(m_host && "Sprite failed to load");
 	}
 
 	~Texture()
 	{
-		if (m_host) SDL_FreeSurface(m_host);
+		if (m_host) 
+		{
+			void* pixels = m_host->pixels;
+			SDL_FreeSurface(m_host);
+			free_image_using_stb(pixels);
+			m_host = nullptr;
+		}
+
 		if (m_device) gl(glDeleteTextures(1, &m_device));
 	}
 
@@ -226,9 +261,9 @@ struct Texture
 		{
 			gl(glGenTextures(1, &m_device));
 			gl(glBindTexture(GL_TEXTURE_2D, m_device));
+			gl(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+			gl(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
 			gl(glTexImage2D(GL_TEXTURE_2D, 0, mode, Width(), Height(), 0, mode, GL_UNSIGNED_BYTE, m_host->pixels));
-			gl(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-			gl(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 		}
 
 		if (m_static)
@@ -244,7 +279,7 @@ struct Texture
 	Texture(Texture&& move)
 		: m_host   (move.m_host)
 		, m_device (move.m_device)
-		, m_tint   (move.m_tint)
+		, m_static (move.m_static)
 	{
 		move.m_host = nullptr;
 		move.m_device = 0;
@@ -253,13 +288,167 @@ struct Texture
 	{
 		m_host = move.m_host;
 		m_device = move.m_device;
-		m_tint = move.m_tint;
+		m_static = move.m_static;
 		move.m_host = nullptr;
 		move.m_device = 0;
 		return *this;
 	}
 	Texture(const Texture& copy) = delete;
 	Texture& operator=(const Texture& copy) = delete;
+
+private:
+	std::tuple<u8*, int, int, int> load_image_using_stb(const std::string& filepath)
+	{
+		int width, height, channels, format;
+		stbi_info(filepath.c_str(), &width, &height, &channels);
+
+		switch (channels)
+		{
+			case 1: format = STBI_grey;       break;
+			case 2: format = STBI_grey_alpha; break;
+			case 3: format = STBI_rgb;        break;
+			case 4: format = STBI_rgb_alpha;  break;
+		}
+
+		u8* pixels = stbi_load(filepath.c_str(), &width, &height, &channels, format);
+
+		if (!pixels || stbi_failure_reason())
+		{
+			printf("failed to load image '%s' reason: %s\n", filepath.c_str(), stbi_failure_reason());
+		}
+
+		return std::make_tuple(pixels, width, height, channels);
+	}
+
+	void free_image_using_stb(void* pixels)
+	{
+		stbi_image_free(pixels);
+	}
+};
+
+struct Mesh
+{
+	// should add index
+
+	std::vector<glm::vec2> m_host;   // this is on the cpu
+	GLuint m_device;       // this is on the gpu
+	bool m_static; // does sending to the device free the host
+
+	int m_vertex_count;
+
+	Mesh()
+		: m_host         ()
+		, m_device       (0)
+		, m_static       (true)
+		, m_vertex_count (0)
+	{}
+
+	Mesh(
+		std::vector<glm::vec2> host,
+		bool is_static = true
+	)
+		: m_host         (host)
+		, m_device       (0)
+		, m_static       (is_static)
+		, m_vertex_count (host.size())
+	{}
+
+	~Mesh()
+	{
+		if (m_device) gl(glDeleteVertexArrays(1, &m_device));
+	}
+
+	int TriangleCount() const { return m_vertex_count / 3; }
+	int VertexCount() const {return m_vertex_count; }
+	bool OnHost() { return m_host.size() > 0; }
+	bool OnDevice() { return m_device > 0; }
+
+	void FreeHost()
+	{
+		SDL_assert(OnHost() && "Nothing to free on the host");
+		m_host.clear();
+	}
+
+	void SendToDevice()
+	{
+		m_vertex_count = m_host.size();
+
+		if (OnDevice())
+		{
+			// gl(glBindTexture(GL_TEXTURE_2D, m_device));
+			// gl(glTextureSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Width(), Height(), mode, GL_UNSIGNED_BYTE, m_host->pixels));
+		}
+
+		else
+		{
+			GLuint vbo;
+			gl(glGenBuffers(1, &vbo));
+			gl(glGenVertexArrays(1, &m_device));
+
+			gl(glBindBuffer(GL_ARRAY_BUFFER, vbo));
+			gl(glBufferData(GL_ARRAY_BUFFER, m_vertex_count * 2 * sizeof(float), m_host.data(), GL_STATIC_DRAW));
+
+			gl(glBindVertexArray(m_device));
+			gl(glEnableVertexAttribArray(0));
+			gl(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr));
+		}
+
+		if (m_static)
+		{
+			FreeHost();
+		}
+
+		// state change on GL_ARRAY_BUFFER
+	}
+
+	// yes moves
+	//  no copys
+	Mesh(Mesh&& move)
+		: m_host   (std::move(move.m_host))
+		, m_device (move.m_device)
+		, m_static (move.m_static)
+	{
+		move.m_device = 0;
+	}
+	Mesh& operator=(Mesh&& move)
+	{
+		m_host = std::move(move.m_host);
+		m_device = move.m_device;
+		m_static = move.m_static;
+		move.m_device = 0;
+		return *this;
+	}
+	Mesh(const Mesh& copy) = delete;
+	Mesh& operator=(const Mesh& copy) = delete;
+
+private:
+	std::tuple<u8*, int, int, int> load_image_using_stb(const std::string& filepath)
+	{
+		int width, height, channels, format;
+		stbi_info(filepath.c_str(), &width, &height, &channels);
+
+		switch (channels)
+		{
+			case 1: format = STBI_grey;       break;
+			case 2: format = STBI_grey_alpha; break;
+			case 3: format = STBI_rgb;        break;
+			case 4: format = STBI_rgb_alpha;  break;
+		}
+
+		u8* pixels = stbi_load(filepath.c_str(), &width, &height, &channels, format);
+
+		if (!pixels || stbi_failure_reason())
+		{
+			printf("failed to load image '%s' reason: %s\n", filepath.c_str(), stbi_failure_reason());
+		}
+
+		return std::make_tuple(pixels, width, height, channels);
+	}
+
+	void free_image_using_stb(void* pixels)
+	{
+		stbi_image_free(pixels);
+	}
 };
 
 /*
@@ -293,6 +482,9 @@ struct SpriteRenderer2D
 {
 	GLuint m_vertices;
 	GLuint m_shader;
+
+	// this gets run multiple times... should save static stuff like shaders
+	// drop raii just use init function or something
 
 	SpriteRenderer2D()
 	{
@@ -343,7 +535,7 @@ struct SpriteRenderer2D
 
 								"void main()"
 								"{"
-									"color = tint;" //  * texture(sprite, TexCoords)
+									"color = tint * texture(sprite, TexCoords);"  
 								"}";
 
 		GLuint shader_vert = gl(glCreateShader(GL_VERTEX_SHADER));
@@ -391,7 +583,7 @@ struct SpriteRenderer2D
 
 	~SpriteRenderer2D()
 	{
-		if (m_vertices == 0) return; // has been moved
+		if (m_shader == 0) return; // has been moved
 
 		// why does this error loop forever
 		// do the vbos need to be deleted aswell?
@@ -406,13 +598,21 @@ struct SpriteRenderer2D
 	} 
 	m_render_state;
 
-	void Begin(Camera& camera) // include render target
+	// I dont like clear here, it's dependent on the order of systems
+	// drawings, which will make odd behaviour
+
+	void Begin(Camera& camera, bool clear) // include render target
 	{
 		m_render_state.camera_proj = camera.Projection();
 
-		Color cc = Color(22, 22, 22, 22);
-		gl(glClearColor(cc.rf(), cc.gf(), cc.bf(), cc.af()));
-		gl(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+		if (clear)
+		{
+			Color cc = Color(22, 22, 22, 22);
+			gl(glClearColor(cc.rf(), cc.gf(), cc.bf(), cc.af()));
+			gl(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+		}
 	}
 
 	// should queue and sort by least state change, could also instance
@@ -432,7 +632,7 @@ struct SpriteRenderer2D
 
 		gl(glUniformMatrix4fv (glGetUniformLocation (m_shader, "projection"), 1, false, glm::value_ptr(m_render_state.camera_proj)));
 		gl(glUniformMatrix4fv (glGetUniformLocation (m_shader, "model"),      1, false, glm::value_ptr(transform.World())));
-		gl(glUniform4fv       (glGetUniformLocation (m_shader, "tint"),       1,        glm::value_ptr(sprite.m_tint.as_v4())));
+		gl(glUniform4fv       (glGetUniformLocation (m_shader, "tint"),       1,        glm::value_ptr(Color().as_v4())));
 
 		gl(glUniform1i(glGetUniformLocation(m_shader, "sprite"), 0));
 		gl(glActiveTexture(GL_TEXTURE0));
@@ -459,6 +659,138 @@ struct SpriteRenderer2D
 	}
 	SpriteRenderer2D(const SpriteRenderer2D& copy) = delete;
 	SpriteRenderer2D& operator=(const SpriteRenderer2D& copy) = delete;
+};
+
+struct TriangleRenderer2D
+{
+	GLuint m_shader;
+
+	TriangleRenderer2D()
+	{
+		const char* source_vert = 
+								"#version 330 core\n"
+								"layout (location = 0) in vec2 vertex;" // <vec2 position>
+								"uniform mat4 model;"
+								"uniform mat4 projection;"
+								"void main()"
+								"{"
+									"gl_Position = projection * model * vec4(vertex.xy, 0.0, 1.0);"
+								"}";
+
+		const char* source_frag = 
+								"#version 330 core\n"
+								"out vec4 color;"
+								"uniform vec4 tint;"
+								"void main()"
+								"{"
+									"color = tint;"  
+								"}";
+
+		GLuint shader_vert = gl(glCreateShader(GL_VERTEX_SHADER));
+		gl(glShaderSource(shader_vert, 1, &source_vert, nullptr));
+		gl(glCompileShader(shader_vert));
+
+		GLint isCompiled = 0;
+		glGetShaderiv(shader_vert, GL_COMPILE_STATUS, &isCompiled);
+		if(isCompiled == GL_FALSE)
+		{
+			GLint maxLength = 0;
+			glGetShaderiv(shader_vert, GL_INFO_LOG_LENGTH, &maxLength);
+			std::vector<GLchar> infoLog(maxLength);
+			glGetShaderInfoLog(shader_vert, maxLength, &maxLength, &infoLog[0]);
+			glDeleteShader(shader_vert);
+			printf("Failed to compile vertex shader: %s\n", (char*)infoLog.data());
+			assert(false && "Failed to compile vertex shader");
+		}
+
+		GLuint shader_frag = gl(glCreateShader(GL_FRAGMENT_SHADER));
+		gl(glShaderSource(shader_frag, 1, &source_frag, nullptr));
+		gl(glCompileShader(shader_frag));
+
+		glGetShaderiv(shader_frag, GL_COMPILE_STATUS, &isCompiled);
+		if(isCompiled == GL_FALSE)
+		{
+			GLint maxLength = 0;
+			glGetShaderiv(shader_frag, GL_INFO_LOG_LENGTH, &maxLength);
+			std::vector<GLchar> infoLog(maxLength);
+			glGetShaderInfoLog(shader_frag, maxLength, &maxLength, &infoLog[0]);
+			glDeleteShader(shader_frag);
+			printf("Failed to compile fragment shader: %s\n", (char*)infoLog.data());
+			assert(false && "Failed to compile fragment shader");
+		}
+
+		m_shader = gl(glCreateProgram());
+		gl(glAttachShader(m_shader, shader_vert));
+		gl(glAttachShader(m_shader, shader_frag));
+
+		gl(glLinkProgram(m_shader));
+
+		gl(glDeleteShader(shader_vert));
+		gl(glDeleteShader(shader_frag));
+	}
+
+	~TriangleRenderer2D()
+	{
+		if (m_shader == 0) return; // has been moved
+		gl(glDeleteProgram(m_shader));
+	}
+
+	struct
+	{
+		glm::mat4 camera_proj;
+	}
+	m_render_state;
+
+	void Begin(Camera& camera, bool clear) // include render target
+	{
+		m_render_state.camera_proj = camera.Projection();
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		
+		if (clear)
+		{
+			Color cc = Color(22, 22, 22, 22);
+			gl(glClearColor(cc.rf(), cc.gf(), cc.bf(), cc.af()));
+			gl(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+		}
+	}
+
+	// should queue and sort by least state change, could also instance
+	// but Ill just go with this until its a problem...
+
+	void DrawMesh(const Transform2D& transform, Mesh& mesh)
+	{
+		if (!mesh.OnDevice())
+		{
+			mesh.SendToDevice();
+		}
+
+		gl(glUseProgram(m_shader));
+
+		gl(glBindVertexArray(mesh.m_device));
+
+		gl(glUniformMatrix4fv (glGetUniformLocation (m_shader, "projection"), 1, false, glm::value_ptr(m_render_state.camera_proj)));
+		gl(glUniformMatrix4fv (glGetUniformLocation (m_shader, "model"),      1, false, glm::value_ptr(transform.World())));
+		gl(glUniform4fv       (glGetUniformLocation (m_shader, "tint"),       1,        glm::value_ptr(Color(255, 0, 0).as_v4())));
+
+		gl(glDrawArrays(GL_TRIANGLES, 0, mesh.VertexCount()));
+	}
+
+	// yes moves
+	//  no copys
+	TriangleRenderer2D(TriangleRenderer2D&& move)
+		: m_shader   (move.m_shader)
+	{
+		move.m_shader = 0;
+	}
+	TriangleRenderer2D& operator=(TriangleRenderer2D&& move)
+	{
+		m_shader = move.m_shader;	
+		move.m_shader = 0;
+		return *this;
+	}
+	TriangleRenderer2D(const TriangleRenderer2D& copy) = delete;
+	TriangleRenderer2D& operator=(const TriangleRenderer2D& copy) = delete;
 };
 
 struct WindowConfig
@@ -510,6 +842,8 @@ public:
 		Init_Imgui(first_glsl_version);
 
 		Resize(config.Width, config.Height);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_BLEND);
 	}
 
 	~Window()

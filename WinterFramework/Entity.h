@@ -366,7 +366,8 @@ struct entity_storage
 		m_pool.m_block_size = archetype.m_size + sizeof(entity_data);
 	}
 
-	entity_handle create_entity()
+	entity_handle create_entity(
+		bool deafult_components = true)
 	{
 		char* raw = m_pool.alloc_block();
 
@@ -375,6 +376,7 @@ struct entity_storage
 		entity->m_version = m_instance;
 		entity->m_index = m_pool.get_block_index(raw); // search, alloc_block could return this
 
+		if (deafult_components)
 		for (const component& component : m_archetype.m_components)
 		{
 			component.m_default(offset_raw_pointer(entity->m_components, component));
@@ -396,11 +398,9 @@ struct entity_storage
 		entity_data* entity = unwrap(handle);
 
 		if (destroy_components)
+		for (const component& component : m_archetype.m_components)
 		{
-			for (const component& component : m_archetype.m_components)
-			{
-				component.m_destructor(offset_raw_pointer(entity->m_components, component));
-			}
+			component.m_destructor(offset_raw_pointer(entity->m_components, component));
 		}
 		
 		m_pool.free_block(entity);
@@ -441,7 +441,7 @@ struct entity_storage
 		assert(handle.m_archetype == m_archetype.m_hash      && "entity_storage::move_entity failed, archetype mismatch");
 		assert(handle.m_version == unwrap(handle)->m_version && "entity_storage::move_entity failed, version mismatch");
 
-		entity_handle new_handle = new_store.create_entity();
+		entity_handle new_handle = new_store.create_entity(false);
 
 		entity_data* old_entity =           unwrap(handle);
 		entity_data* new_entity = new_store.unwrap(new_handle);
@@ -886,10 +886,6 @@ struct entity_manager
 	template<typename _t, typename... _args>
 	entity add(entity_handle handle, _args&&... args)
 	{
-		if constexpr (sizeof...(_args) == 0) {
-			return add(handle, make_component<_t>(), nullptr);
-		}
-
 		_t temp = _t{args...}; // this gets moved
 		return add(handle, make_component<_t>(), &temp);
 	}
