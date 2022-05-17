@@ -4,6 +4,9 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
+float get_rand(float x) { return x * rand() / (float)RAND_MAX; }
+int get_rand(int x) { return rand() % x; }
+
 using u32 = uint32_t;
 using u8 = uint8_t;
 
@@ -22,6 +25,11 @@ struct Color
 	{
 		return { rf(), gf(), bf(), af() };
 	}
+
+	static Color rand()
+	{
+		return Color(get_rand(255), get_rand(255), get_rand(255), get_rand(255));	
+	}
 };
 
 struct Transform2D
@@ -29,9 +37,13 @@ struct Transform2D
 	float x, y, z, sx, sy, r;
 
 	Transform2D()
-		:  x(0),  y(0), z(0)
-		, sx(1), sy(1)
-		, r(0)
+		:  x(0), y(0), z(0), sx(1), sy(1), r(0)
+	{}
+
+	Transform2D(
+		int x, int y, int z, int sx, int sy, int r
+	)
+		:  x(x), y(y), z(z), sx(sx), sy(sy), r(r)
 	{}
 
 	glm::mat4 World() const

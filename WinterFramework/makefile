@@ -13,7 +13,7 @@ EXT_SRC = serial_json.cpp RenderingSDL.cpp Time.cpp
 
 VENDOR_SRC = ./vendor/glad/src/glad.c ./vendor/imgui/backends/imgui_impl_sdl.cpp ./vendor/imgui//backends/imgui_impl_opengl3.cpp
 
-VENDOR_INC = sdl box2d imgui hitbox stb glm glad asio json
+VENDOR_INC = sdl box2d imgui hitbox entt stb glm glad asio json
 VENDOR_LIB = sdl box2d imgui hitbox 
 
 VENDOR_BIN = sdl2dll box2d imgui hitbox

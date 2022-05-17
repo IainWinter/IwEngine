@@ -8,6 +8,7 @@
 #include <string>
 #include <cmath>
 #include <tuple>
+#include <array>
 
 // renderer ties this to opengl
 // should split this into an ext and seperate the imgui and window
@@ -55,7 +56,7 @@ inline bool MessageCallback(
 	bool hasError = true;
 	GLenum lastErr = 0;
 
-	while (hasError && finite < 10)
+	while (hasError && finite < 3)
 	{
 		GLenum err = glGetError();
 		hasError = err != GL_NO_ERROR;
@@ -70,7 +71,7 @@ inline bool MessageCallback(
 				printf("\r");
 			}
 
-			else
+			else if (finite > 0)
 			{
 				finite = 0;
 				printf("\n"); // this inf loops on a set of repeating two errors
@@ -115,9 +116,17 @@ struct event_WindowResize
 	int width, height;
 };
 
-struct event_MouseMove
+struct event_Mouse
 {
-	int x, y;
+	int pixel_x, pixel_y;
+	float screen_x, screen_y;
+	float vel_x, vel_y;
+
+	bool button_left;
+	bool button_middle;
+	bool button_right;
+	bool button_x1;
+	bool button_x2;
 };
 
 // should provide a way to map an sdl input to an enum, and read a char from it
@@ -200,6 +209,39 @@ struct Texture
 		// pitch is the size in bytes of each row of image data
 		
 		auto [pixels, width, height, channels] = load_image_using_stb(path);
+		init_texture_host_memory(pixels, width, height, channels);
+	}
+
+	Texture(
+		int width, int height, int channels,
+		bool is_static = true
+	)
+		: m_device (0)
+		, m_static (is_static)
+	{
+		void* pixels = malloc(width * height * channels);
+		init_texture_host_memory(pixels, width, height, channels);
+	}
+
+	~Texture()
+	{
+		if (m_host) 
+		{
+			void* pixels = m_host->pixels;
+			SDL_FreeSurface(m_host);
+			free(pixels); // free_image_using_stb(pixels); // stb calls free, doesnt HAVE to though so this is a lil jank
+			m_host = nullptr;
+		}
+
+		if (m_device) 
+		{
+			gl(glDeleteTextures(1, &m_device));
+		}
+	}
+
+private:
+	void init_texture_host_memory(void* pixels, int w, int h, int channels)
+	{
 		std::array<int, 4> masks = {0, 0, 0, 0};
 		switch (channels)
 		{
@@ -210,21 +252,20 @@ struct Texture
 			default: assert(false && "no channels?"); break;
 		}
 
-		m_host = SDL_CreateRGBSurfaceFrom(pixels, width, height, channels * 8, width * channels, masks[0], masks[1], masks[2], masks[3]);
+		m_host = SDL_CreateRGBSurfaceFrom(pixels, w, h, channels * 8, w * channels, masks[0], masks[1], masks[2], masks[3]);
 		SDL_assert(m_host && "Sprite failed to load");
 	}
+public:
 
-	~Texture()
+	Color& Get(int x, int y)
 	{
-		if (m_host) 
-		{
-			void* pixels = m_host->pixels;
-			SDL_FreeSurface(m_host);
-			free_image_using_stb(pixels);
-			m_host = nullptr;
-		}
+		int index = (x + y * m_host->w) * m_host->format->BytesPerPixel;
+		return *(Color*)((u8*)m_host->pixels + index);
+	}
 
-		if (m_device) gl(glDeleteTextures(1, &m_device));
+	void ClearHost()
+	{
+		memset(m_host->pixels, 0, m_host->pitch * m_host->h);
 	}
 
 	int Width() const { return m_host->w; }
@@ -253,8 +294,7 @@ struct Texture
 
 		if (OnDevice())
 		{
-			gl(glBindTexture(GL_TEXTURE_2D, m_device));
-			gl(glTextureSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Width(), Height(), mode, GL_UNSIGNED_BYTE, m_host->pixels));
+			gl(glTextureSubImage2D(m_device, 0, 0, 0, Width(), Height(), mode, GL_UNSIGNED_BYTE, m_host->pixels));
 		}
 
 		else
@@ -773,7 +813,7 @@ struct TriangleRenderer2D
 		gl(glUniformMatrix4fv (glGetUniformLocation (m_shader, "model"),      1, false, glm::value_ptr(transform.World())));
 		gl(glUniform4fv       (glGetUniformLocation (m_shader, "tint"),       1,        glm::value_ptr(Color(255, 0, 0).as_v4())));
 
-		gl(glDrawArrays(GL_TRIANGLES, 0, mesh.VertexCount()));
+		gl(glDrawArrays(GL_LINE_LOOP, 0, mesh.VertexCount()));
 	}
 
 	// yes moves
@@ -881,7 +921,21 @@ public:
 				}
 				case SDL_MOUSEMOTION:
 				{
-					m_events->send(event_MouseMove { event.motion.x, event.motion.y });
+					event_Mouse mouse;
+
+					m_events->send(event_Mouse { 
+						event.motion.x,                                      // position as (0, width/height)
+						event.motion.y,
+						(event.motion.x / (float)m_config.Width)  * 2 - 1,   // position as (-1, +1)
+						(event.motion.y / (float)m_config.Height) * 2 - 1,
+						float(event.motion.xrel),                            // velocity
+						float(event.motion.yrel),
+						bool(event.motion.state & SDL_BUTTON_LMASK),
+						bool(event.motion.state & SDL_BUTTON_MMASK),
+						bool(event.motion.state & SDL_BUTTON_RMASK),
+						bool(event.motion.state & SDL_BUTTON_X1MASK),
+						bool(event.motion.state & SDL_BUTTON_X2MASK),
+					});
 					break;
 				}
 				case SDL_WINDOWEVENT:
