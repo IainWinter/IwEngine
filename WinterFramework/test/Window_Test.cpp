@@ -1,6 +1,7 @@
 #include "../Entry.h"
 #include "../Entity.h"
 #include "../Rendering.h"
+#include "../Windowing.h"
 #include "../Physics.h"
 #include "../ext/Time.h"
 #include "../ext/marching_cubes.h"
@@ -29,7 +30,7 @@ entity CreateTexturedBox(PhysicsWorld& world, const std::string& path, const std
 	Texture collider_mask = Texture(collider_mask_path);
 	
 	auto polygons = MakePolygonFromField<u32>(
-		(u32*)collider_mask.m_host->pixels, 
+		(u32*)collider_mask.Pixels(), 
 		collider_mask.Width(), 
 		collider_mask.Height(),
 		[](const u32& color) { return (color & ~0xff000000) == 0; }
@@ -160,9 +161,22 @@ struct TriangleRenderer2DSystem : System
 
 struct AddSandToWorldSystem : System
 {
+	Window& window;
+	SandWorld& sand;
+
+	bool mouseDown;
+	float mouseX, mouseY, mouseVx, mouseVy;
+
+	float accTime;
+	float x;
+
 	AddSandToWorldSystem()
+		: window (entities().first<Window>())
+		, sand   (entities().first<SandWorld>())
 	{
 		events().attach<event_Mouse>(this);
+		accTime = 0;
+		mouseDown = false;
 	}
 
 	~AddSandToWorldSystem()
@@ -170,16 +184,45 @@ struct AddSandToWorldSystem : System
 		events().detach(this);
 	}
 
+	float s = 100;
+	CellVel v;
+
+	void ImGui() override
+	{
+		ImGui::Begin("sand");
+		ImGui::SliderFloat("speed", &s, 0, 1000);
+		ImGui::SliderFloat("dampen", &v.dampen, .1, 1000);
+		ImGui::End();
+	}
+
+	void Update() override
+	{
+		if (mouseDown)
+		{
+			float x = mouseX;
+			float y = mouseY;
+			float d = sqrt(x*x + y*y);
+			x /= d;
+			y /= d;
+
+			x *= s;
+			y *= s;
+
+			sand.CreateCell(-200 + get_rand(30), 0 + get_rand(30), Color(255, 255, 19))
+				.add<CellVel>(x, y, v.dampen)
+				.add<CellLife>(5.f);
+		}
+	}
+
 	void on(event_Mouse& e)
 	{
-		auto [window, sand] = entities().first<Window, SandWorld>();
-
-		if (e.button_left)
+		if (e.button_repeat >= 1)
 		{
-			sand.CreateCell(e.pixel_x, window.m_config.Height - e.pixel_y, Color::rand())
-				.add<CellVel>(get_rand(2.f) - 1.f, get_rand(2.f) - 1.f)
-				.add<CellTime>(1.f);
+			mouseDown = e.button_left;
 		}
+
+		mouseX = e.screen_x * 640;
+		mouseY = e.screen_y * 360;
 	}
 };
 
@@ -259,7 +302,7 @@ struct Application
 		events().attach<event_Shutdown> (this);
 
 		WindowConfig windowConfig = {
-			"Winter Framework Testbed", 1280, 720
+			"Winter Framework Testbed", 800, 1000
 		};
 
 		m_modules = entities().create()
@@ -267,8 +310,8 @@ struct Application
 			.add<SpriteRenderer2D>()
 			.add<TriangleRenderer2D>()
 			.add<PhysicsWorld>()
-			.add<SandWorld>(640, 360, 32, 18)
-			.add<Camera>(0, 0, 32, 18);
+			.add<SandWorld>(400, 400, 20*.8, 20)
+			.add<Camera>(0, 0, 20*.8, 20);
 
 		InputMapping& input = m_modules.get<Window>().m_input;
 

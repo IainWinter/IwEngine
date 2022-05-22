@@ -21,224 +21,248 @@
 // imgui is going to be the UI library for everything in the game
 // so hard commit to tieing it up with the renderer
 
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_opengl3.h"
-#include "imgui/imgui_impl_sdl.h"
-#include "sdl/SDL.h"
-#include "glad/glad.h"
+#include "util/error_check.h" // gives gl
+#include "sdl/SDL_surface.h"
 
 #define STB_IMAGE_IMPLEMENTATION // not great, I guess this should be in a cpp file
 #include "stb/stb_image.h"
 
-inline constexpr char const* GetErrorString(
-	GLenum err) noexcept
+std::tuple<u8*, int, int, int> load_image_using_stb(const std::string& filepath)
 {
-	switch (err) {
-		case GL_NO_ERROR:                      return "GL_NO_ERROR";
-		case GL_INVALID_ENUM:                  return "GL_INVALID_ENUM";
-		case GL_INVALID_VALUE:                 return "GL_INVALID_VALUE";
-		case GL_INVALID_OPERATION:             return "GL_INVALID_OPERATION";
-		case GL_STACK_OVERFLOW:                return "GL_STACK_OVERFLOW";
-		case GL_STACK_UNDERFLOW:               return "GL_STACK_UNDERFLOW";
-		case GL_OUT_OF_MEMORY:                 return "GL_OUT_OF_MEMORY";
-		case GL_TABLE_TOO_LARGE:               return "GL_TABLE_TOO_LARGE";
-		case GL_INVALID_FRAMEBUFFER_OPERATION: return "GL_INVALID_FRAMEBUFFER_OPERATION";
-		default:                               return "unknown error";
+	int width, height, channels, format;
+	stbi_info(filepath.c_str(), &width, &height, &channels);
+
+	switch (channels)
+	{
+		case 1: format = STBI_grey;       break;
+		case 2: format = STBI_grey_alpha; break;
+		case 3: format = STBI_rgb;        break;
+		case 4: format = STBI_rgb_alpha;  break;
 	}
+
+	u8* pixels = stbi_load(filepath.c_str(), &width, &height, &channels, format);
+
+	if (!pixels || stbi_failure_reason())
+	{
+		printf("failed to load image '%s' reason: %s\n", filepath.c_str(), stbi_failure_reason());
+	}
+
+	return std::make_tuple(pixels, width, height, channels);
 }
 
-inline bool MessageCallback(
-	const char* stmt,
-	const char* fname,
-	int line)
+void free_image_using_stb(void* pixels)
 {
-	int finite = 0;
-	bool hasError = true;
-	GLenum lastErr = 0;
-
-	while (hasError && finite < 3)
-	{
-		GLenum err = glGetError();
-		hasError = err != GL_NO_ERROR;
-
-		if (hasError)
-		{
-			const char* str = GetErrorString(err);
-			
-			if (err == lastErr) 
-			{
-				finite += 1;
-				printf("\r");
-			}
-
-			else if (finite > 0)
-			{
-				finite = 0;
-				printf("\n"); // this inf loops on a set of repeating two errors
-			}
-
-			printf("GL ERROR: %s in file %s[%d] %s", str, fname, line, stmt);
-			if (err == lastErr) printf(" x%d", finite);
-		}
-
-		lastErr = err;
-	}
-
-	if (hasError)
-	{
-		printf("\n");
-	}
-	
-	return hasError;
+	free(pixels); // stb calls free, doesnt HAVE to though so this is a lil jank
 }
 
-#ifdef IW_DEBUG
-#	define gl(stmt)  stmt; if (MessageCallback(#stmt, __FILE__, __LINE__)) {}
-#	define gle(stmt) stmt; if (MessageCallback(#stmt, __FILE__, __LINE__)) { err = true; }
-#else
-#	define gl(stmt)  stmt
-#	define gle(stmt) stmt
-#endif
+// I want to create the simplest graphics api that hides as much as possible away
+// I only need simple Texture/Mesh/Shader, I dont even need materials
+// user should be able to understand where the memory is without needing to know the specifics of each type
+//   I like how cuda does it with host and device
+// Each thing could be interfaces with a graphics objeect type, might make things more? or less confusing
+// This should just be a wrapper, I dont want to cover everything, so expose underlying library
 
-/*
+// I was using RAII, but that causes headaches with all the move constructors
+// So here is how this works
 
-	Events
+// Constructor  ( create host memory / load from files )
+// SendToDevice ( create device memory and copy over) [free host if static]
+// Cleanup      ( destroy host and device memory if they exists)
 
-*/
+// this allows these classes to be passed to functions without ref
+// bc they are quite small, only store handles / pointers
 
-struct event_Shutdown
+// doesnt support reading from device, but just follow the pattern to do that. Need SendToHost, _InitOnHost, _UpdateOnHost
+// or just require non static and have only SendToHost and UpdateOnHost
+// now it does :)
+
+// you cannot however, SendToDevice(), FreeHost(), SendToHost()
+// Sending to host requires it is never freeed, and therefore not static
+
+struct IDeviceObject
 {
+	IDeviceObject(
+		bool is_static
+	)
+		: m_static (is_static)
+	{} 
 
-};
-
-struct event_WindowResize
-{
-	int width, height;
-};
-
-struct event_Mouse
-{
-	int pixel_x, pixel_y;
-	float screen_x, screen_y;
-	float vel_x, vel_y;
-
-	bool button_left;
-	bool button_middle;
-	bool button_right;
-	bool button_x1;
-	bool button_x2;
-};
-
-// should provide a way to map an sdl input to an enum, and read a char from it
-// imgui handles all input typing for me
-
-#include <unordered_map>
-
-enum class InputName
-{
-	_NONE,
-	UP,
-	DOWN,
-	RIGHT,
-	LEFT,
-};
-
-struct InputMapping
-{
-	std::unordered_map<SDL_Scancode, InputName> m_keyboard;
-
-	InputName Map(SDL_Scancode code)
+	void FreeHost()
 	{
-		InputName name = InputName::_NONE;
-		auto itr = m_keyboard.find(code);
-		if (itr != m_keyboard.end())
+		assert_on_host();
+		_FreeHost();
+	}
+
+	void FreeDevice()
+	{
+		assert_on_device();
+		_FreeDevice();
+	}
+
+	void SendToDevice()
+	{
+		assert_on_host(); // always require at least something on host to be copied to device, no device only init
+
+		if (OnDevice())
 		{
-			name = itr->second;
+			assert_not_static();
+			_UpdateOnDevice();
 		}
 
-		return name;
+		else
+		{
+			_InitOnDevice();
+			if (m_static) FreeHost();
+		}
 	}
+
+	void SendToHost()
+	{
+		assert_on_host(); // need host memory
+		assert_not_static();
+		_UpdateFromDevice();
+	}
+
+	void Cleanup()
+	{
+		if (OnDevice()) _FreeDevice();
+		if (OnHost())   _FreeHost();
+	}
+
+	bool IsStatic() const
+	{
+		return m_static;
+	}
+
+	// interface
+
+public:
+	virtual bool OnHost() const = 0; 
+	virtual bool OnDevice() const = 0;
+	virtual int  DeviceHandle() const = 0;      // underlying opengl handle, useful for custom calls
+
+protected:
+	virtual void _FreeHost() = 0;               // delete host memory
+	virtual void _FreeDevice() = 0;             // delete device memory
+	virtual void _InitOnDevice() = 0;           // create device memory
+	virtual void _UpdateOnDevice() = 0;         // update device memory
+	virtual void _UpdateFromDevice() = 0;       // update host memory
+private:
+	bool m_static;
+
+	// some helpers
+
+// these could be public
+protected:
+	void assert_on_host()    const { assert(OnHost()   && "Device object has no data on host"); }
+	void assert_on_device()  const { assert(OnDevice() && "Device object has no data on device"); }
+	void assert_is_static()  const { assert( m_static  && "Device object is static"); }
+	void assert_not_static() const { assert(!m_static  && "Device object is not static"); }
 };
 
-struct event_Input
+// textures are very simple
+// just two arrays, one on the cpu, one on the device
+// can pass by value without much worry
+struct Texture : IDeviceObject
 {
-	InputName name;
-	float state;
-};
+private:
+	SDL_Surface* m_host     = nullptr; // deafult construction
+	GLuint       m_device   = 0u;
 
-/*
+	int          m_width    = 0;       // cache so we don't need to read from host
+	int          m_height   = 0; 
+	int          m_channels = 0; 
 
-	Textures and Sprites
+// public texture specific functions
 
-*/
+public:
+	int Width()      const { return m_width; } 
+	int Height()     const { return m_height; } 
+	int Channels()   const { return m_channels; }
+	u8* Pixels()     const { return (u8*)m_host->pixels; }
+	int BufferSize() const { return Width() * Height() * Channels(); }
 
-// mesh and texture, which gets used as a sprite, are very similar
-// should think about combining. I want ease of use to be the focus
+	// reads from the host
+	// only rgba up to Channels() belong to the pixel at (x, y)
+	// only r -> Channels() = 1
+	// only rg -> Channels() = 2
+	// only rgb -> Channels() = 3
+	// full rgba -> Channels() = 4
+	      Color& Get(int x, int y)       { assert_on_host(); return *(Color*)(Pixels() + x + y * m_width); }
+	const Color& Get(int x, int y) const { assert_on_host(); return *(Color*)(Pixels() + x + y * m_width); }
 
-// struct IGraphicsObject
-// {
-// 	GLuint m_device; // handle to the object in the graphics library
-// 	bool m_static; // if after submitting the data to the device, should the host be freeed
+	void Clear()
+	{
+		assert_on_host();
+		memset(m_host->pixels, 0, m_width * m_height * m_channels);
+	}
 
-// 	bool OnDevice() const { return m_device != 0; };
+// interface
 
-// 	virtual bool OnHost() const = 0;
-// 	virtual void SendToDevice() = 0;
-// 	virtual void FreeHost() = 0;
-// };
+public:	
+	bool OnHost()       const override { return m_host   != nullptr; }
+	bool OnDevice()     const override { return m_device != 0u;      }
+	int  DeviceHandle() const override { return m_device; } 
+protected:
+	void _FreeHost()
+	{
+		void* pixels = m_host->pixels;
+		SDL_FreeSurface(m_host);
+		free_image_using_stb(pixels);
+		m_host = nullptr;
+	}
 
-struct Texture
-{
-	SDL_Surface* m_host;   // this is on the cpu
-	GLuint m_device;       // this is on the gpu
-	bool m_static; // does sending to the device free the host
+	void _FreeDevice() override
+	{
+		gl(glDeleteTextures(1, &m_device));
+		m_device = 0;
+	}
 
+	void _InitOnDevice() override
+	{
+		gl(glGenTextures(1, &m_device));
+		gl(glBindTexture(GL_TEXTURE_2D, m_device));
+		gl(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+		gl(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+		gl(glTexImage2D(GL_TEXTURE_2D, 0, gl_format(), Width(), Height(), 0, gl_format(), GL_UNSIGNED_BYTE, Pixels()));
+	}
+
+	void _UpdateOnDevice() override
+	{
+		gl(glTextureSubImage2D(m_device, 0, 0, 0, Width(), Height(), gl_format(), GL_UNSIGNED_BYTE, Pixels()));
+	}
+
+	void _UpdateFromDevice() override
+	{
+		gl(glGetTextureImage(m_device, 0, gl_format(), GL_UNSIGNED_BYTE, BufferSize(), Pixels()));
+	}
+
+// construction
+
+public:
 	Texture()
-		: m_host   (nullptr)
-		, m_device (0)
-		, m_static (true)
+		: IDeviceObject (true)
 	{}
 
 	Texture(
 		const std::string& path,
-		bool is_static = true
+		bool isStatic = true
 	)
-		: m_device (0)
-		, m_static (is_static)
+		: IDeviceObject (isStatic)
 	{
-		// pitch is the size in bytes of each row of image data
-		
 		auto [pixels, width, height, channels] = load_image_using_stb(path);
 		init_texture_host_memory(pixels, width, height, channels);
 	}
 
 	Texture(
 		int width, int height, int channels,
-		bool is_static = true
+		bool isStatic = true
 	)
-		: m_device (0)
-		, m_static (is_static)
+		: IDeviceObject (isStatic)
 	{
 		void* pixels = malloc(width * height * channels);
 		init_texture_host_memory(pixels, width, height, channels);
 	}
-
-	~Texture()
-	{
-		if (m_host) 
-		{
-			void* pixels = m_host->pixels;
-			SDL_FreeSurface(m_host);
-			free(pixels); // free_image_using_stb(pixels); // stb calls free, doesnt HAVE to though so this is a lil jank
-			m_host = nullptr;
-		}
-
-		if (m_device) 
-		{
-			gl(glDeleteTextures(1, &m_device));
-		}
-	}
-
 private:
 	void init_texture_host_memory(void* pixels, int w, int h, int channels)
 	{
@@ -252,250 +276,582 @@ private:
 			default: assert(false && "no channels?"); break;
 		}
 
+		// pitch is the size in bytes of each row of image data
+
 		m_host = SDL_CreateRGBSurfaceFrom(pixels, w, h, channels * 8, w * channels, masks[0], masks[1], masks[2], masks[3]);
-		SDL_assert(m_host && "Sprite failed to load");
+		assert(m_host && "Sprite failed to load");
+
+		m_width = w; // cache values
+		m_height = h;
+		m_channels = channels;
 	}
+
+	GLenum gl_format() const // doesnt need to be here
+	{
+		switch (m_host->format->BytesPerPixel)			
+		{
+			case 1: return GL_R;
+			case 2: return GL_RG;
+			case 3: return GL_RGB;
+			case 4: return GL_RGBA;
+		}
+
+		assert(false);
+		return -1;
+	}
+};
+
+// meshes are annoying
+// can have many many differnt setups
+// I am going to make the desision to spit each buffer into a seperate array so they can be appended
+// this is useful for a GenerateNormals function, which would add some buffers
+
+// so goal is to be able to add a buffer ONLY by typename
+// if vert attribs are a map, not an array, then I will store the device buffers as such
+
+// I dont like this thought because functions cannot know what other functions will change
+// so two could try and add the same type of buffer without knowing
+// and there are no names that work for everything, so aAttrib1, 2, 3, 4, 5 are needed
+// maybe should just use strings?
+// or have an order
+
+// hmm maybe create a the buffer obj that the mesh seems to be a collection
+// and then the mesh is just a map of these
+// MeshSource is a map of attribs to shared_ptrs of buffers
+// then a Mesh is just an instance of this, can swap out attribs as it likes
+
+// add std::enable_shared_from_this
+
+struct Buffer : IDeviceObject
+{
 public:
-
-	Color& Get(int x, int y)
+	enum ElementType
 	{
-		int index = (x + y * m_host->w) * m_host->format->BytesPerPixel;
-		return *(Color*)((u8*)m_host->pixels + index);
+		_none, _u8, _u32, _f32
+	};
+private:
+	void*        m_host     = nullptr; // deafult construction
+	GLuint       m_device   = 0u;
+
+	int          m_length   = 0;
+	int          m_repeat   = 0;
+	ElementType  m_type     = _none;
+
+// public mesh specific functions
+
+public:
+	      void* Data()                   { return m_host; }
+	const void* Data()             const { return m_host; }
+	int         Length()           const { return m_length; }
+	int         Repeat()           const { return m_repeat; }
+	ElementType Type()             const { return m_type; }
+	int         BytesPerElement()  const { return Repeat() * element_type_size(Type()); }
+	int         Bytes()            const { return Length() * BytesPerElement(); }
+
+	template<typename _t>       _t& Get(int i)       { assert_on_host(); return *(      _t*)m_host + i * BytesPerElement(); }
+	template<typename _t> const _t& Get(int i) const { assert_on_host(); return *(const _t*)m_host + i * BytesPerElement(); }
+
+	// length is number of elements
+	void Set(int length, const void* data)
+	{
+		assert_on_host();
+		int size = length * BytesPerElement();
+		m_length = length;
+		m_host = realloc(m_host, size);
+		memcpy(m_host, data, size);
 	}
 
-	void ClearHost()
+	// length is number of elements
+	// offset is the number of elements from the start
+	// offset must be positive and adjacent or inside of the buffer
+	// if the length + offset is larger than the buffer, it is realloced and appended to
+	// data is left uninitalized if there are gaps between offsets
+	void Append(int length, const void* data, int offset)
 	{
-		memset(m_host->pixels, 0, m_host->pitch * m_host->h);
+		assert_on_host();
+		assert(offset >= 0 && offset <= Length() && "offset must be positive and adjacent or inside of the buffer");
+		int size = length * BytesPerElement();
+		int osize = size + offset * BytesPerElement();
+		if (osize > Bytes())
+		{
+			m_host = realloc(m_host, osize);
+			m_length = length + offset;
+		}
+
+		memcpy((char*)m_host + offset, data, size);
 	}
 
-	int Width() const { return m_host->w; }
-	int Height() const {return m_host->h; }
-	bool OnHost() { return m_host; }
-	bool OnDevice() { return m_device > 0; }
+// interface
 
-	void FreeHost()
+public:
+	bool OnHost()       const override { return m_host   != nullptr; }
+	bool OnDevice()     const override { return m_device != 0u;      }
+	int  DeviceHandle() const override { return m_device; }
+protected:
+	void _FreeHost() override
 	{
-		SDL_assert(m_host && "Nothing to free on the host");
-		SDL_FreeSurface(m_host);
+		free(m_host);
 		m_host = nullptr;
 	}
 
-	void SendToDevice()
+	void _FreeDevice() override
 	{
-		GLint mode = 0;
-		switch (m_host->format->BytesPerPixel)			
-		{
-			case 1: mode = GL_R;    break;
-			case 2: mode = GL_RG;   break;
-			case 3: mode = GL_RGB;  break;
-			case 4: mode = GL_RGBA; break;
-			default: assert(false); break;
-		}
-
-		if (OnDevice())
-		{
-			gl(glTextureSubImage2D(m_device, 0, 0, 0, Width(), Height(), mode, GL_UNSIGNED_BYTE, m_host->pixels));
-		}
-
-		else
-		{
-			gl(glGenTextures(1, &m_device));
-			gl(glBindTexture(GL_TEXTURE_2D, m_device));
-			gl(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-			gl(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-			gl(glTexImage2D(GL_TEXTURE_2D, 0, mode, Width(), Height(), 0, mode, GL_UNSIGNED_BYTE, m_host->pixels));
-		}
-
-		if (m_static)
-		{
-			FreeHost();
-		}
-
-		// state change on GL_TEXTUER_2D
+		glDeleteBuffers(1, &m_device);
+		m_device = 0;
 	}
 
-	// yes moves
-	//  no copys
-	Texture(Texture&& move)
-		: m_host   (move.m_host)
-		, m_device (move.m_device)
-		, m_static (move.m_static)
+	void _InitOnDevice() override
 	{
-		move.m_host = nullptr;
-		move.m_device = 0;
-	}
-	Texture& operator=(Texture&& move)
-	{
-		m_host = move.m_host;
-		m_device = move.m_device;
-		m_static = move.m_static;
-		move.m_host = nullptr;
-		move.m_device = 0;
-		return *this;
-	}
-	Texture(const Texture& copy) = delete;
-	Texture& operator=(const Texture& copy) = delete;
-
-private:
-	std::tuple<u8*, int, int, int> load_image_using_stb(const std::string& filepath)
-	{
-		int width, height, channels, format;
-		stbi_info(filepath.c_str(), &width, &height, &channels);
-
-		switch (channels)
-		{
-			case 1: format = STBI_grey;       break;
-			case 2: format = STBI_grey_alpha; break;
-			case 3: format = STBI_rgb;        break;
-			case 4: format = STBI_rgb_alpha;  break;
-		}
-
-		u8* pixels = stbi_load(filepath.c_str(), &width, &height, &channels, format);
-
-		if (!pixels || stbi_failure_reason())
-		{
-			printf("failed to load image '%s' reason: %s\n", filepath.c_str(), stbi_failure_reason());
-		}
-
-		return std::make_tuple(pixels, width, height, channels);
+		gl(glGenBuffers(1, &m_device));
+		gl(glBindBuffer(GL_ARRAY_BUFFER, m_device)); // user can bind to what they want after using ::DeviceHandle
+		gl(glNamedBufferData(m_device, Bytes(), Data(), gl_static()));
 	}
 
-	void free_image_using_stb(void* pixels)
+	void _UpdateOnDevice() override
 	{
-		stbi_image_free(pixels);
+		// on realloc, does old buffer need to be destroied?
+
+		int size = 0;
+		glGetNamedBufferParameteriv(m_device, GL_BUFFER_SIZE, &size);
+		if (Bytes() != size) { gl(glNamedBufferData(m_device, Bytes(), Data(), gl_static())); }
+		else                 { gl(glNamedBufferSubData(m_device, 0, Bytes(), Data())); }
 	}
-};
 
-struct Mesh
-{
-	// should add index
+	void _UpdateFromDevice() override
+	{
+		gl(glGetNamedBufferSubData(m_device, 0, Bytes(), Data()));
+	}
 
-	std::vector<glm::vec2> m_host;   // this is on the cpu
-	GLuint m_device;       // this is on the gpu
-	bool m_static; // does sending to the device free the host
+// construction
 
-	int m_vertex_count;
-
-	Mesh()
-		: m_host         ()
-		, m_device       (0)
-		, m_static       (true)
-		, m_vertex_count (0)
+public:
+	Buffer()
+		: IDeviceObject (true)
 	{}
 
-	Mesh(
-		std::vector<glm::vec2> host,
-		bool is_static = true
+	Buffer(
+		int length, int repeat, ElementType type,
+		bool isStatic = true
 	)
-		: m_host         (host)
-		, m_device       (0)
-		, m_static       (is_static)
-		, m_vertex_count (host.size())
-	{}
-
-	~Mesh()
+		: IDeviceObject (isStatic)
+		, m_length      (length)
+		, m_repeat      (repeat)
+		, m_type        (type)
 	{
-		if (m_device) gl(glDeleteVertexArrays(1, &m_device));
+		m_host = malloc(length * repeat * element_type_size(type));
 	}
-
-	int TriangleCount() const { return m_vertex_count / 3; }
-	int VertexCount() const {return m_vertex_count; }
-	bool OnHost() { return m_host.size() > 0; }
-	bool OnDevice() { return m_device > 0; }
-
-	void FreeHost()
+private:
+	int element_type_size(ElementType type) const // doesnt need to be here
 	{
-		SDL_assert(OnHost() && "Nothing to free on the host");
-		m_host.clear();
-	}
-
-	void SendToDevice()
-	{
-		m_vertex_count = m_host.size();
-
-		if (OnDevice())
+		switch (type)
 		{
-			// gl(glBindTexture(GL_TEXTURE_2D, m_device));
-			// gl(glTextureSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Width(), Height(), mode, GL_UNSIGNED_BYTE, m_host->pixels));
+			case _u8:  return sizeof(u8);
+			case _u32: return sizeof(u32);
+			case _f32: return sizeof(f32);
+		}
+
+		assert(false && "invalid buffer element type");
+		return 0;
+	}
+
+	GLenum gl_static() const
+	{
+		return IsStatic() ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW;
+	}
+};
+
+// mesh data is a list of buffer objects bound together
+// by a vertex array
+// attribs in shaders need to be in the order of AttribName
+
+struct Mesh : IDeviceObject
+{
+public:
+	enum AttribName
+	{
+		aPosition,
+		aTextureCoord,
+
+		aNormal,
+		aTangent,
+		aBiTangent,
+		aCustom1,
+		aCustom2,
+		aCustom3,
+		aCustom4,
+		aCustom5,
+		aCustom6,
+
+		aIndexBuffer // the index buffer
+	};
+
+	enum DrawType
+	{
+		dTriangles,
+		dLoops
+	};
+private:
+	using _buffers = std::unordered_map<AttribName, r<Buffer>>;
+	
+	_buffers     m_buffers;            // deafult construction
+	GLuint       m_device   = 0;
+
+// public mesh specific functions
+
+public:
+	int NumberOfBuffers() const { return m_buffers.size(); }
+
+	      r<Buffer>& Get(AttribName name)       { return m_buffers.at(name); }
+	const r<Buffer>& Get(AttribName name) const { return m_buffers.at(name); }
+
+	// instances a buffer
+	void Add(AttribName name, const r<Buffer>& buffer)
+	{
+		assert(m_buffers.find(name) == m_buffers.end() && "Buffer already exists in mesh");
+		assert(name != aIndexBuffer || (buffer->Type() == Buffer::_u32 && buffer->Repeat() == 1) && "index buffer must be of type 'int' with a repeat of 1.");
+		m_buffers.emplace(name, buffer);
+	}
+
+	// creates an empty buffer
+	r<Buffer> Add(AttribName name, int length, int repeat, Buffer::ElementType type)
+	{
+		r<Buffer> buffer = std::make_shared<Buffer>(length, repeat, type);
+		Add(name, buffer);
+
+		return buffer;
+	}
+
+	// creates an empty buffer
+	// gets repeat from _t::length() or 1
+	// gets type from ::value_type or _t 
+	template<typename _t>
+	r<Buffer> Add(AttribName name, const std::vector<_t>& data)
+	{
+		Buffer::ElementType type;
+		int repeat = 1; // deafult
+
+		constexpr bool isFloat = std::is_same<_t, float>::value;
+		constexpr bool isByte  = std::is_same<_t,  char>::value || std::is_same<_t, unsigned char>::value; // or bool?
+		constexpr bool isInt   = std::is_same<_t,   int>::value || std::is_same<_t, unsigned  int>::value;
+
+		if constexpr (!isFloat && !isByte && !isInt)
+		{
+			// assume has a value_type and length() like glm
+
+			constexpr bool _isFloat = std::is_same<typename _t::value_type, float>::value;
+			constexpr bool _isByte  = std::is_same<typename _t::value_type,  char>::value || std::is_same<typename _t::value_type, unsigned char>::value; // or bool?
+			constexpr bool _isInt   = std::is_same<typename _t::value_type,   int>::value || std::is_same<typename _t::value_type, unsigned  int>::value;
+
+			if constexpr (_isFloat) { type = Buffer::_f32; }
+			if constexpr (_isByte)  { type = Buffer::_u8;  }
+			if constexpr (_isInt)   { type = Buffer::_u32; }
+
+			repeat = _t::length();
+		}
+
+		if constexpr (isFloat) { type = Buffer::_f32; }
+		if constexpr (isByte)  { type = Buffer::_u8;  }
+		if constexpr (isInt)   { type = Buffer::_u32; }
+
+		r<Buffer> buffer = Add(name, data.size(), repeat, type);
+		buffer->Set(data.size(), data.data());
+
+		return buffer;
+	}
+
+	void Draw(DrawType drawType = DrawType::dTriangles)
+	{
+		if (!OnDevice()) SendToDevice();
+		gl(glBindVertexArray(m_device));
+
+		if (m_buffers.find(aIndexBuffer) != m_buffers.end())
+		{
+			r<Buffer> index = m_buffers.at(aIndexBuffer);
+			gl(glDrawElements(gl_drawtype(drawType), index->Length(), GL_UNSIGNED_INT, nullptr));
 		}
 
 		else
 		{
-			GLuint vbo;
-			gl(glGenBuffers(1, &vbo));
-			gl(glGenVertexArrays(1, &m_device));
-
-			gl(glBindBuffer(GL_ARRAY_BUFFER, vbo));
-			gl(glBufferData(GL_ARRAY_BUFFER, m_vertex_count * 2 * sizeof(float), m_host.data(), GL_STATIC_DRAW));
-
-			gl(glBindVertexArray(m_device));
-			gl(glEnableVertexAttribArray(0));
-			gl(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr));
+			glDrawArrays(gl_drawtype(drawType), 0, m_buffers.at(aPosition)->Length());
 		}
+	}
 
-		if (m_static)
+// interface
+
+public:
+
+	// All these functions will skip buffers
+	// that dont meet assertion requirements
+	
+	// OnHost gives no information about underlying buffers
+	// only if it contains any buffers
+	// this is to meet interface: SendToDevice frees static hosts
+	// then onhost would return false for when the mesh would try and call free host on itself
+	// little hackey
+	// might want to return true always just to hammer the point home that this func isnt what its ment to be
+
+	bool OnHost()       const override { return m_buffers.size() != 0; }
+	bool OnDevice()     const override { return m_device != 0u; }
+	int  DeviceHandle() const override { return m_device; } 
+protected:
+	void _FreeHost() override
+	{
+		for (auto& [_, buffer] : m_buffers) if (buffer->OnHost()) buffer->FreeHost();
+	}
+
+	void _FreeDevice() override
+	{
+		for (auto& [_, buffer] : m_buffers) if (buffer->OnDevice()) buffer->FreeDevice();
+		glDeleteVertexArrays(1, &m_device);
+		m_device = 0;
+	}
+
+	void _InitOnDevice() override
+	{
+		gl(glGenVertexArrays(1, &m_device));
+		gl(glBindVertexArray(m_device));
+
+		for (auto& [attrib, buffer] : m_buffers)
 		{
-			FreeHost();
+ 			if (buffer->OnHost()) 
+			{
+				buffer->SendToDevice();
+			}
+			
+			if (attrib == aIndexBuffer)
+			{
+				gl(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer->DeviceHandle())); // set for vba
+				continue;
+			}
+
+			gl(glBindBuffer(GL_ARRAY_BUFFER, buffer->DeviceHandle()));
+			gl(glVertexAttribPointer(attrib, buffer->Repeat(), gl_format(buffer->Type()), GL_FALSE, 0/*buffer->BytesPerElement()*/, nullptr));
+			gl(glEnableVertexAttribArray(attrib));
 		}
-
-		// state change on GL_ARRAY_BUFFER
 	}
 
-	// yes moves
-	//  no copys
-	Mesh(Mesh&& move)
-		: m_host   (std::move(move.m_host))
-		, m_device (move.m_device)
-		, m_static (move.m_static)
+	void _UpdateOnDevice() override
 	{
-		move.m_device = 0;
+		for (auto& [_, buffer] : m_buffers) if (buffer->OnHost()) buffer->SendToDevice();
 	}
-	Mesh& operator=(Mesh&& move)
+
+	void _UpdateFromDevice() override
 	{
-		m_host = std::move(move.m_host);
-		m_device = move.m_device;
-		m_static = move.m_static;
-		move.m_device = 0;
-		return *this;
+		for (auto& [_, buffer] : m_buffers) if (buffer->OnDevice()) buffer->SendToHost();
 	}
-	Mesh(const Mesh& copy) = delete;
-	Mesh& operator=(const Mesh& copy) = delete;
+
+// construction
+
+public:
+	Mesh(
+		bool isStatic = true
+	)
+		: IDeviceObject (isStatic)
+	{}
+
+	// add instancing constructor
 
 private:
-	std::tuple<u8*, int, int, int> load_image_using_stb(const std::string& filepath)
+	GLenum gl_format(Buffer::ElementType type) const // doesnt need to be here
 	{
-		int width, height, channels, format;
-		stbi_info(filepath.c_str(), &width, &height, &channels);
-
-		switch (channels)
+		switch (type)
 		{
-			case 1: format = STBI_grey;       break;
-			case 2: format = STBI_grey_alpha; break;
-			case 3: format = STBI_rgb;        break;
-			case 4: format = STBI_rgb_alpha;  break;
+			case Buffer::_u8:  return GL_UNSIGNED_BYTE;
+			case Buffer::_u32: return GL_INT;
+			case Buffer::_f32: return GL_FLOAT;
 		}
 
-		u8* pixels = stbi_load(filepath.c_str(), &width, &height, &channels, format);
-
-		if (!pixels || stbi_failure_reason())
-		{
-			printf("failed to load image '%s' reason: %s\n", filepath.c_str(), stbi_failure_reason());
-		}
-
-		return std::make_tuple(pixels, width, height, channels);
+		assert(false);
+		return -1;
+	}
+	
+	GLenum gl_static() const
+	{
+		return IsStatic() ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW;
 	}
 
-	void free_image_using_stb(void* pixels)
+	GLenum gl_drawtype(DrawType drawType) const
 	{
-		stbi_image_free(pixels);
+		switch (drawType)
+		{
+			case DrawType::dTriangles: return GL_TRIANGLES;
+			case DrawType::dLoops:     return GL_LINE_LOOP;
+		}
+
+		assert(false);
+		return -1;
 	}
 };
 
-/*
+// this turned out to be very similar to a mesh hmmm
 
-	Window and Renderer
+struct ShaderProgram : IDeviceObject
+{
+public:
+	enum ShaderName
+	{
+		sVertex,
+		sFragment,
+		sGeometry,
+		sCompute
+	};
+private:
+	using _buffers = std::unordered_map<ShaderName, Buffer>; // buffer for string storage (host only)
+	
+	_buffers     m_buffers;            // deafult construction
+	GLuint       m_device   = 0;
 
-*/
+	int          m_slot     = 0;       // number of active texture slots
+
+// public mesh specific functions
+
+public:
+	int NumberOfShaders()       const { return m_buffers.size(); }
+	int NumberOfBoundTextures() const { return m_slot; }
+
+	// appends source onto a shader
+	void Add(ShaderName name, const char* str)
+	{
+		bool new_text = m_buffers.find(name) == m_buffers.end();
+		if (new_text) m_buffers.emplace(name, Buffer(1, 1, Buffer::_u8));
+		Buffer& buffer = m_buffers.at(name);
+		buffer.Append(strlen(str) + 1, str, buffer.Length() - 1); // +1 copies null and -1 removes it
+	}
+
+	void Add(ShaderName name, const std::string& str)
+	{
+		Add(name, str.c_str());
+	}
+
+	void Use()
+	{
+		if (!OnDevice()) SendToDevice();
+		gl(glUseProgram(m_device));
+	}
+
+	// these could be const if texture didnt get sent here
+	// think of another way to do this...
+
+	void Set(const std::string& name, const   int& x) { gl(glUniform1iv       (gl_location(name), 1,            (  int*)  &x)); }
+	void Set(const std::string& name, const float& x) { gl(glUniform1fv       (gl_location(name), 1,            (float*)  &x)); }
+	void Set(const std::string& name, const fvec1& x) { gl(glUniform1fv       (gl_location(name), 1,            (float*)  &x)); }
+	void Set(const std::string& name, const fvec2& x) { gl(glUniform2fv       (gl_location(name), 1,            (float*)  &x)); }
+	void Set(const std::string& name, const fvec3& x) { gl(glUniform3fv       (gl_location(name), 1,            (float*)  &x)); }
+	void Set(const std::string& name, const fvec4& x) { gl(glUniform4fv       (gl_location(name), 1,            (float*)  &x)); }
+	void Set(const std::string& name, const ivec1& x) { gl(glUniform1iv       (gl_location(name), 1,            (  int*)  &x)); }
+	void Set(const std::string& name, const ivec2& x) { gl(glUniform2iv       (gl_location(name), 1,            (  int*)  &x)); }
+	void Set(const std::string& name, const ivec3& x) { gl(glUniform3iv       (gl_location(name), 1,            (  int*)  &x)); }
+	void Set(const std::string& name, const ivec4& x) { gl(glUniform4iv       (gl_location(name), 1,            (  int*)  &x)); }
+	void Set(const std::string& name, const fmat2& x) { gl(glUniformMatrix2fv (gl_location(name), 1,  GL_FALSE, (float*)  &x)); }
+	void Set(const std::string& name, const fmat3& x) { gl(glUniformMatrix3fv (gl_location(name), 1,  GL_FALSE, (float*)  &x)); }
+	void Set(const std::string& name, const fmat4& x) { gl(glUniformMatrix4fv (gl_location(name), 1,  GL_FALSE, (float*)  &x)); }
+
+	void Set(const std::string& name, Texture& texture)
+	{
+		if (!texture.OnDevice()) texture.SendToDevice();
+		gl(glBindTexture(GL_TEXTURE_2D, texture.DeviceHandle())); // need texture usage
+		gl(glActiveTexture(gl_slot()));
+		gl(glUniform1i(gl_location(name), m_slot));
+	}
+
+// interface
+
+public:
+
+	bool OnHost()       const override { return m_buffers.size() != 0; }
+	bool OnDevice()     const override { return m_device != 0u; }
+	int  DeviceHandle() const override { return m_device; } 
+protected:
+	void _FreeHost() override
+	{
+		for (auto& [_, buffer] : m_buffers) if (buffer.OnHost()) buffer.FreeHost();
+	}
+
+	void _FreeDevice() override
+	{
+		gl(glDeleteProgram(m_device));
+		m_device = 0;
+	}
+
+	void _InitOnDevice() override
+	{
+		m_device = gl(glCreateProgram());
+
+		for (auto& [name, buffer] : m_buffers)
+		{
+			const char* source = (char*)buffer.Data(); // only reason this is a var is for odd error when it's an arg
+
+			GLuint shader = gl(glCreateShader(gl_type(name)));
+			glShaderSource(shader, 1, &source, nullptr);
+			gl(glCompileShader(shader));
+
+			// error check
+			GLint isCompiled = 0;
+			glGetShaderiv(shader, GL_COMPILE_STATUS, &isCompiled);
+			if (isCompiled == GL_FALSE)
+			{
+				GLint maxLength = 0;
+				glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
+				std::vector<GLchar> infoLog(maxLength);
+				glGetShaderInfoLog(shader, maxLength, &maxLength, &infoLog[0]);
+				glDeleteShader(shader); // if soft error this can be removed
+				printf("Failed to compile shader: %s\n", (char*)infoLog.data());
+				assert(false && "Failed to compile shader"); // maybe soft error
+			}
+
+			gl(glAttachShader(m_device, shader));
+			gl(glDeleteShader(shader));
+		}
+
+		gl(glLinkProgram(m_device));
+	}
+
+	void _UpdateOnDevice() override
+	{
+		glDeleteProgram(m_device);
+		_InitOnDevice();
+	}
+
+	void _UpdateFromDevice() override
+	{
+		assert(false && "Updating from device has no impl for shaders");
+		// maybe copy the source back? I dont think this will ever be useful
+	}
+
+// construction
+
+public:
+	ShaderProgram(
+		bool isStatic = true
+	)
+		: IDeviceObject (isStatic)
+	{}
+
+private:
+	GLenum gl_type(ShaderName type) const // doesnt need to be here
+	{
+		switch (type)			
+		{
+			case ShaderName::sVertex:   return GL_VERTEX_SHADER;
+			case ShaderName::sFragment: return GL_FRAGMENT_SHADER;
+			case ShaderName::sGeometry: return GL_GEOMETRY_SHADER;
+			case ShaderName::sCompute:  return GL_COMPUTE_SHADER;
+		}
+
+		assert(false);
+		return -1;
+	}
+
+	GLint gl_slot() const
+	{
+		return GL_TEXTURE0 + m_slot;
+	}
+
+	GLint gl_location(const std::string& name) const
+	{
+		return glGetUniformLocation(m_device, name.c_str());
+	}
+};
 
 struct Camera
 {
@@ -509,10 +865,10 @@ struct Camera
 		: x(x), y(y), w(w), h(h)
 	{}
 
-	glm::mat4 Projection() const
+	mat4 Projection() const
 	{
-		glm::mat4 camera = glm::ortho(-w, w, -h, h, -16.f, 16.f);
-		camera = glm::translate(camera, glm::vec3(x, y, 0.f));
+		mat4 camera = ortho(-w, w, -h, h, -16.f, 16.f);
+		camera = translate(camera, vec3(x, y, 0.f));
 
 		return camera;
 	}
@@ -520,38 +876,46 @@ struct Camera
 
 struct SpriteRenderer2D
 {
-	GLuint m_vertices;
-	GLuint m_shader;
+	ShaderProgram m_shader;
+	Mesh          m_quad;
+
+	struct
+	{
+		mat4 camera_proj;
+	}
+	m_render_state;
 
 	// this gets run multiple times... should save static stuff like shaders
 	// drop raii just use init function or something
 
 	SpriteRenderer2D()
 	{
-		static float verts[6 * 4] = {
-			-1,  1,  0, 1,
-			 1, -1,  1, 0,
-			-1, -1,  0, 0, 
-		
-			-1,  1,  0, 1,
-			 1,  1,  1, 1,
-			 1, -1,  1, 0
-		};
-		
-		GLuint vbo;
-		gl(glGenBuffers(1, &vbo));
-		gl(glGenVertexArrays(1, &m_vertices));
+		m_quad.Add<vec2>(Mesh::aPosition,
+		{
+			vec2(-1, -1),
+			vec2( 1, -1),
+			vec2( 1,  1),
+			vec2(-1,  1)
+		});
 
-		gl(glBindBuffer(GL_ARRAY_BUFFER, vbo));
-		gl(glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW));
+		m_quad.Add<vec2>(Mesh::aTextureCoord,
+		{
+			vec2(0, 0),
+			vec2(1, 0),
+			vec2(1, 1),
+			vec2(0, 1)
+		});
 
-		gl(glBindVertexArray(m_vertices));
-		gl(glEnableVertexAttribArray(0));
-		gl(glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr));
+		m_quad.Add<int>(Mesh::aIndexBuffer,
+		{
+			0, 1, 2,
+			0, 2, 3
+		});
 
 		const char* source_vert = 
 								"#version 330 core\n"
-								"layout (location = 0) in vec4 vertex;" // <vec2 position, vec2 texCoords>
+								"layout (location = 0) in vec2 pos;"
+								"layout (location = 1) in vec2 uv;"
 
 								"out vec2 TexCoords;"
 
@@ -560,8 +924,8 @@ struct SpriteRenderer2D
 
 								"void main()"
 								"{"
-									"TexCoords = vertex.zw;"
-									"gl_Position = projection * model * vec4(vertex.xy, 0.0, 1.0);"
+									"TexCoords = uv;"
+									"gl_Position = projection * model * vec4(pos, 0.0, 1.0);"
 								"}";
 
 		const char* source_frag = 
@@ -578,65 +942,9 @@ struct SpriteRenderer2D
 									"color = tint * texture(sprite, TexCoords);"  
 								"}";
 
-		GLuint shader_vert = gl(glCreateShader(GL_VERTEX_SHADER));
-		gl(glShaderSource(shader_vert, 1, &source_vert, nullptr));
-		gl(glCompileShader(shader_vert));
-
-		GLint isCompiled = 0;
-		glGetShaderiv(shader_vert, GL_COMPILE_STATUS, &isCompiled);
-		if(isCompiled == GL_FALSE)
-		{
-			GLint maxLength = 0;
-			glGetShaderiv(shader_vert, GL_INFO_LOG_LENGTH, &maxLength);
-			std::vector<GLchar> infoLog(maxLength);
-			glGetShaderInfoLog(shader_vert, maxLength, &maxLength, &infoLog[0]);
-			glDeleteShader(shader_vert);
-			printf("Failed to compile vertex shader: %s\n", (char*)infoLog.data());
-			assert(false && "Failed to compile vertex shader");
-		}
-
-		GLuint shader_frag = gl(glCreateShader(GL_FRAGMENT_SHADER));
-		gl(glShaderSource(shader_frag, 1, &source_frag, nullptr));
-		gl(glCompileShader(shader_frag));
-
-		glGetShaderiv(shader_frag, GL_COMPILE_STATUS, &isCompiled);
-		if(isCompiled == GL_FALSE)
-		{
-			GLint maxLength = 0;
-			glGetShaderiv(shader_frag, GL_INFO_LOG_LENGTH, &maxLength);
-			std::vector<GLchar> infoLog(maxLength);
-			glGetShaderInfoLog(shader_frag, maxLength, &maxLength, &infoLog[0]);
-			glDeleteShader(shader_frag);
-			printf("Failed to compile fragment shader: %s\n", (char*)infoLog.data());
-			assert(false && "Failed to compile fragment shader");
-		}
-
-		m_shader = gl(glCreateProgram());
-		gl(glAttachShader(m_shader, shader_vert));
-		gl(glAttachShader(m_shader, shader_frag));
-
-		gl(glLinkProgram(m_shader));
-
-		gl(glDeleteShader(shader_vert));
-		gl(glDeleteShader(shader_frag));
+		m_shader.Add(ShaderProgram::sVertex, source_vert);
+		m_shader.Add(ShaderProgram::sFragment, source_frag);
 	}
-
-	~SpriteRenderer2D()
-	{
-		if (m_shader == 0) return; // has been moved
-
-		// why does this error loop forever
-		// do the vbos need to be deleted aswell?
-
-		gl(glDeleteVertexArrays(1, &m_vertices));
-		gl(glDeleteProgram(m_shader));
-	}
-
-	struct
-	{
-		glm::mat4 camera_proj;
-	} 
-	m_render_state;
 
 	// I dont like clear here, it's dependent on the order of systems
 	// drawings, which will make odd behaviour
@@ -646,7 +954,6 @@ struct SpriteRenderer2D
 		m_render_state.camera_proj = camera.Projection();
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
 		if (clear)
 		{
 			Color cc = Color(22, 22, 22, 22);
@@ -660,56 +967,31 @@ struct SpriteRenderer2D
 
 	void DrawSprite(const Transform2D& transform, Texture& sprite)
 	{
-		if (!sprite.OnDevice())
-		{
-			sprite.SendToDevice();
-		}
+		m_shader.Use();
+		m_shader.Set("projection", m_render_state.camera_proj);
+		m_shader.Set("model",      transform.World());
+		m_shader.Set("tint",       Color().as_v4());
+		m_shader.Set("sprite",     sprite);
 
-		gl(glUseProgram(m_shader));
-
-		gl(glBindTexture(GL_TEXTURE_2D, sprite.m_device));
-		gl(glBindVertexArray(m_vertices));
-
-		gl(glUniformMatrix4fv (glGetUniformLocation (m_shader, "projection"), 1, false, glm::value_ptr(m_render_state.camera_proj)));
-		gl(glUniformMatrix4fv (glGetUniformLocation (m_shader, "model"),      1, false, glm::value_ptr(transform.World())));
-		gl(glUniform4fv       (glGetUniformLocation (m_shader, "tint"),       1,        glm::value_ptr(Color().as_v4())));
-
-		gl(glUniform1i(glGetUniformLocation(m_shader, "sprite"), 0));
-		gl(glActiveTexture(GL_TEXTURE0));
-
-		gl(glDrawArrays(GL_TRIANGLES, 0, 6));
+		m_quad.Draw();
 	}
-
-	// yes moves
-	//  no copys
-	SpriteRenderer2D(SpriteRenderer2D&& move)
-		: m_vertices (move.m_vertices)
-		, m_shader   (move.m_shader)
-	{
-		move.m_vertices = 0;
-		move.m_shader = 0;
-	}
-	SpriteRenderer2D& operator=(SpriteRenderer2D&& move)
-	{
-		m_vertices = move.m_vertices;
-		m_shader = move.m_shader;	
-		move.m_vertices = 0;
-		move.m_shader = 0;
-		return *this;
-	}
-	SpriteRenderer2D(const SpriteRenderer2D& copy) = delete;
-	SpriteRenderer2D& operator=(const SpriteRenderer2D& copy) = delete;
 };
 
 struct TriangleRenderer2D
 {
-	GLuint m_shader;
+	ShaderProgram m_shader;
+
+	struct
+	{
+		mat4 camera_proj;
+	}
+	m_render_state;
 
 	TriangleRenderer2D()
 	{
 		const char* source_vert = 
 								"#version 330 core\n"
-								"layout (location = 0) in vec2 vertex;" // <vec2 position>
+								"layout (location = 0) in vec2 vertex;"
 								"uniform mat4 model;"
 								"uniform mat4 projection;"
 								"void main()"
@@ -726,60 +1008,9 @@ struct TriangleRenderer2D
 									"color = tint;"  
 								"}";
 
-		GLuint shader_vert = gl(glCreateShader(GL_VERTEX_SHADER));
-		gl(glShaderSource(shader_vert, 1, &source_vert, nullptr));
-		gl(glCompileShader(shader_vert));
-
-		GLint isCompiled = 0;
-		glGetShaderiv(shader_vert, GL_COMPILE_STATUS, &isCompiled);
-		if(isCompiled == GL_FALSE)
-		{
-			GLint maxLength = 0;
-			glGetShaderiv(shader_vert, GL_INFO_LOG_LENGTH, &maxLength);
-			std::vector<GLchar> infoLog(maxLength);
-			glGetShaderInfoLog(shader_vert, maxLength, &maxLength, &infoLog[0]);
-			glDeleteShader(shader_vert);
-			printf("Failed to compile vertex shader: %s\n", (char*)infoLog.data());
-			assert(false && "Failed to compile vertex shader");
-		}
-
-		GLuint shader_frag = gl(glCreateShader(GL_FRAGMENT_SHADER));
-		gl(glShaderSource(shader_frag, 1, &source_frag, nullptr));
-		gl(glCompileShader(shader_frag));
-
-		glGetShaderiv(shader_frag, GL_COMPILE_STATUS, &isCompiled);
-		if(isCompiled == GL_FALSE)
-		{
-			GLint maxLength = 0;
-			glGetShaderiv(shader_frag, GL_INFO_LOG_LENGTH, &maxLength);
-			std::vector<GLchar> infoLog(maxLength);
-			glGetShaderInfoLog(shader_frag, maxLength, &maxLength, &infoLog[0]);
-			glDeleteShader(shader_frag);
-			printf("Failed to compile fragment shader: %s\n", (char*)infoLog.data());
-			assert(false && "Failed to compile fragment shader");
-		}
-
-		m_shader = gl(glCreateProgram());
-		gl(glAttachShader(m_shader, shader_vert));
-		gl(glAttachShader(m_shader, shader_frag));
-
-		gl(glLinkProgram(m_shader));
-
-		gl(glDeleteShader(shader_vert));
-		gl(glDeleteShader(shader_frag));
+		m_shader.Add(ShaderProgram::sVertex, source_vert);
+		m_shader.Add(ShaderProgram::sFragment, source_frag);
 	}
-
-	~TriangleRenderer2D()
-	{
-		if (m_shader == 0) return; // has been moved
-		gl(glDeleteProgram(m_shader));
-	}
-
-	struct
-	{
-		glm::mat4 camera_proj;
-	}
-	m_render_state;
 
 	void Begin(Camera& camera, bool clear) // include render target
 	{
@@ -800,285 +1031,11 @@ struct TriangleRenderer2D
 
 	void DrawMesh(const Transform2D& transform, Mesh& mesh)
 	{
-		if (!mesh.OnDevice())
-		{
-			mesh.SendToDevice();
-		}
+		m_shader.Use();
+		m_shader.Set("projection", m_render_state.camera_proj);
+		m_shader.Set("model",      transform.World());
+		m_shader.Set("tint",       Color().as_v4());
 
-		gl(glUseProgram(m_shader));
-
-		gl(glBindVertexArray(mesh.m_device));
-
-		gl(glUniformMatrix4fv (glGetUniformLocation (m_shader, "projection"), 1, false, glm::value_ptr(m_render_state.camera_proj)));
-		gl(glUniformMatrix4fv (glGetUniformLocation (m_shader, "model"),      1, false, glm::value_ptr(transform.World())));
-		gl(glUniform4fv       (glGetUniformLocation (m_shader, "tint"),       1,        glm::value_ptr(Color(255, 0, 0).as_v4())));
-
-		gl(glDrawArrays(GL_LINE_LOOP, 0, mesh.VertexCount()));
-	}
-
-	// yes moves
-	//  no copys
-	TriangleRenderer2D(TriangleRenderer2D&& move)
-		: m_shader   (move.m_shader)
-	{
-		move.m_shader = 0;
-	}
-	TriangleRenderer2D& operator=(TriangleRenderer2D&& move)
-	{
-		m_shader = move.m_shader;	
-		move.m_shader = 0;
-		return *this;
-	}
-	TriangleRenderer2D(const TriangleRenderer2D& copy) = delete;
-	TriangleRenderer2D& operator=(const TriangleRenderer2D& copy) = delete;
-};
-
-struct WindowConfig
-{
-	std::string Title = "Welcome to Winter Framework";
-	int Width = 640;
-	int Height = 480;
-};
-
-struct Window
-{
-public:
-	SDL_Window* m_window;
-	SDL_GLContext m_opengl;
-	event_manager* m_events;
-
-	WindowConfig m_config;
-	InputMapping m_input;
-
-private:
-	inline static bool s_first = true;
-
-public:
-	Window()
-		: m_window (nullptr)
-		, m_opengl (nullptr)
-		, m_events (nullptr)
-	{}
-
-	Window(
-		const WindowConfig& config,
-		event_manager* events = nullptr
-	)
-		: m_events (events)
-		, m_config (config)
-	{
-		if (s_first) s_first = false;
-		else assert(false && "Only a single window has been tested");
-
-		const char* first_glsl_version = Window::Init_Video();
-
-		m_window = SDL_CreateWindow(config.Title.c_str(), 0, 0, config.Width, config.Height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
-		m_opengl = SDL_GL_CreateContext(m_window);
-		
-		SDL_GL_MakeCurrent(m_window, m_opengl);
-		SDL_SetWindowPosition(m_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-
-		gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
-		Init_Imgui(first_glsl_version);
-
-		Resize(config.Width, config.Height);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glEnable(GL_BLEND);
-	}
-
-	~Window()
-	{
-		if (m_window == nullptr) return; // has been moved
-
-		Dnit_Imgui();
-		SDL_GL_DeleteContext(m_opengl);
-		SDL_DestroyWindow(m_window);
-	}
-
-	void PumpEvents()
-	{
-		SDL_Event event;
-		while (SDL_PollEvent(&event))
-		{
-			ImGui_ImplSDL2_ProcessEvent(&event); // does this need to be between frames?
-
-			if (!m_events)
-			{
-				if (event.type == SDL_QUIT)
-				{
-					SDL_Quit(); // allow for quit without events
-				}
-
-				continue; // pump but do nothing, maybe log
-			} 
-
-			switch (event.type)
-			{
-				case SDL_QUIT: 
-				{
-					m_events->send(event_Shutdown {});
-					break;
-				}
-				case SDL_MOUSEMOTION:
-				{
-					event_Mouse mouse;
-
-					m_events->send(event_Mouse { 
-						event.motion.x,                                      // position as (0, width/height)
-						event.motion.y,
-						(event.motion.x / (float)m_config.Width)  * 2 - 1,   // position as (-1, +1)
-						(event.motion.y / (float)m_config.Height) * 2 - 1,
-						float(event.motion.xrel),                            // velocity
-						float(event.motion.yrel),
-						bool(event.motion.state & SDL_BUTTON_LMASK),
-						bool(event.motion.state & SDL_BUTTON_MMASK),
-						bool(event.motion.state & SDL_BUTTON_RMASK),
-						bool(event.motion.state & SDL_BUTTON_X1MASK),
-						bool(event.motion.state & SDL_BUTTON_X2MASK),
-					});
-					break;
-				}
-				case SDL_WINDOWEVENT:
-				{
-					switch (event.window.event)
-					{
-						case SDL_WINDOWEVENT_RESIZED:
-						{
-							Resize(event.window.data1, event.window.data2);
-							m_events->send(event_WindowResize { m_config.Width, m_config.Height });
-							break;
-						}
-					}
-					break;
-				}
-				case SDL_KEYDOWN:
-				case SDL_KEYUP:
-				{
-					if (event.key.repeat == 0)
-					{
-						m_events->send(event_Input { 
-							m_input.Map(event.key.keysym.scancode),
-							event.key.state == SDL_PRESSED ? 1.f : -1.f // -1 for += e.state math, check for > 0 for is pressed
-						});
-					}
-					break;
-				}
-			}
-		}
-	}
-
-	void Resize(int width, int height)
-	{
-		m_config.Width = width;
-		m_config.Height = height;
-		gl(glViewport(0, 0, m_config.Width, m_config.Height ));
-	}
-
-	void EndFrame() 
-	{
-		SDL_GL_SwapWindow(m_window);
-	}
-
-	// imgui renderer
-
-	void BeginImgui()
-	{
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplSDL2_NewFrame(m_window);
-        ImGui::NewFrame();
-	}
-
-	void EndImgui()
-	{
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-	}
-
-	// yes moves
-	//  no copys
-	Window(Window&& move)
-		: m_window (move.m_window)
-		, m_opengl (move.m_opengl)
-		, m_events (move.m_events)
-		, m_config (move.m_config)
-		, m_input  (move.m_input)
-	{
-		move.m_window = nullptr;
-		move.m_opengl = nullptr;
-		move.m_events = nullptr;
-	}
-	Window& operator=(Window&& move)
-	{
-		m_window = move.m_window;
-		m_opengl = move.m_opengl;
-		m_events = move.m_events;
-		m_config = move.m_config;
-		m_input  = move.m_input;
-		move.m_window = nullptr;
-		move.m_opengl = nullptr;
-		move.m_events = nullptr;
-		return *this;
-	}
-	Window(const Window& copy) = delete;
-	Window& operator=(const Window& copy) = delete;
-
-// init funcs
-
-private:
-	static const char* Init_Video()
-	{
-		SDL_Init(SDL_INIT_VIDEO);
-
-		// set OpenGL attributes
-		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-		SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-
-		SDL_GL_SetAttribute(
-			SDL_GL_CONTEXT_PROFILE_MASK,
-			SDL_GL_CONTEXT_PROFILE_CORE
-		);
-
-		// is this needed?
-
-#ifdef __APPLE__
-		// GL 3.2 Core + GLSL 150
-		SDL_GL_SetAttribute( // required on Mac OS
-			SDL_GL_CONTEXT_FLAGS,
-			SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG
-		);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
-		return "#version 150";
-#elif __linux__
-		// GL 3.2 Core + GLSL 150
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-		return "#version 150";
-#elif _WIN32
-		// GL 3.0 + GLSL 130
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-		return "#version 130";
-#endif
-	}
-
-	void Init_Imgui(const char* glsl_version)
-	{
-		IMGUI_CHECKVERSION();
-		ImGui::CreateContext();
-		ImGui::StyleColorsDark();
-
-		ImGui_ImplSDL2_InitForOpenGL(m_window, m_opengl);
-		ImGui_ImplOpenGL3_Init(glsl_version);
-	}
-
-	void Dnit_Imgui()
-	{
-		ImGui_ImplOpenGL3_Shutdown();
-    	ImGui_ImplSDL2_Shutdown();
- 		ImGui::DestroyContext();
+		mesh.Draw(Mesh::dLoops);
 	}
 };

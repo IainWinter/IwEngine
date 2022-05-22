@@ -4,11 +4,21 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
+#include <memory>
+template<typename _t>
+using r = std::shared_ptr<_t>;
+
+// make glm the deafult math library
+// no need to think about if something is glm or not because it should
+// be ingrained into the framework at a core level
+using namespace glm;
+
 float get_rand(float x) { return x * rand() / (float)RAND_MAX; }
 int get_rand(int x) { return rand() % x; }
 
-using u32 = uint32_t;
+using u32 = uint32_t; // redundant with glm
 using u8 = uint8_t;
+using f32 = float;
 
 struct Color
 {
