@@ -131,8 +131,6 @@ public:
 
 	~Window()
 	{
-		if (m_window == nullptr) return; // has been moved
-
 		Dnit_Imgui();
 		SDL_GL_DeleteContext(m_opengl);
 		SDL_DestroyWindow(m_window);
@@ -172,13 +170,14 @@ public:
 						((m_config.Height -  event.button.y) / (float)m_config.Height) * 2 - 1,
 						0.f,                                                                      // velocity
 						0.f,
-						event.button.state == SDL_BUTTON_LMASK,
-						event.button.state == SDL_BUTTON_MMASK,
-						event.button.state == SDL_BUTTON_RMASK,
-						event.button.state == SDL_BUTTON_X1MASK,
-						event.button.state == SDL_BUTTON_X2MASK,
+						event.button.state == SDL_BUTTON_LEFT,
+						event.button.state == SDL_BUTTON_MIDDLE,
+						event.button.state == SDL_BUTTON_RIGHT,
+						event.button.state == SDL_BUTTON_X1, // no x1 x2?
+						event.button.state == SDL_BUTTON_X2,
 						event.button.clicks
-					});					
+					});	
+					break;
 				}
 				case SDL_MOUSEMOTION:
 				{
@@ -231,8 +230,7 @@ public:
 	{
 		m_config.Width = width;
 		m_config.Height = height;
-		//SDL_SetWindowSize(window, );
-		//gl(glViewport(0, 0, m_config.Width, m_config.Height ));
+		gl(glViewport(0, 0, m_config.Width, m_config.Height)); // for now this works, but shouldnt be here
 	}
 
 	void EndFrame() 

@@ -19,6 +19,8 @@ struct allocator
 	virtual void reset() = 0;
 	virtual size_t capacity() const = 0;
 
+	virtual bool is_empty() const = 0;
+
 	size_t block_capacity() const
 	{
 		assert(m_block_size > 0 && "Block size needs to be set to use this");

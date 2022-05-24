@@ -11,11 +11,10 @@
 #endif
 
 
-//#include "iw/log/logger.h"
-#include "../IwEngine/include/iw/log/logger.h"
 #include <unordered_map>
 #include <vector>
 #include <string>
+#include <stdio.h>
 
 #undef PlaySound
 
@@ -43,10 +42,10 @@ enum audio_error : int
 	ENGINE_FAILED_GET_PARAM = -11
 };
 
-const std::string& audio_error_string(
+const char* audio_error_string(
 	audio_error code)
 {
-	static std::unordered_map<int, std::string> translation;
+	static std::unordered_map<int, const char*> translation;
 	if (translation.size() == 0)
 	{
 		translation.emplace(ENGINE_OK,               "Engine is ok");
@@ -70,7 +69,7 @@ const std::string& audio_error_string(
 void audio_log_error(
 	audio_error error)
 {
-	LOG_ERROR << "[Audio] " << audio_get_string(error);
+	printf("[Audio] %s", audio_error_string(error));
 }
 
 // 0 is a special handle representing global actions
@@ -127,6 +126,6 @@ protected:
 		int handle)
 	{
 		m_loaded.emplace(path, handle);
-		LOG_INFO << "[Audio] Engine loaded: " << path << ". Handle: " << handle;
+		printf("[Audio] Engine loaded: %s. Handle: %d", path.c_str(), handle);
 	}
 };

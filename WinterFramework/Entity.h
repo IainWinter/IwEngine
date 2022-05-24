@@ -95,8 +95,13 @@ struct entity_manager
 	template<typename... _t>
 	tuple_or_single<_t...> first()
 	{
-		// is there a way to get this better?
 		return entity(m_store.view<_t...>().front(), &m_store).get<_t...>();
+	}
+
+	template<typename... _t>
+	entity firste()
+	{
+		return entity(m_store.view<_t...>().front(), &m_store);
 	}
 };
 
@@ -127,4 +132,4 @@ struct For_System : System
 	virtual void Update(entity e, _t&... components) = 0;
 };
 
-struct Delete {};
+//struct Delete {};

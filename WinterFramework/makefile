@@ -6,7 +6,7 @@ CC = g++ -std=c++17
 
 MAIN_SRC = ./test/Window_Test.cpp
 
-EXT_SRC = serial_json.cpp RenderingSDL.cpp Time.cpp
+EXT_SRC = serial_json.cpp Time.cpp
 
 # I dont really like how this is the only lib that directly links its file...
 # wish it could just be a static a. like the others
@@ -19,7 +19,7 @@ VENDOR_LIB = sdl box2d imgui hitbox
 VENDOR_BIN = sdl2dll box2d imgui hitbox
 SYSTEM_BIN = gdi32 ws2_32 wsock32 user32 kernel32 shell32
 
-DEFINES = IW_DEBUG
+DEFINES = IW_DEBUG IW_ENTITY_DEBUG
 
 _esrc = $(foreach name, $(EXT_SRC),./ext/cpp/$(name))
 

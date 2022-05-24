@@ -25,6 +25,13 @@ using rep_t  = uint16_t; // low bits of the hash to represent repeat components 
 using hash_bits = std::integral_constant<hash_t, ~(hash_t)rep_t(-1) & hash_t(-1)>;
 using rep_bits  = std::integral_constant<hash_t,  (hash_t)rep_t(-1)>;
 
+// template<typename... _t>
+// using tuple_or_single = typename std::conditional<
+// 							sizeof...(_t) == 1,
+// 							typename std::tuple_element<0, std::tuple<_t&...>>::type,
+// 							typename std::tuple<_t&...>
+// 						>::type;
+
 constexpr void set_repeats(hash_t& hash, rep_t count) { hash = (hash & hash_bits::value) | (hash_t)count; }
 constexpr rep_t get_repeats(const hash_t& hash) { return (rep_t)(hash & rep_bits::value); }
 constexpr hash_t just_hash(const hash_t& hash) { return hash & hash_bits::value; }
@@ -45,7 +52,8 @@ struct component
 	
 	std::function<void(void*)>        m_destructor;
 	std::function<void(void*)>        m_default;
-	std::function<void(void*, void*)> m_move;
+	std::function<void(void*, void*)> m_move; // see below comment
+	//std::function<void(void*, void*)> m_copy;
 };
 
 template<typename _t>       // this should be the only place that templates are necessary for storage
@@ -64,7 +72,16 @@ component make_component()  //	everyother template function is short-hand back t
 
 		c.m_destructor = [](void* ptr)             { ((_t*)ptr)->~_t(); };
 		c.m_default    = [](void* ptr)             { new (ptr) _t(); };
+		
+		// actually these should be hidden in the impl
+		// no reason for the user to need to know about the copies and moves taking
+		// place when they are in mem manager
+		
+		// maps and such break with memcpy? this should be the case because its raw bytes
+		// for now use move I guess, not happy with this though >:
+
 		c.m_move       = [](void* ptr, void* data) { new (ptr) _t(std::move(*(_t*)data)); };
+		//c.m_copy       = [](void* ptr, void* data) { new (ptr) _t(*(_t*)data); };
 	}
 	return c;
 }
@@ -467,17 +484,26 @@ struct entity_storage
 
 			if (old_component.m_hash == new_component.m_hash)
 			{
-				new_store.set_component(new_handle, new_component, get_raw_pointer(handle, old_component));
+				// void* new_data = new_store.get_raw_pointer(new_handle, new_component);
+				// void* old_data =           get_raw_pointer(    handle, old_component);
+				// int size = new_component.m_info->m_size;
+
+				//memcpy(new_data, old_data, size);
+				//memset(old_data, 0, size);
+
+				//new_store.set_component(new_handle, new_component, get_raw_pointer(handle, old_component));
 
 				// memcpy_s(
 				// 	new_store.offset_raw_pointer(new_data, new_component), old_component.m_info->m_size,
 				// 			  offset_raw_pointer(old_data, old_component), old_component.m_info->m_size
 				// );
 
-				// old_component.m_move(
-				// 	new_store.offset_raw_pointer(new_data, new_component),
-				// 	          offset_raw_pointer(old_data, old_component)
-				//);
+				// old and new component are the same
+
+				old_component.m_move(
+					new_store.get_raw_pointer(new_handle, new_component),
+					          get_raw_pointer(    handle, old_component)
+				);
 
 				break; // iterate unique pairs only, verify this
 			}
@@ -497,8 +523,9 @@ struct entity_storage
 		assert(handle.m_version == unwrap(handle)->m_version && "entity_storage::set_component failed, version mismatch");
 		assert(data                                          && "entity_storage::set_component failed, data is null");
 
-		memcpy_s(get_raw_pointer(handle, component), component.m_info->m_size, data, component.m_info->m_size);
-		//component.m_move(get_raw_pointer(handle, component), data);
+		// dont move data...
+		memcpy(get_raw_pointer(handle, component), data, component.m_info->m_size); // _s ? but dest and src are the same
+		//component.m_copy(get_raw_pointer(handle, component), data);
 	}
 
 	void* get_raw_pointer(
@@ -665,6 +692,8 @@ struct entity_query
 					m_current->m_store->m_archetype.m_hash
 				};
 
+				assert(m_current->m_store->is_entity_alive(handle));
+
 				return std::tuple_cat(
 					std::make_tuple<entity>({handle, m_current->m_store, m_manager}),
 					just_components()
@@ -779,7 +808,7 @@ struct entity_manager
 		remove_listeners(handle);
 		entity_storage& store = m_storage.at(handle.m_archetype);
 		store.destroy_entity(handle);
-		clean_storage(store); // breaks itr
+		//clean_storage(store); // breaks itr
 	}
 
 	bool is_alive(entity_handle handle)
@@ -825,7 +854,7 @@ struct entity_manager
 
 		call_listener(entity_command::ADD, handle, &component);
 
-		clean_storage(old_store); // breaks itr
+		//clean_storage(old_store); // breaks itr
 		return wrap(new_handle);
 	}
 
@@ -838,7 +867,7 @@ struct entity_manager
 
 		entity_handle new_handle = old_store.move_entity(handle, new_store);
 
-		clean_storage(old_store); // breaks itr
+		//clean_storage(old_store); // breaks itr
 		return wrap(new_handle);
 	}
 
@@ -887,15 +916,30 @@ struct entity_manager
 	template<typename _t, typename... _args>
 	void set(entity_handle handle, _args&&... args) // aa man this causes a destructor to be called, also forget move should just memcpy
 	{
-		_t temp = _t{args...}; // this gets moved
-		set(handle, make_component<_t>(), &temp);
+		// _t temp = _t{args...}; // this gets moved
+		// set(handle, make_component<_t>(), &temp);
+
+		// avoids calling destructor on temp
+		_t* ptr;
+		get(handle, make_component<_t>(), (void**)&ptr);
+		new (ptr) _t{std::forward<_args>(args)...};
 	}
 
 	template<typename _t, typename... _args>
 	entity add(entity_handle handle, _args&&... args)
 	{
-		_t temp = _t{args...}; // this gets moved
-		return add(handle, make_component<_t>(), &temp);
+		//_t temp = _t{args...}; // this gets moved
+		//return add(handle, make_component<_t>(), &temp);
+		
+		entity e = add(handle, make_component<_t>(), nullptr);
+
+		// copy of above, maybe make function
+		// avoids calling destructor on temp
+		_t* ptr;
+		get(e.m_handle, make_component<_t>(), (void**)&ptr);
+		new (ptr) _t{std::forward<_args>(args)...};
+
+		return e;
 	}
 
 	template<typename _t>
@@ -935,15 +979,17 @@ struct entity_manager
 		return result;
 	}
 
-private:
-	void clean_storage(const entity_storage& storage)
+//private:
+	void clean_storage(/*const entity_storage& storage*/)
 	{
 		// this breaks entity bc storage pointer is invalid
 		// should think more about it, for now just keep empty storages
-		return;
-		if (storage.m_count == 0)
+		//return;
+
+		for (auto itr = m_storage.begin(); itr != m_storage.end();)
 		{
-			m_storage.erase(storage.m_archetype.m_hash);
+			if (itr->second.m_count == 0) itr = m_storage.erase(itr);
+			else                          itr++;
 		}
 	}
 
@@ -1105,11 +1151,11 @@ struct command_buffer
 			{
 				command_destroy* cd = (command_destroy*)c;
 
-				if (cd->m_handle.m_entity == entity.m_handle.m_entity)
+				if (cd->m_handle.m_index == entity.m_handle.m_index)
 				{
 					printf("\n[Entity] Tried to double queue a delete");
-					printf("\n[Entity]\t 1. Index: %d from %s", cd->   m_handle.m_entity, cd->m_where);
-					printf("\n[Entity]\t 2. Index: %d from %s", entity.m_handle.m_entity, m_where_current);
+					printf("\n[Entity]\t 1. Index: %d from %s", cd->   m_handle.m_index, cd->m_where);
+					printf("\n[Entity]\t 2. Index: %d from %s", entity.m_handle.m_index, m_where_current);
 					//__debugbreak();
 					return;
 				}
@@ -1119,7 +1165,7 @@ struct command_buffer
 		if (!entity.is_alive())
 		{
 			printf("\n[Entity] Tried queue a delete with a dead entity");
-			printf("\n[Entity]\t 1. Index: %d from %s", entity.m_handle.m_entity, m_where_current);
+			printf("\n[Entity]\t 1. Index: %d from %s", entity.m_handle.m_index, m_where_current);
 		}
 #endif
 		command_destroy* command = queue<command_destroy>();
@@ -1282,3 +1328,31 @@ inline entity& entity::on_remove (const std::function<void(entity, const compone
 #		define entities_defer() entities_defer(__LOCATION)
 #	endif
 #endif
+
+struct System
+{
+	virtual void Update() {}
+	virtual void FixedUpdate() {}
+	virtual void UI() {}
+};
+
+// template<typename... _t>
+// struct For_System : System
+// {
+// 	void Update()
+// 	{
+// 		if constexpr (std::is_same<std::tuple_element<0, std::tuple<_t...>>::type, entity>::value)
+// 		{
+// 			for (auto std::tuple<_t...> )
+// 		}
+// 		std::tuple<_t&>
+
+
+// 		entities().m_store.view<_t...>().each([this](entt::entity e, _t&... components)
+// 		{
+// 			Update(entity(e, &entities().m_store), components...);
+// 		});
+// 	}
+
+// 	virtual void UpdateFor(_t&... components) = 0;
+// };

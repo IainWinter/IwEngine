@@ -4,7 +4,7 @@
 
 struct pool_allocator : allocator
 {
-	std::vector<linear_allocator*> m_pages;
+	std::vector<std::pair<size_t, linear_allocator*>> m_pages; // block index start, page
 	size_t m_page_size_hint;
 	size_t m_next_page_size;
 	size_t m_next_page_mult;
@@ -34,7 +34,7 @@ struct pool_allocator : allocator
 
 	~pool_allocator()
 	{
-		for (linear_allocator* page : m_pages)
+		for (auto [_, page] : m_pages)
 		{
 			delete page;
 		}
@@ -43,7 +43,7 @@ struct pool_allocator : allocator
 	char* alloc_bytes(size_t size) override
 	{
 		linear_allocator* page = nullptr;
-		for (linear_allocator* p : m_pages)
+		for (auto [_, p] : m_pages)
 		{
 			if (p->has_space(size)) 
 			{
@@ -59,7 +59,8 @@ struct pool_allocator : allocator
 			page = new linear_allocator(m_next_page_size);
 			page->m_block_size = m_block_size;
 
-			m_pages.push_back(page);
+			int start_block_index = m_pages.size() == 0 ? 0 : m_pages.back().first + m_pages.back().second->block_capacity();
+			m_pages.emplace_back(start_block_index, page);
 
 			assert(m_next_page_mult > 0 && "Next page expansion is invalid");
 			m_next_page_size *= m_next_page_mult;
@@ -70,12 +71,13 @@ struct pool_allocator : allocator
 
 	void free_bytes(void* address, size_t size) override
 	{
+		auto itr = m_pages.begin(); // to not include algorithm for std::find
 		linear_allocator* page = nullptr;
-		for (linear_allocator* p : m_pages)
+		for (; itr != m_pages.end(); ++itr)
 		{
-			if (p->contains(address)) 
+			if ((*itr).second->contains(address)) 
 			{
-				page = p;
+				page = (*itr).second;
 				break;
 			}
 		}
@@ -84,51 +86,47 @@ struct pool_allocator : allocator
 
 		page->free_bytes(address, size);
 		
-		if (!page->has_space(1))
-		{
-			delete page;
-			assert(m_next_page_mult > 0 && "Next page expansion is invalid");
-			m_next_page_size /= m_next_page_mult;
-		}
+		// if (page->is_empty()) 
+		// {
+		// 	delete page;
+		// 	assert(m_next_page_mult > 0 && "Next page expansion is invalid");
+		// 	m_next_page_size /= m_next_page_mult;
+		// 	m_pages.erase(itr);                           // see above
+		// }
 	}
 
 	bool has_space(size_t size) const override
 	{
-		for (linear_allocator* page : m_pages) if (page->has_space(size)) return true;
+		for (auto [_, page] : m_pages) if (page->has_space(size)) return true;
 		return false;
 	}
 
 	bool has_allocated(void* address) const override
 	{
-		for (linear_allocator* page : m_pages) if (page->has_allocated(address)) return true;
+		for (auto [_, page] : m_pages) if (page->has_allocated(address)) return true;
 		return false;
 	}
 
 	bool contains(void* address) const override
 	{
-		for (linear_allocator* page : m_pages) if (page->contains(address)) return true;
+		for (auto [_, page] : m_pages) if (page->contains(address)) return true;
 		return false;
 	}
 
 	bool contains_block(size_t index) const override
 	{
-		for (linear_allocator* page : m_pages) if (page->contains_block(index)) return true;
+		for (auto [_, page] : m_pages) if (page->contains_block(index)) return true;
 		return false;
 	}
 
 	size_t get_block_index(void* address) const override
 	{
-		size_t index = 0;
-		
-		for (linear_allocator* page : m_pages)
+		for (auto [page_index_start, page] : m_pages)
 		{
 			if (page->contains(address))
 			{
-				index += page->get_block_index(address);
-				return index;
+				return page_index_start + page->get_block_index(address);
 			}
-
-			index += page->block_capacity();
 		}
 
 		assert(false && "Address is not in allocator");
@@ -137,14 +135,12 @@ struct pool_allocator : allocator
 
 	void* get_block_address(size_t index) const override
 	{
-		for (linear_allocator* page : m_pages)
+		for (auto [page_index_start, page] : m_pages)
 		{
-			if (page->contains_block(index))
+			if (page->contains_block(index - page_index_start)) // valid if negitive or overflow
 			{
-				return page->get_block_address(index);
+				return page->get_block_address(index - page_index_start);
 			}
-
-			index -= page->block_capacity();
 		}
 
 		assert(false && "Address is not in allocator");
@@ -153,7 +149,7 @@ struct pool_allocator : allocator
 
 	void reset() override
 	{
-		for (linear_allocator* page : m_pages)
+		for (auto [_, page] : m_pages)
 		{
 			delete page;
 		}
@@ -165,8 +161,14 @@ struct pool_allocator : allocator
 	size_t capacity() const override
 	{
 		size_t size = 0;
-		for (linear_allocator* page : m_pages) size += page->capacity();
+		for (auto [_, page] : m_pages) size += page->capacity();
 		return size;
+	}
+
+	bool is_empty() const override
+	{
+		for (auto [_, page] : m_pages) if (!page->is_empty()) return false;
+		return true;
 	}
 };
 
@@ -185,9 +187,11 @@ struct pool_iterator : allocator_iterator
 	pool_iterator(const pool_allocator& alloc)
 	{
 		m_pages.reserve(alloc.m_pages.size());
-		for (const linear_allocator* page : alloc.m_pages)
+		for (const auto [_, page] : alloc.m_pages)
 		{
-			m_pages.push_back(linear_iterator(*page));
+			linear_iterator itr = linear_iterator(*page);
+			assert(itr.more());
+			m_pages.push_back(itr);
 		}
 
 		m_current = m_pages.begin();

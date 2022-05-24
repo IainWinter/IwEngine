@@ -86,6 +86,11 @@ public:
 	{
 		return m_freelist.m_limit_size;
 	}
+	
+	bool is_empty() const override
+	{
+		return m_freelist.has_space(m_freelist.m_limit_size);
+	}
 };
 
 // This iterator only supports iterating over blocks of memory
@@ -126,7 +131,7 @@ struct linear_iterator : allocator_iterator
 	bool more() const override
 	{
 		assert(m_current <= m_end && "past end of iterator");
-		return m_current != m_end;
+		return m_current < m_end;
 	}
 
 	void next() override

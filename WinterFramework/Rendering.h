@@ -42,7 +42,7 @@ std::tuple<u8*, int, int, int> load_image_using_stb(const std::string& filepath)
 
 	u8* pixels = stbi_load(filepath.c_str(), &width, &height, &channels, format);
 
-	if (!pixels || stbi_failure_reason())
+	if (!pixels /*|| stbi_failure_reason()*/) // no SOI bug
 	{
 		printf("failed to load image '%s' reason: %s\n", filepath.c_str(), stbi_failure_reason());
 	}
@@ -188,8 +188,8 @@ public:
 	// only rg -> Channels() = 2
 	// only rgb -> Channels() = 3
 	// full rgba -> Channels() = 4
-	      Color& Get(int x, int y)       { assert_on_host(); return *(Color*)(Pixels() + x + y * m_width); }
-	const Color& Get(int x, int y) const { assert_on_host(); return *(Color*)(Pixels() + x + y * m_width); }
+	      Color& Get(int x, int y)       { assert_on_host(); return *(Color*)(Pixels() + (x + y * m_width) * m_channels); }
+	const Color& Get(int x, int y) const { assert_on_host(); return *(Color*)(Pixels() + (x + y * m_width) * m_channels); }
 
 	void Clear()
 	{
@@ -254,6 +254,7 @@ public:
 		init_texture_host_memory(pixels, width, height, channels);
 	}
 
+	// creates pixel memory
 	Texture(
 		int width, int height, int channels,
 		bool isStatic = true
@@ -261,6 +262,15 @@ public:
 		: IDeviceObject (isStatic)
 	{
 		void* pixels = malloc(width * height * channels);
+		init_texture_host_memory(pixels, width, height, channels);
+	}
+
+	Texture(
+		int width, int height, int channels,
+		void* pixels
+	)
+		: IDeviceObject (false) // false dont delete
+	{
 		init_texture_host_memory(pixels, width, height, channels);
 	}
 private:
@@ -873,6 +883,13 @@ struct Camera
 		return camera;
 	}
 };
+
+// struct Sprite
+// {
+// 	r<Texture> m_source;
+// 	Sprite(r<Texture> source) : m_source(source) {}
+// 	Texture& Get() { return *m_source; }
+// };
 
 struct SpriteRenderer2D
 {
