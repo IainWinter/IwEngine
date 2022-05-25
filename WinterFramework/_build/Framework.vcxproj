@@ -1,0 +1,147 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{1362EE31-7FCC-A2A8-C80A-544E34B480FD}</ProjectGuid>
+    <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Framework</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>..\_bin\</OutDir>
+    <IntDir>obj\x64\Debug\</IntDir>
+    <TargetName>Framework</TargetName>
+    <TargetExt>.exe</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>..\_bin\</OutDir>
+    <IntDir>obj\x64\Release\</IntDir>
+    <TargetName>Framework</TargetName>
+    <TargetExt>.exe</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>IW_DEBUG;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\src;..\vendor\sdl\include;..\vendor\box2d\include;..\vendor\imgui\include;..\vendor\hitbox\include;..\vendor\entt\include;..\vendor\stb\include;..\vendor\glm\include;..\vendor\glad\include;..\vendor\asio\include;..\vendor\json\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>SDL2.lib;gdi32.lib;ws2_32.lib;wsock32.lib;user32.lib;kernel32.lib;shell32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\vendor\sdl\lib;..\vendor\box2d\lib;..\vendor\imgui\lib;..\vendor\hitbox\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>IW_DEBUG;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\src;..\vendor\sdl\include;..\vendor\box2d\include;..\vendor\imgui\include;..\vendor\hitbox\include;..\vendor\entt\include;..\vendor\stb\include;..\vendor\glm\include;..\vendor\glad\include;..\vendor\asio\include;..\vendor\json\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>SDL2.lib;gdi32.lib;ws2_32.lib;wsock32.lib;user32.lib;kernel32.lib;shell32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\vendor\sdl\lib;..\vendor\box2d\lib;..\vendor\imgui\lib;..\vendor\hitbox\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\Audio.h" />
+    <ClInclude Include="..\src\Common.h" />
+    <ClInclude Include="..\src\Entity.h" />
+    <ClInclude Include="..\src\EntityMine.h" />
+    <ClInclude Include="..\src\Entry.h" />
+    <ClInclude Include="..\src\Event.h" />
+    <ClInclude Include="..\src\Macros.h" />
+    <ClInclude Include="..\src\Physics.h" />
+    <ClInclude Include="..\src\Rendering.h" />
+    <ClInclude Include="..\src\Serial.h" />
+    <ClInclude Include="..\src\SimpleServer.h" />
+    <ClInclude Include="..\src\Windowing.h" />
+    <ClInclude Include="..\src\ext\AudioFMOD.h" />
+    <ClInclude Include="..\src\ext\Components.h" />
+    <ClInclude Include="..\src\ext\Components_meta.h" />
+    <ClInclude Include="..\src\ext\Sand.h" />
+    <ClInclude Include="..\src\ext\Time.h" />
+    <ClInclude Include="..\src\ext\__debug.h" />
+    <ClInclude Include="..\src\ext\marching_cubes.h" />
+    <ClInclude Include="..\src\ext\multi_vector.h" />
+    <ClInclude Include="..\src\ext\serial_bin.h" />
+    <ClInclude Include="..\src\ext\serial_common.h" />
+    <ClInclude Include="..\src\ext\serial_json.h" />
+    <ClInclude Include="..\src\util\allocator.h" />
+    <ClInclude Include="..\src\util\error_check.h" />
+    <ClInclude Include="..\src\util\free_list.h" />
+    <ClInclude Include="..\src\util\linear_allocator.h" />
+    <ClInclude Include="..\src\util\pool_allocator.h" />
+    <ClInclude Include="..\src\util\tsque.h" />
+    <ClInclude Include="..\src\util\type_info.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\ext\cpp\Time.cpp" />
+    <ClCompile Include="..\test\Window_Test.cpp" />
+    <ClCompile Include="..\vendor\glad\src\glad.c" />
+    <ClCompile Include="..\vendor\imgui\backends\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="..\vendor\imgui\backends\imgui_impl_sdl.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\vendor\box2d\lib\build\box2d.vcxproj">
+      <Project>{E4442B0F-5059-53C0-19DB-F61F85AE4FF1}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\vendor\imgui\lib\build\ImGui.vcxproj">
+      <Project>{C0FF640D-2C14-8DBE-F595-301E616989EF}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\vendor\hitbox\lib\build\Hitbox.vcxproj">
+      <Project>{93CA7FB7-7F6C-AA8D-6827-BEE1546831DE}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

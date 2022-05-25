@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\ext">
+      <UniqueIdentifier>{0DFD2FA9-79DC-AE44-82F4-391BEE5215A6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\ext\cpp">
+      <UniqueIdentifier>{5F35ED8B-CBEA-6581-54DF-5F58C0935C85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\util">
+      <UniqueIdentifier>{BA5238CF-A61F-93DA-CF38-8182BB64C868}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test">
+      <UniqueIdentifier>{65689E7C-519F-9F0D-FA8B-8510E6A11B0F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor">
+      <UniqueIdentifier>{B3738122-9F15-ACF8-88D0-BF4C74113349}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\glad">
+      <UniqueIdentifier>{9A8E79C1-0644-F2B6-8F38-EC8DFBECE8BA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\glad\src">
+      <UniqueIdentifier>{B1098FEA-1D95-FCAE-26A6-7FA392B058AF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\imgui">
+      <UniqueIdentifier>{5D3BD0F0-499E-5F95-F223-984BDE652B18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\imgui\backends">
+      <UniqueIdentifier>{27CEAEAF-933A-6AAA-5C2E-0208C8598C12}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\Audio.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Common.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Entity.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\EntityMine.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Entry.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Event.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Macros.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Physics.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Rendering.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Serial.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\SimpleServer.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Windowing.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ext\AudioFMOD.h">
+      <Filter>src\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ext\Components.h">
+      <Filter>src\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ext\Components_meta.h">
+      <Filter>src\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ext\Sand.h">
+      <Filter>src\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ext\Time.h">
+      <Filter>src\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ext\__debug.h">
+      <Filter>src\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ext\marching_cubes.h">
+      <Filter>src\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ext\multi_vector.h">
+      <Filter>src\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ext\serial_bin.h">
+      <Filter>src\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ext\serial_common.h">
+      <Filter>src\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ext\serial_json.h">
+      <Filter>src\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\util\allocator.h">
+      <Filter>src\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\util\error_check.h">
+      <Filter>src\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\util\free_list.h">
+      <Filter>src\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\util\linear_allocator.h">
+      <Filter>src\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\util\pool_allocator.h">
+      <Filter>src\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\util\tsque.h">
+      <Filter>src\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\util\type_info.h">
+      <Filter>src\util</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\ext\cpp\Time.cpp">
+      <Filter>src\ext\cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\test\Window_Test.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vendor\glad\src\glad.c">
+      <Filter>vendor\glad\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vendor\imgui\backends\imgui_impl_opengl3.cpp">
+      <Filter>vendor\imgui\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vendor\imgui\backends\imgui_impl_sdl.cpp">
+      <Filter>vendor\imgui\backends</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

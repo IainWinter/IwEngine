@@ -1,0 +1,298 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{1362EE31-7FCC-A2A8-C80A-544E34B480FD}</ProjectGuid>
+    <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Framework</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>_bin_Debug\</OutDir>
+    <IntDir>obj\Debug\</IntDir>
+    <TargetName>Framework</TargetName>
+    <TargetExt>.exe</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>_bin_Release\</OutDir>
+    <IntDir>obj\Release\</IntDir>
+    <TargetName>Framework</TargetName>
+    <TargetExt>.exe</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include=".old\Asset.h" />
+    <ClInclude Include=".old\RenderingHideSDL.h" />
+    <ClInclude Include=".old\RenderingSDL.h" />
+    <ClInclude Include="Audio.h" />
+    <ClInclude Include="Common.h" />
+    <ClInclude Include="Entity.h" />
+    <ClInclude Include="EntityMine.h" />
+    <ClInclude Include="Entry.h" />
+    <ClInclude Include="Event.h" />
+    <ClInclude Include="Macros.h" />
+    <ClInclude Include="Physics.h" />
+    <ClInclude Include="Rendering.h" />
+    <ClInclude Include="Serial.h" />
+    <ClInclude Include="SimpleServer.h" />
+    <ClInclude Include="Windowing.h" />
+    <ClInclude Include="ext\AudioFMOD.h" />
+    <ClInclude Include="ext\Components.h" />
+    <ClInclude Include="ext\Components_meta.h" />
+    <ClInclude Include="ext\Sand.h" />
+    <ClInclude Include="ext\Time.h" />
+    <ClInclude Include="ext\__debug.h" />
+    <ClInclude Include="ext\marching_cubes.h" />
+    <ClInclude Include="ext\multi_vector.h" />
+    <ClInclude Include="ext\serial_bin.h" />
+    <ClInclude Include="ext\serial_common.h" />
+    <ClInclude Include="ext\serial_json.h" />
+    <ClInclude Include="test\unit_test.h" />
+    <ClInclude Include="util\allocator.h" />
+    <ClInclude Include="util\error_check.h" />
+    <ClInclude Include="util\free_list.h" />
+    <ClInclude Include="util\linear_allocator.h" />
+    <ClInclude Include="util\pool_allocator.h" />
+    <ClInclude Include="util\tsque.h" />
+    <ClInclude Include="util\type_info.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_api.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_block_allocator.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_body.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_broad_phase.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_chain_shape.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_circle_shape.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_collision.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_common.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_contact.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_contact_manager.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_distance.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_distance_joint.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_draw.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_dynamic_tree.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_edge_shape.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_fixture.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_friction_joint.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_gear_joint.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_growable_stack.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_joint.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_math.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_motor_joint.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_mouse_joint.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_polygon_shape.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_prismatic_joint.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_pulley_joint.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_revolute_joint.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_rope.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_settings.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_shape.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_stack_allocator.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_time_of_impact.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_time_step.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_timer.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_types.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_weld_joint.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_wheel_joint.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_world.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\b2_world_callbacks.h" />
+    <ClInclude Include="vendor\box2d\include\box2d\box2d.h" />
+    <ClInclude Include="vendor\box2d\src\dynamics\b2_chain_circle_contact.h" />
+    <ClInclude Include="vendor\box2d\src\dynamics\b2_chain_polygon_contact.h" />
+    <ClInclude Include="vendor\box2d\src\dynamics\b2_circle_contact.h" />
+    <ClInclude Include="vendor\box2d\src\dynamics\b2_contact_solver.h" />
+    <ClInclude Include="vendor\box2d\src\dynamics\b2_edge_circle_contact.h" />
+    <ClInclude Include="vendor\box2d\src\dynamics\b2_edge_polygon_contact.h" />
+    <ClInclude Include="vendor\box2d\src\dynamics\b2_island.h" />
+    <ClInclude Include="vendor\box2d\src\dynamics\b2_polygon_circle_contact.h" />
+    <ClInclude Include="vendor\box2d\src\dynamics\b2_polygon_contact.h" />
+    <ClInclude Include="vendor\box2d\src\out\build\x64-Debug\CMakeFiles\ShowIncludes\foo.h" />
+    <ClInclude Include="vendor\entt\include\entt\config\config.h" />
+    <ClInclude Include="vendor\entt\include\entt\config\macro.h" />
+    <ClInclude Include="vendor\entt\include\entt\config\version.h" />
+    <ClInclude Include="vendor\entt\include\entt\core\attribute.h" />
+    <ClInclude Include="vendor\glad\include\KHR\khrplatform.h" />
+    <ClInclude Include="vendor\glad\include\glad\glad.h" />
+    <ClInclude Include="vendor\glm\include\glm\simd\common.h" />
+    <ClInclude Include="vendor\glm\include\glm\simd\exponential.h" />
+    <ClInclude Include="vendor\glm\include\glm\simd\geometric.h" />
+    <ClInclude Include="vendor\glm\include\glm\simd\integer.h" />
+    <ClInclude Include="vendor\glm\include\glm\simd\matrix.h" />
+    <ClInclude Include="vendor\glm\include\glm\simd\neon.h" />
+    <ClInclude Include="vendor\glm\include\glm\simd\packing.h" />
+    <ClInclude Include="vendor\glm\include\glm\simd\platform.h" />
+    <ClInclude Include="vendor\glm\include\glm\simd\trigonometric.h" />
+    <ClInclude Include="vendor\glm\include\glm\simd\vector_relational.h" />
+    <ClInclude Include="vendor\hitbox\include\hitbox\Hitbox.h" />
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_allegro5.h" />
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_android.h" />
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_dx10.h" />
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_dx11.h" />
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_dx12.h" />
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_dx9.h" />
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_glfw.h" />
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_glut.h" />
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_metal.h" />
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_opengl2.h" />
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_opengl3.h" />
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_osx.h" />
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_sdl.h" />
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_sdlrenderer.h" />
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_vulkan.h" />
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_wgpu.h" />
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_win32.h" />
+    <ClInclude Include="vendor\imgui\include\imgui\imconfig.h" />
+    <ClInclude Include="vendor\imgui\include\imgui\imgui.h" />
+    <ClInclude Include="vendor\imgui\include\imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="vendor\imgui\include\imgui\imgui_impl_sdl.h" />
+    <ClInclude Include="vendor\imgui\src\Rendering.h" />
+    <ClInclude Include="vendor\imgui\src\imgui_internal.h" />
+    <ClInclude Include="vendor\imgui\src\imstb_rectpack.h" />
+    <ClInclude Include="vendor\imgui\src\imstb_textedit.h" />
+    <ClInclude Include="vendor\imgui\src\imstb_truetype.h" />
+    <ClInclude Include="vendor\json\include\json\json.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_assert.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_atomic.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_audio.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_bits.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_blendmode.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_clipboard.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_config.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_cpuinfo.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_egl.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_endian.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_error.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_events.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_filesystem.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_gamecontroller.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_gesture.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_haptic.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_hidapi.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_hints.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_joystick.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_keyboard.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_keycode.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_loadso.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_locale.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_log.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_main.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_messagebox.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_metal.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_misc.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_mouse.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_mutex.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_name.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_opengl.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_opengl_glext.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_opengles.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_opengles2.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_opengles2_gl2.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_opengles2_gl2ext.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_opengles2_gl2platform.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_opengles2_khrplatform.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_pixels.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_platform.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_power.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_quit.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_rect.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_render.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_revision.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_rwops.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_scancode.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_sensor.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_shape.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_stdinc.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_surface.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_system.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_syswm.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_test.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_test_assert.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_test_common.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_test_compare.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_test_crc32.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_test_font.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_test_fuzzer.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_test_harness.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_test_images.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_test_log.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_test_md5.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_test_memory.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_test_random.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_thread.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_timer.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_touch.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_types.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_version.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_video.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_vulkan.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\begin_code.h" />
+    <ClInclude Include="vendor\sdl\include\sdl\close_code.h" />
+    <ClInclude Include="vendor\stb\include\stb\stb_image.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

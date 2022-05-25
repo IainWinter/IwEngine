@@ -1,11 +1,11 @@
-#include "../Entry.h"
-#include "../EntityMine.h"
-#include "../Rendering.h"
-#include "../Windowing.h"
-#include "../Physics.h"
-#include "../ext/Time.h"
-#include "../ext/marching_cubes.h"
-#include "../ext/Sand.h"
+#include "Entry.h"
+#include "EntityMine.h"
+#include "Rendering.h"
+#include "Windowing.h"
+#include "Physics.h"
+#include "ext/Time.h"
+#include "ext/marching_cubes.h"
+#include "ext/Sand.h"
 
 #include <iostream>
 

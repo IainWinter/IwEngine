@@ -1,0 +1,739 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include=".old">
+      <UniqueIdentifier>{722F787C-5E66-790D-0753-5F10F368F50E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ext">
+      <UniqueIdentifier>{7670880B-E279-887C-6BF5-9E7CD7FD937C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test">
+      <UniqueIdentifier>{65689E7C-519F-9F0D-FA8B-8510E6A11B0F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="util">
+      <UniqueIdentifier>{43339F7C-2F6A-A00D-D856-8610C46C1C0F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor">
+      <UniqueIdentifier>{B3738122-9F15-ACF8-88D0-BF4C74113349}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\box2d">
+      <UniqueIdentifier>{41E852F0-2D4B-E294-D6D0-1A4BC212AE17}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\box2d\include">
+      <UniqueIdentifier>{B4C0E076-A04F-6A40-496E-7E3B35DC7AE6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\box2d\include\box2d">
+      <UniqueIdentifier>{02323261-EE41-DE31-57FB-4250432ACDCA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\box2d\src">
+      <UniqueIdentifier>{D8DE3A34-C4D7-5986-ED09-3F0BD9613992}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\box2d\src\dynamics">
+      <UniqueIdentifier>{5FFFC53E-CBC1-F9C8-1472-88558073D2A6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\box2d\src\out">
+      <UniqueIdentifier>{5F38DA81-4BC7-634B-F4E5-7746E05374F1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\box2d\src\out\build">
+      <UniqueIdentifier>{DE8F52C0-CA9F-FE90-3359-63AF1F88ED29}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\box2d\src\out\build\x64-Debug">
+      <UniqueIdentifier>{C312737D-AFF9-3475-584A-9B924410AEDB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\box2d\src\out\build\x64-Debug\CMakeFiles">
+      <UniqueIdentifier>{26680BEC-92A3-6BAF-9B98-E83E0753F0DF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\box2d\src\out\build\x64-Debug\CMakeFiles\ShowIncludes">
+      <UniqueIdentifier>{2DCD6CAF-1938-2DBB-C253-9220AE9DF09D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\entt">
+      <UniqueIdentifier>{DD8078C1-4936-F1B6-D22A-EB8D3EDFE7BA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\entt\include">
+      <UniqueIdentifier>{5035F37B-BC96-D089-4504-173CB1640749}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\entt\include\entt">
+      <UniqueIdentifier>{9ACC644B-86F1-B3CB-AF3C-995B9BC0B2E9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\entt\include\entt\config">
+      <UniqueIdentifier>{7FEA17B9-EBCD-26F9-F4D0-54356033ED49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\entt\include\entt\core">
+      <UniqueIdentifier>{526D0951-BE85-F07A-8732-8014F3098514}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\glad">
+      <UniqueIdentifier>{9A8E79C1-0644-F2B6-8F38-EC8DFBECE8BA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\glad\include">
+      <UniqueIdentifier>{0DB0903E-7911-6E4C-027F-B4FE6EDFA40B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\glad\include\KHR">
+      <UniqueIdentifier>{01FD6E78-6D34-B70F-763E-1B33E2F4DD08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\glad\include\glad">
+      <UniqueIdentifier>{34935E86-20B8-AD06-4903-93963587AC24}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\glm">
+      <UniqueIdentifier>{829FC5A8-6E57-07F6-D75E-E051C335A2E6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\glm\include">
+      <UniqueIdentifier>{F528B309-E10C-745F-4A6D-6EB236705EE1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\glm\include\glm">
+      <UniqueIdentifier>{C4257490-B01F-9DE2-998C-33F38525034F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\glm\include\glm\simd">
+      <UniqueIdentifier>{A0BC9914-0CCA-C7FA-95B0-C3E501BD93B1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\hitbox">
+      <UniqueIdentifier>{B0ED4008-1CAE-BC3E-E5E8-05BC5168011B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\hitbox\include">
+      <UniqueIdentifier>{23C5F88C-8F31-B487-5825-4CE5C450D6EF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\hitbox\include\hitbox">
+      <UniqueIdentifier>{20410058-0CFC-EF03-B5B3-684EA14D3A94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\imgui">
+      <UniqueIdentifier>{5D3BD0F0-499E-5F95-F223-984BDE652B18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\imgui\backends">
+      <UniqueIdentifier>{27CEAEAF-933A-6AAA-5C2E-0208C8598C12}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\imgui\include">
+      <UniqueIdentifier>{D06F9DBA-BCFE-2684-651D-3B7F518B372A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\imgui\include\imgui">
+      <UniqueIdentifier>{3A1952FD-2629-FECD-8FE2-62EC7B11ED66}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\imgui\src">
+      <UniqueIdentifier>{F45F240B-E058-435D-098B-28E2F5E22269}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\json">
+      <UniqueIdentifier>{5C537BC1-C808-F4B6-51FD-ED8DBDB1EABA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\json\include">
+      <UniqueIdentifier>{CF16643C-3B78-414A-C4E5-87FC30467809}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\json\include\json">
+      <UniqueIdentifier>{F847CCD2-E46C-1B53-0DB8-00E3F93B1A71}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\sdl">
+      <UniqueIdentifier>{85D1C5A8-7189-07F6-DA90-E051C667A2E6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\sdl\include">
+      <UniqueIdentifier>{F8AD3AB5-E491-FB0A-4DF2-F55D39F5E58C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\sdl\include\sdl">
+      <UniqueIdentifier>{4AA66C0E-36A0-9560-1F0D-2C710BA6FBCC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\stb">
+      <UniqueIdentifier>{8BD3C5A8-778B-07F6-E092-E051CC69A2E6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\stb\include">
+      <UniqueIdentifier>{FE550769-EA39-C8BE-539A-C2113F9DB240}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\stb\include\stb">
+      <UniqueIdentifier>{56E3B9A8-42DD-E2FA-2B4A-790B17E34867}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include=".old\Asset.h">
+      <Filter>.old</Filter>
+    </ClInclude>
+    <ClInclude Include=".old\RenderingHideSDL.h">
+      <Filter>.old</Filter>
+    </ClInclude>
+    <ClInclude Include=".old\RenderingSDL.h">
+      <Filter>.old</Filter>
+    </ClInclude>
+    <ClInclude Include="Audio.h" />
+    <ClInclude Include="Common.h" />
+    <ClInclude Include="Entity.h" />
+    <ClInclude Include="EntityMine.h" />
+    <ClInclude Include="Entry.h" />
+    <ClInclude Include="Event.h" />
+    <ClInclude Include="Macros.h" />
+    <ClInclude Include="Physics.h" />
+    <ClInclude Include="Rendering.h" />
+    <ClInclude Include="Serial.h" />
+    <ClInclude Include="SimpleServer.h" />
+    <ClInclude Include="Windowing.h" />
+    <ClInclude Include="ext\AudioFMOD.h">
+      <Filter>ext</Filter>
+    </ClInclude>
+    <ClInclude Include="ext\Components.h">
+      <Filter>ext</Filter>
+    </ClInclude>
+    <ClInclude Include="ext\Components_meta.h">
+      <Filter>ext</Filter>
+    </ClInclude>
+    <ClInclude Include="ext\Sand.h">
+      <Filter>ext</Filter>
+    </ClInclude>
+    <ClInclude Include="ext\Time.h">
+      <Filter>ext</Filter>
+    </ClInclude>
+    <ClInclude Include="ext\__debug.h">
+      <Filter>ext</Filter>
+    </ClInclude>
+    <ClInclude Include="ext\marching_cubes.h">
+      <Filter>ext</Filter>
+    </ClInclude>
+    <ClInclude Include="ext\multi_vector.h">
+      <Filter>ext</Filter>
+    </ClInclude>
+    <ClInclude Include="ext\serial_bin.h">
+      <Filter>ext</Filter>
+    </ClInclude>
+    <ClInclude Include="ext\serial_common.h">
+      <Filter>ext</Filter>
+    </ClInclude>
+    <ClInclude Include="ext\serial_json.h">
+      <Filter>ext</Filter>
+    </ClInclude>
+    <ClInclude Include="test\unit_test.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="util\allocator.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="util\error_check.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="util\free_list.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="util\linear_allocator.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="util\pool_allocator.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="util\tsque.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="util\type_info.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_api.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_block_allocator.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_body.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_broad_phase.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_chain_shape.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_circle_shape.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_collision.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_common.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_contact.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_contact_manager.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_distance.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_distance_joint.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_draw.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_dynamic_tree.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_edge_shape.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_fixture.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_friction_joint.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_gear_joint.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_growable_stack.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_joint.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_math.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_motor_joint.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_mouse_joint.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_polygon_shape.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_prismatic_joint.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_pulley_joint.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_revolute_joint.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_rope.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_settings.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_shape.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_stack_allocator.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_time_of_impact.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_time_step.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_timer.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_types.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_weld_joint.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_wheel_joint.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_world.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\b2_world_callbacks.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\include\box2d\box2d.h">
+      <Filter>vendor\box2d\include\box2d</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\src\dynamics\b2_chain_circle_contact.h">
+      <Filter>vendor\box2d\src\dynamics</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\src\dynamics\b2_chain_polygon_contact.h">
+      <Filter>vendor\box2d\src\dynamics</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\src\dynamics\b2_circle_contact.h">
+      <Filter>vendor\box2d\src\dynamics</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\src\dynamics\b2_contact_solver.h">
+      <Filter>vendor\box2d\src\dynamics</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\src\dynamics\b2_edge_circle_contact.h">
+      <Filter>vendor\box2d\src\dynamics</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\src\dynamics\b2_edge_polygon_contact.h">
+      <Filter>vendor\box2d\src\dynamics</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\src\dynamics\b2_island.h">
+      <Filter>vendor\box2d\src\dynamics</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\src\dynamics\b2_polygon_circle_contact.h">
+      <Filter>vendor\box2d\src\dynamics</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\src\dynamics\b2_polygon_contact.h">
+      <Filter>vendor\box2d\src\dynamics</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\box2d\src\out\build\x64-Debug\CMakeFiles\ShowIncludes\foo.h">
+      <Filter>vendor\box2d\src\out\build\x64-Debug\CMakeFiles\ShowIncludes</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\entt\include\entt\config\config.h">
+      <Filter>vendor\entt\include\entt\config</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\entt\include\entt\config\macro.h">
+      <Filter>vendor\entt\include\entt\config</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\entt\include\entt\config\version.h">
+      <Filter>vendor\entt\include\entt\config</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\entt\include\entt\core\attribute.h">
+      <Filter>vendor\entt\include\entt\core</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\glad\include\KHR\khrplatform.h">
+      <Filter>vendor\glad\include\KHR</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\glad\include\glad\glad.h">
+      <Filter>vendor\glad\include\glad</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\glm\include\glm\simd\common.h">
+      <Filter>vendor\glm\include\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\glm\include\glm\simd\exponential.h">
+      <Filter>vendor\glm\include\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\glm\include\glm\simd\geometric.h">
+      <Filter>vendor\glm\include\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\glm\include\glm\simd\integer.h">
+      <Filter>vendor\glm\include\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\glm\include\glm\simd\matrix.h">
+      <Filter>vendor\glm\include\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\glm\include\glm\simd\neon.h">
+      <Filter>vendor\glm\include\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\glm\include\glm\simd\packing.h">
+      <Filter>vendor\glm\include\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\glm\include\glm\simd\platform.h">
+      <Filter>vendor\glm\include\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\glm\include\glm\simd\trigonometric.h">
+      <Filter>vendor\glm\include\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\glm\include\glm\simd\vector_relational.h">
+      <Filter>vendor\glm\include\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\hitbox\include\hitbox\Hitbox.h">
+      <Filter>vendor\hitbox\include\hitbox</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_allegro5.h">
+      <Filter>vendor\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_android.h">
+      <Filter>vendor\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_dx10.h">
+      <Filter>vendor\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_dx11.h">
+      <Filter>vendor\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_dx12.h">
+      <Filter>vendor\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_dx9.h">
+      <Filter>vendor\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_glfw.h">
+      <Filter>vendor\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_glut.h">
+      <Filter>vendor\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_metal.h">
+      <Filter>vendor\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_opengl2.h">
+      <Filter>vendor\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_opengl3.h">
+      <Filter>vendor\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_opengl3_loader.h">
+      <Filter>vendor\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_osx.h">
+      <Filter>vendor\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_sdl.h">
+      <Filter>vendor\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_sdlrenderer.h">
+      <Filter>vendor\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_vulkan.h">
+      <Filter>vendor\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_wgpu.h">
+      <Filter>vendor\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\imgui\backends\imgui_impl_win32.h">
+      <Filter>vendor\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\imgui\include\imgui\imconfig.h">
+      <Filter>vendor\imgui\include\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\imgui\include\imgui\imgui.h">
+      <Filter>vendor\imgui\include\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\imgui\include\imgui\imgui_impl_opengl3.h">
+      <Filter>vendor\imgui\include\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\imgui\include\imgui\imgui_impl_sdl.h">
+      <Filter>vendor\imgui\include\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\imgui\src\Rendering.h">
+      <Filter>vendor\imgui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\imgui\src\imgui_internal.h">
+      <Filter>vendor\imgui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\imgui\src\imstb_rectpack.h">
+      <Filter>vendor\imgui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\imgui\src\imstb_textedit.h">
+      <Filter>vendor\imgui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\imgui\src\imstb_truetype.h">
+      <Filter>vendor\imgui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\json\include\json\json.h">
+      <Filter>vendor\json\include\json</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_assert.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_atomic.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_audio.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_bits.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_blendmode.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_clipboard.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_config.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_cpuinfo.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_egl.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_endian.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_error.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_events.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_filesystem.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_gamecontroller.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_gesture.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_haptic.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_hidapi.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_hints.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_joystick.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_keyboard.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_keycode.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_loadso.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_locale.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_log.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_main.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_messagebox.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_metal.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_misc.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_mouse.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_mutex.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_name.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_opengl.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_opengl_glext.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_opengles.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_opengles2.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_opengles2_gl2.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_opengles2_gl2ext.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_opengles2_gl2platform.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_opengles2_khrplatform.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_pixels.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_platform.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_power.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_quit.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_rect.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_render.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_revision.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_rwops.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_scancode.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_sensor.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_shape.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_stdinc.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_surface.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_system.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_syswm.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_test.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_test_assert.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_test_common.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_test_compare.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_test_crc32.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_test_font.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_test_fuzzer.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_test_harness.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_test_images.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_test_log.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_test_md5.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_test_memory.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_test_random.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_thread.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_timer.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_touch.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_types.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_version.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_video.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\SDL_vulkan.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\begin_code.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\sdl\include\sdl\close_code.h">
+      <Filter>vendor\sdl\include\sdl</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\stb\include\stb\stb_image.h">
+      <Filter>vendor\stb\include\stb</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
