@@ -3,3 +3,12 @@
 .vs/
 
 node_modules
+
+imgui.ini
+_bin
+_build
+bin
+lib
+build
+*.vcxproj
+*.filters

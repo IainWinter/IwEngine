@@ -127,6 +127,10 @@ public:
 		Resize(config.Width, config.Height);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_BLEND);
+
+		// vsync
+
+		SDL_GL_SetSwapInterval(0);
 	}
 
 	~Window()

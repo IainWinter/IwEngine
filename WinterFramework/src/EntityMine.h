@@ -25,13 +25,6 @@ using rep_t  = uint16_t; // low bits of the hash to represent repeat components 
 using hash_bits = std::integral_constant<hash_t, ~(hash_t)rep_t(-1) & hash_t(-1)>;
 using rep_bits  = std::integral_constant<hash_t,  (hash_t)rep_t(-1)>;
 
-// template<typename... _t>
-// using tuple_or_single = typename std::conditional<
-// 							sizeof...(_t) == 1,
-// 							typename std::tuple_element<0, std::tuple<_t&...>>::type,
-// 							typename std::tuple<_t&...>
-// 						>::type;
-
 constexpr void set_repeats(hash_t& hash, rep_t count) { hash = (hash & hash_bits::value) | (hash_t)count; }
 constexpr rep_t get_repeats(const hash_t& hash) { return (rep_t)(hash & rep_bits::value); }
 constexpr hash_t just_hash(const hash_t& hash) { return hash & hash_bits::value; }
