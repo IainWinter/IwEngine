@@ -5,10 +5,10 @@
 node_modules
 
 imgui.ini
-_bin
-_build
-bin
-lib
-build
+_bin/
+_build/
+bin/
+lib/
+build/
 *.vcxproj
-*.filters
+*.vcxproj.filters
