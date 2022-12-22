@@ -21,7 +21,7 @@ namespace Physics {
 			scalar aInvMass = aBody ? aBody->InvMass : 1.0f;
 			scalar bInvMass = bBody ? bBody->InvMass : 1.0f;
 
-			// Impluse
+			// Impulse
 
 			// This is important for convergence
 			// a negitive impulse would drive the objects closer together
